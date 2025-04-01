@@ -1,0 +1,51 @@
+const calculateScaleDistance = (brand1, brand2, scales) => {
+  if (!brand1 || !brand2) return { distance: Infinity, normalizedSimilarity: 0, scaleDetails: {} };
+  
+  let totalSquaredDistance = 0;
+  const scaleDetails = {};
+  let validScalesCount = 0;
+  
+  // Überprüfe jede Skala
+  for (const scale of scales) {
+    // Überprüfe, ob beide Marken Werte für diese Skala haben
+    if (brand1[scale] !== undefined && brand1[scale] !== null && 
+        brand2[scale] !== undefined && brand2[scale] !== null) {
+      
+      // Berechne euklidischen Abstand für diese Skala
+      const diff = brand1[scale] - brand2[scale];
+      const squaredDiff = diff * diff;
+      totalSquaredDistance += squaredDiff;
+      validScalesCount++;
+      
+      // Speichere Details zur Ähnlichkeit dieser Skala
+      scaleDetails[scale] = {
+        brand1Value: brand1[scale],
+        brand2Value: brand2[scale],
+        difference: Math.abs(diff),
+        // Normalisierte Ähnlichkeit (0 = völlig unterschiedlich, 1 = identisch)
+        // Die Skalen gehen von 1-5, also ist der maximale Unterschied 4
+        similarity: 1 - (Math.abs(diff) / 4)
+      };
+    }
+  }
+  
+  // Wenn keine gültigen Skalen gefunden wurden, return 0 Ähnlichkeit
+  if (validScalesCount === 0) {
+    return { distance: Infinity, normalizedSimilarity: 0, scaleDetails: {} };
+  }
+  
+  // Berechne euklidischen Abstand (Wurzel der Summe der quadrierten Abstände)
+  const distance = Math.sqrt(totalSquaredDistance);
+  
+  // Berechne eine Gesamtähnlichkeit (0 = völlig unterschiedlich, 1 = identisch)
+  // Da wir Skalen mit jeweils maximalem Unterschied von 4 haben, ist der
+  // maximale euklidische Abstand sqrt(validScalesCount * 16)
+  const maxPossibleDistance = Math.sqrt(validScalesCount * 16);
+  const normalizedSimilarity = 1 - (distance / maxPossibleDistance);
+  
+  return {
+    distance,
+    normalizedSimilarity,
+    scaleDetails
+  };
+};

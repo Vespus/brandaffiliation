@@ -1,0 +1,35 @@
+// Tokenisierungsfunktion für Textvergleiche
+const tokenizeText = (text) => {
+  if (!text) return [];
+  return text.toLowerCase()
+    .replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '')
+    .split(/\s+/)
+    .filter(word => word.length > 3);
+};
+
+// Textbasierte Ähnlichkeitsberechnung
+const calculateTextSimilarity = (characteristics1, characteristics2) => {
+  // Alle Charakteristiken zusammenfassen
+  const text1 = characteristics1.join(' ').toLowerCase();
+  const text2 = characteristics2.join(' ').toLowerCase();
+  
+  // Tokenisierung: Text in Wörter aufteilen
+  const words1 = tokenizeText(text1);
+  const words2 = tokenizeText(text2);
+  
+  // Gemeinsame Wörter finden
+  const commonWords = words1.filter(word => words2.includes(word));
+  
+  // Alle eindeutigen Wörter sammeln
+  const uniqueWords = Array.from(new Set([...words1, ...words2]));
+  
+  if (uniqueWords.length === 0) return { similarity: 0, commonWords: [] };
+  
+  // Ähnlichkeitswert berechnen
+  const similarity = commonWords.length / uniqueWords.length;
+  
+  return { 
+    similarity, 
+    commonWords 
+  };
+};
