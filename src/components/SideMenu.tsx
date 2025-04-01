@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 
 export default function SideMenu() {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -36,9 +37,15 @@ export default function SideMenu() {
       }`}
     >
       {/* Logo Bereich */}
-      <div className="h-16 flex items-center justify-center border-b border-gray-200">
-        <div className={`${isCollapsed ? 'w-8 h-8' : 'w-32 h-8'} bg-gray-200 rounded`}>
-          {/* Hier später das Logo einfügen */}
+      <div className="h-16 flex items-center justify-center border-b border-gray-200 px-4">
+        <div className={`relative ${isCollapsed ? 'w-8 h-8' : 'w-40 h-8'}`}>
+          <Image
+            src="/HEA-logo.png"
+            alt="HEA Logo"
+            fill
+            className="object-contain"
+            priority
+          />
         </div>
       </div>
 

@@ -6,6 +6,7 @@ import { loadBrands } from '@/utils/loadBrands';
 import BrandSearch from '@/components/BrandSearch';
 import BrandDetails from '@/components/BrandDetails';
 import AffinitySlider from '@/components/AffinitySlider';
+import AffinityResults from '@/components/AffinityResults';
 import { calculateAffinity } from '@/utils/affinity';
 
 export default function Home() {
@@ -40,7 +41,8 @@ export default function Home() {
         brand,
         affinity: calculateAffinity(selectedBrand, brand, affinityWeight)
       }))
-      .sort((a, b) => b.affinity.overallSimilarity - a.affinity.overallSimilarity);
+      .sort((a, b) => b.affinity.overallSimilarity - a.affinity.overallSimilarity)
+      .slice(0, 5); // Zeige nur die Top 5 ähnlichsten Marken
   };
 
   if (loading) {
@@ -59,17 +61,10 @@ export default function Home() {
     );
   }
 
+  const similarBrands = selectedBrand ? calculateAffinities() : [];
+
   return (
     <div className="space-y-6">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Markencharakteristiken
-        </h1>
-        <p className="text-lg text-gray-600">
-          Entdecken Sie die Vielfalt der Markenwelt
-        </p>
-      </div>
-
       <div className="mb-8">
         <BrandSearch
           brands={brands}
@@ -89,6 +84,13 @@ export default function Home() {
             <AffinitySlider
               value={affinityWeight}
               onChange={setAffinityWeight}
+            />
+          </div>
+
+          <div className="mb-8">
+            <AffinityResults
+              selectedBrand={selectedBrand}
+              similarBrands={similarBrands}
             />
           </div>
         </>
