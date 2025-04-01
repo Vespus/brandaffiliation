@@ -45,6 +45,9 @@ export default function BrandDetails({ brand }: BrandDetailsProps) {
               {brand['Kurzcharakteristik 2'] && (
                 <p className="text-gray-700 leading-relaxed">{brand['Kurzcharakteristik 2']}</p>
               )}
+              {brand['Kurzcharakteristik 3 (optional)'] && (
+                <p className="text-gray-700 leading-relaxed">{brand['Kurzcharakteristik 3 (optional)']}</p>
+              )}
             </div>
           </section>
 

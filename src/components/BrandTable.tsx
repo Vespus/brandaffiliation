@@ -44,10 +44,30 @@ export default function BrandTable({ brands }: BrandTableProps) {
                 <div className="font-medium text-gray-900">{brand.Marke}</div>
               </td>
               <td className="px-6 py-4">
-                <div className="text-sm text-gray-900">{brand['Kurzcharakteristik 1']}</div>
-                {brand['Kurzcharakteristik 2'] && (
-                  <div className="text-sm text-gray-500 mt-1">{brand['Kurzcharakteristik 2']}</div>
-                )}
+                <ul className="space-y-1.5">
+                  <li className="flex items-start">
+                    <svg className="w-4 h-4 text-gray-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 8 8">
+                      <circle cx="4" cy="4" r="3" />
+                    </svg>
+                    <span className="text-sm text-gray-900">{brand['Kurzcharakteristik 1']}</span>
+                  </li>
+                  {brand['Kurzcharakteristik 2'] && (
+                    <li className="flex items-start">
+                      <svg className="w-4 h-4 text-gray-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 8 8">
+                        <circle cx="4" cy="4" r="3" />
+                      </svg>
+                      <span className="text-sm text-gray-700">{brand['Kurzcharakteristik 2']}</span>
+                    </li>
+                  )}
+                  {brand['Kurzcharakteristik 3 (optional)'] && (
+                    <li className="flex items-start">
+                      <svg className="w-4 h-4 text-gray-400 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 8 8">
+                        <circle cx="4" cy="4" r="3" />
+                      </svg>
+                      <span className="text-sm text-gray-700">{brand['Kurzcharakteristik 3 (optional)']}</span>
+                    </li>
+                  )}
+                </ul>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <ScaleDisplay value={brand.Preis} label={preisLabels[brand.Preis]} maxStars={5} />

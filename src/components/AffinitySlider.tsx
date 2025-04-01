@@ -5,15 +5,12 @@ interface AffinitySliderProps {
 
 export default function AffinitySlider({ value, onChange }: AffinitySliderProps) {
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">Affinitätsgewichtung</h3>
-        <div className="text-sm text-gray-600">
-          {value === 0 ? 'Nur Skalen' : value === 1 ? 'Nur Text' : `${Math.round((1 - value) * 100)}% Skalen, ${Math.round(value * 100)}% Text`}
-        </div>
-      </div>
+    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        Affinitätsgewichtung
+      </label>
       
-      <div className="relative">
+      <div className="flex items-center space-x-4">
         <input
           type="range"
           min="0"
@@ -21,20 +18,21 @@ export default function AffinitySlider({ value, onChange }: AffinitySliderProps)
           step="0.01"
           value={value}
           onChange={(e) => onChange(parseFloat(e.target.value))}
-          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+          className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
         />
-        <div className="absolute top-0 left-0 w-full h-2 pointer-events-none">
-          <div 
-            className="h-full bg-blue-600 rounded-lg"
-            style={{ width: `${value * 100}%` }}
-          />
-        </div>
+        <span className="text-sm font-medium text-gray-900 min-w-[7rem] text-right">
+          {value === 0 
+            ? 'Nur Skalen' 
+            : value === 1 
+              ? 'Nur Text' 
+              : `${Math.round((1 - value) * 100)}% / ${Math.round(value * 100)}%`
+          }
+        </span>
       </div>
 
-      <div className="flex justify-between mt-2 text-sm text-gray-600">
-        <span>Nur Skalen</span>
-        <span>Nur Text</span>
-      </div>
+      <p className="mt-1 text-sm text-gray-500">
+        Gewichtung zwischen Skalen- und Text-basierter Affinität
+      </p>
     </div>
   );
 } 

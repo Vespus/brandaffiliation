@@ -9,12 +9,23 @@ import AffinitySlider from '@/components/AffinitySlider';
 import AffinityResults from '@/components/AffinityResults';
 import { calculateAffinity } from '@/utils/affinity';
 
+const STORAGE_KEY = 'affineBrandsCount';
+
 export default function Home() {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
   const [affinityWeight, setAffinityWeight] = useState(0.6); // Standardgewichtung: 60% Skalen, 40% Text
+  const [affineBrandsCount, setAffineBrandsCount] = useState(5);
+
+  useEffect(() => {
+    // Lade gespeicherte Einstellung beim Start
+    const savedCount = localStorage.getItem(STORAGE_KEY);
+    if (savedCount) {
+      setAffineBrandsCount(parseInt(savedCount));
+    }
+  }, []);
 
   useEffect(() => {
     async function fetchBrands() {
@@ -42,7 +53,7 @@ export default function Home() {
         affinity: calculateAffinity(selectedBrand, brand, affinityWeight)
       }))
       .sort((a, b) => b.affinity.overallSimilarity - a.affinity.overallSimilarity)
-      .slice(0, 5); // Zeige nur die Top 5 ähnlichsten Marken
+      .slice(0, affineBrandsCount);
   };
 
   if (loading) {
