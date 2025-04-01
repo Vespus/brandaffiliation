@@ -7,25 +7,53 @@ import BrandSearch from '@/components/BrandSearch';
 import BrandDetails from '@/components/BrandDetails';
 import AffinitySlider from '@/components/AffinitySlider';
 import AffinityResults from '@/components/AffinityResults';
+import ScaleWeights from '@/components/ScaleWeights';
 import { calculateAffinity } from '@/utils/affinity';
 
 const STORAGE_KEY = 'affineBrandsCount';
+const SCALE_WEIGHTS_KEY = 'scaleWeights';
+
+// Standardgewichte für die Skalen
+const DEFAULT_SCALE_WEIGHTS = [
+  { name: 'Preis', weight: 0.3 },
+  { name: 'Design', weight: 0.2 },
+  { name: 'Bekanntheit', weight: 0.2 },
+  { name: 'Sortimentsbreite', weight: 0.15 },
+  { name: 'Positionierung', weight: 0.15 }
+];
 
 export default function Home() {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
-  const [affinityWeight, setAffinityWeight] = useState(0.6); // Standardgewichtung: 60% Skalen, 40% Text
+  const [affinityWeight, setAffinityWeight] = useState(0.6);
   const [affineBrandsCount, setAffineBrandsCount] = useState(5);
+  const [scaleWeights, setScaleWeights] = useState(DEFAULT_SCALE_WEIGHTS);
 
   useEffect(() => {
-    // Lade gespeicherte Einstellung beim Start
+    // Lade gespeicherte Einstellungen beim Start
     const savedCount = localStorage.getItem(STORAGE_KEY);
+    const savedWeights = localStorage.getItem(SCALE_WEIGHTS_KEY);
+    
     if (savedCount) {
       setAffineBrandsCount(parseInt(savedCount));
     }
+    
+    if (savedWeights) {
+      try {
+        const parsedWeights = JSON.parse(savedWeights);
+        setScaleWeights(parsedWeights);
+      } catch (e) {
+        console.error('Fehler beim Laden der Skalengewichtungen:', e);
+      }
+    }
   }, []);
+
+  // Speichere Skalengewichtungen bei Änderung
+  useEffect(() => {
+    localStorage.setItem(SCALE_WEIGHTS_KEY, JSON.stringify(scaleWeights));
+  }, [scaleWeights]);
 
   useEffect(() => {
     async function fetchBrands() {
@@ -46,11 +74,17 @@ export default function Home() {
   const calculateAffinities = () => {
     if (!selectedBrand) return [];
     
+    // Konvertiere die Gewichtungen in das Format für die Berechnung
+    const weightsObject = scaleWeights.reduce((acc, { name, weight }) => {
+      acc[name] = weight;
+      return acc;
+    }, {} as Record<string, number>);
+    
     return brands
       .filter(brand => brand.Marke !== selectedBrand.Marke)
       .map(brand => ({
         brand,
-        affinity: calculateAffinity(selectedBrand, brand, affinityWeight)
+        affinity: calculateAffinity(selectedBrand, brand, affinityWeight, weightsObject)
       }))
       .sort((a, b) => b.affinity.overallSimilarity - a.affinity.overallSimilarity)
       .slice(0, affineBrandsCount);
@@ -95,6 +129,13 @@ export default function Home() {
             <AffinitySlider
               value={affinityWeight}
               onChange={setAffinityWeight}
+            />
+          </div>
+
+          <div className="mb-8">
+            <ScaleWeights
+              weights={scaleWeights}
+              onChange={setScaleWeights}
             />
           </div>
 
