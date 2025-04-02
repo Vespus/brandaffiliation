@@ -12,31 +12,39 @@ export default function SettingsPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   useEffect(() => {
-    // Lade Einstellungen aus den Umgebungsvariablen
-    const envSettings = {
-      openaiApiKey: process.env.OPENAI_API_KEY || '',
-      promptTemplate: process.env.SEO_PROMPT_TEMPLATE || '',
-    };
-
-    // Lade gespeicherte Einstellungen aus localStorage als Fallback
-    const savedSettings = localStorage.getItem('seoSettings');
-    if (savedSettings) {
+    // Lade Einstellungen von der API
+    const loadSettings = async () => {
       try {
-        const localSettings = JSON.parse(savedSettings);
-        // Kombiniere Env und Local Settings, bevorzuge Local Settings
+        const response = await fetch('/api/settings');
+        const data = await response.json();
+        
+        // Lade gespeicherte Einstellungen aus localStorage als Fallback
+        const savedSettings = localStorage.getItem('seoSettings');
+        let localSettings = {};
+        
+        if (savedSettings) {
+          try {
+            localSettings = JSON.parse(savedSettings);
+          } catch (e) {
+            console.error('Fehler beim Laden der lokalen Einstellungen:', e);
+          }
+        }
+
         setSettings({
-          ...envSettings,
+          openaiApiKey: data.hasApiKey ? '********' : '',
+          promptTemplate: data.promptTemplate || '',
           ...localSettings
         });
-      } catch (e) {
-        console.error('Fehler beim Laden der Einstellungen:', e);
-        // Wenn localStorage fehlschlägt, nutze nur Env Settings
-        setSettings(envSettings);
+      } catch (error) {
+        console.error('Fehler beim Laden der Einstellungen:', error);
+        setMessage({
+          type: 'error',
+          text: 'Fehler beim Laden der Einstellungen'
+        });
       }
-    } else {
-      // Wenn keine lokalen Einstellungen vorhanden sind, nutze Env Settings
-      setSettings(envSettings);
-    }
+    };
+
+    loadSettings();
   }, []);
 
   const handleSave = async () => {
