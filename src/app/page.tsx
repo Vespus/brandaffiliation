@@ -117,6 +117,7 @@ export default function Home() {
           onSelect={(brand) => {
             setSelectedBrand(brand);
           }}
+          selectedBrand={selectedBrand}
         />
       </div>
 
