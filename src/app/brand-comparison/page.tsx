@@ -111,6 +111,7 @@ export default function BrandComparisonPage() {
           <BrandSearch
             brands={brands}
             onSelect={setSelectedBrand1}
+            selectedBrand={selectedBrand1}
           />
           {selectedBrand1 && (
             <div className="mt-4">
@@ -124,6 +125,7 @@ export default function BrandComparisonPage() {
           <BrandSearch
             brands={brands}
             onSelect={setSelectedBrand2}
+            selectedBrand={selectedBrand2}
           />
           {selectedBrand2 && (
             <div className="mt-4">
