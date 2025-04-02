@@ -25,6 +25,8 @@ Der Text sollte:
 
 Bitte generiere einen Text von 300-400 Wörtern.`;
 
+export const runtime = 'edge'; // Wichtig für längere Ausführungszeiten
+
 export async function POST(request: Request) {
   try {
     // Prüfe ob API Key in Umgebungsvariablen vorhanden ist
@@ -49,7 +51,8 @@ export async function POST(request: Request) {
 
     // Initialisiere OpenAI mit dem API-Key aus den Umgebungsvariablen
     const openai = new OpenAI({
-      apiKey: apiKey
+      apiKey: apiKey,
+      timeout: 60000, // 60 Sekunden Timeout
     });
 
     try {
@@ -71,38 +74,60 @@ export async function POST(request: Request) {
       });
 
       // Extrahiere den generierten Text
-      const generatedText = completion.choices[0].message.content;
+      const generatedText = completion.choices[0]?.message?.content;
 
       if (!generatedText) {
         throw new Error('Keine Antwort von OpenAI erhalten');
       }
 
       // Sende erfolgreiche Antwort
-      return NextResponse.json({ text: generatedText });
+      return new NextResponse(
+        JSON.stringify({ text: generatedText }),
+        {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
     } catch (openaiError) {
       console.error('OpenAI API Fehler:', openaiError);
       
       // Spezifische Fehlerbehandlung für OpenAI Fehler
+      let errorMessage = 'Fehler bei der Kommunikation mit OpenAI';
+      let statusCode = 400;
+
       if (openaiError instanceof Error) {
-        return NextResponse.json(
-          { error: `OpenAI Fehler: ${openaiError.message}` },
-          { status: 400 }
-        );
+        errorMessage = openaiError.message;
+        // Timeout oder Netzwerkfehler
+        if (errorMessage.includes('timeout') || errorMessage.includes('network')) {
+          statusCode = 504;
+        }
       }
       
-      return NextResponse.json(
-        { error: 'Fehler bei der Kommunikation mit OpenAI' },
-        { status: 400 }
+      return new NextResponse(
+        JSON.stringify({ error: errorMessage }),
+        {
+          status: statusCode,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
       );
     }
 
   } catch (error) {
     // Allgemeine Fehlerbehandlung
     console.error('Server Fehler:', error);
-    return NextResponse.json(
-      { error: 'Interner Server Fehler' },
-      { status: 500 }
+    return new NextResponse(
+      JSON.stringify({ error: 'Interner Server Fehler' }),
+      {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
     );
   }
 } 
