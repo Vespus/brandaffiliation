@@ -16,29 +16,6 @@ interface CategoryData extends Category {
   subcategories: string[];
 }
 
-const DEFAULT_PROMPT_TEMPLATE = `Erstelle einen SEO-optimierten Text für die Marke {brand} in der Kategorie {category} für die Saison {season}.
-
-Markeninformationen:
-- Kurzcharakteristik 1: {char1}
-- Kurzcharakteristik 2: {char2}
-- Kurzcharakteristik 3: {char3}
-
-Markenprofil:
-- Preisniveau: {price}
-- Design: {design}
-- Bekanntheit: {fame}
-- Sortimentsbreite: {range}
-- Positionierung: {positioning}
-
-Der Text sollte:
-1. Natürlich und flüssig lesbar sein
-2. Die wichtigsten Keywords für SEO enthalten
-3. Die Markenidentität und -werte widerspiegeln
-4. Die Zielgruppe ansprechen
-5. Call-to-Actions enthalten
-
-Bitte generiere einen Text von 300-400 Wörtern.`;
-
 export default function SeoTextPage() {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [categories, setCategories] = useState<CategoryData[]>([]);
@@ -49,8 +26,10 @@ export default function SeoTextPage() {
   const [error, setError] = useState<string | null>(null);
   const [generatedText, setGeneratedText] = useState<string | null>(null);
   const [generatedPrompt, setGeneratedPrompt] = useState<string | null>(null);
+  const [editedPrompt, setEditedPrompt] = useState<string | null>(null);
+  const [promptTemplate, setPromptTemplate] = useState<string>('');
 
-  // Lade Marken und Kategorien beim Start
+  // Lade Marken, Kategorien und Prompt Template beim Start
   useEffect(() => {
     async function fetchData() {
       try {
@@ -65,6 +44,14 @@ export default function SeoTextPage() {
         }
         const categoriesData = await categoriesResponse.json();
         setCategories(categoriesData.categories);
+
+        // Lade Prompt Template von der API
+        const settingsResponse = await fetch('/api/settings');
+        if (!settingsResponse.ok) {
+          throw new Error('Fehler beim Laden des Prompt Templates');
+        }
+        const settingsData = await settingsResponse.json();
+        setPromptTemplate(settingsData.promptTemplate || '');
       } catch (err) {
         setError('Fehler beim Laden der Daten');
       }
@@ -78,18 +65,12 @@ export default function SeoTextPage() {
       return;
     }
 
-    try {
-      // Hole die Einstellungen aus dem localStorage
-      const settings = localStorage.getItem('seoSettings');
-      let promptTemplate = DEFAULT_PROMPT_TEMPLATE;
-      
-      if (settings) {
-        const parsedSettings = JSON.parse(settings);
-        if (parsedSettings.promptTemplate) {
-          promptTemplate = parsedSettings.promptTemplate;
-        }
-      }
+    if (!promptTemplate) {
+      setError('Prompt Template ist nicht konfiguriert');
+      return;
+    }
 
+    try {
       // Übersetze die Skalenwerte in beschreibende Texte
       const priceLevels = ['günstig', 'preisgünstig', 'mittleres Preissegment', 'premium', 'luxuriös'];
       const designLevels = ['einfach', 'klassisch', 'zeitlos', 'modern', 'innovativ'];
@@ -112,6 +93,7 @@ export default function SeoTextPage() {
         .replace('{positioning}', positioningLevels[selectedBrand.Positionierung - 1]);
 
       setGeneratedPrompt(prompt);
+      setEditedPrompt(prompt); // Initialisiere den editierbaren Prompt
       setError(null);
     } catch (err) {
       setError('Fehler bei der Prompt-Generierung');
@@ -119,7 +101,7 @@ export default function SeoTextPage() {
   };
 
   const handleGenerateText = async () => {
-    if (!generatedPrompt) {
+    if (!editedPrompt) {
       setError('Bitte zuerst den Prompt generieren');
       return;
     }
@@ -128,28 +110,13 @@ export default function SeoTextPage() {
     setError(null);
 
     try {
-      // Hole die Einstellungen aus dem localStorage
-      const settings = localStorage.getItem('seoSettings');
-      let apiKey = '';
-      
-      if (settings) {
-        const parsedSettings = JSON.parse(settings);
-        apiKey = parsedSettings.openaiApiKey;
-      }
-
-      if (!apiKey) {
-        throw new Error('OpenAI API-Key nicht gefunden. Bitte in den Einstellungen hinterlegen.');
-      }
-
-      console.log('Sende Anfrage an API...');
       const response = await fetch('/api/generate-seo-text', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          apiKey,
-          promptTemplate: generatedPrompt,
+          promptTemplate: editedPrompt,
         }),
       });
 
@@ -161,12 +128,19 @@ export default function SeoTextPage() {
       }
 
       setGeneratedText(data.text);
-      setGeneratedPrompt(null); // Reset prompt after successful generation
+      setGeneratedPrompt(null);
+      setEditedPrompt(null);
     } catch (err) {
       console.error('Fehler Details:', err);
       setError(err instanceof Error ? err.message : 'Fehler bei der Textgenerierung');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResetPrompt = () => {
+    if (generatedPrompt) {
+      setEditedPrompt(generatedPrompt);
     }
   };
 
@@ -208,8 +182,8 @@ export default function SeoTextPage() {
                 onClick={() => setSelectedSeason(season)}
                 className={`p-4 rounded-lg border ${
                   selectedSeason?.id === season.id
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200'
+                    ? 'bg-blue-50 border-blue-500 text-blue-700'
+                    : 'border-gray-200 hover:border-blue-500'
                 }`}
               >
                 {season.name}
@@ -221,62 +195,74 @@ export default function SeoTextPage() {
         {/* Kategorieauswahl */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Kategorie auswählen</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {categories.map((category) => (
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category)}
                 className={`p-4 rounded-lg border ${
                   selectedCategory?.id === category.id
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200'
+                    ? 'bg-blue-50 border-blue-500 text-blue-700'
+                    : 'border-gray-200 hover:border-blue-500'
                 }`}
               >
-                <div className="text-base font-medium">{category.name}</div>
-                <div className="text-sm text-gray-500 mt-1">
-                  {category.subcategories.slice(0, 3).join(', ')}
-                  {category.subcategories.length > 3 && '...'}
-                </div>
+                <div className="font-semibold">{category.name}</div>
+                {category.subcategories && (
+                  <div className="mt-2 text-sm text-gray-600">
+                    {category.subcategories.join(', ')}
+                  </div>
+                )}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Prompt-Generierung Button */}
-        <button
-          onClick={generatePrompt}
-          disabled={!selectedBrand || !selectedSeason || !selectedCategory}
-          className={`w-full py-3 px-4 rounded-lg text-white font-semibold ${
-            !selectedBrand || !selectedSeason || !selectedCategory
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-blue-500 hover:bg-blue-600'
-          }`}
-        >
-          Prompt generieren
-        </button>
-
-        {/* Generierter Prompt */}
-        {generatedPrompt && (
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-4">Generierter Prompt</h2>
-            <div className="p-4 bg-gray-50 rounded-lg whitespace-pre-wrap mb-4">
-              {generatedPrompt}
-            </div>
+        {/* Prompt Generierung und Bearbeitung */}
+        <div className="mb-8">
+          {!generatedPrompt ? (
             <button
-              onClick={handleGenerateText}
-              disabled={loading}
+              onClick={generatePrompt}
+              disabled={!selectedBrand || !selectedSeason || !selectedCategory}
               className={`w-full py-3 px-4 rounded-lg text-white font-semibold ${
-                loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'
+                !selectedBrand || !selectedSeason || !selectedCategory
+                  ? 'bg-gray-400'
+                  : 'bg-blue-500 hover:bg-blue-600'
               }`}
             >
-              {loading ? 'Generiere Text...' : 'An ChatGPT senden'}
+              Prompt generieren
             </button>
-          </div>
-        )}
+          ) : (
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">Prompt überprüfen und anpassen</h2>
+              <textarea
+                value={editedPrompt || ''}
+                onChange={(e) => setEditedPrompt(e.target.value)}
+                className="w-full h-64 p-4 border rounded-lg font-mono text-sm"
+              />
+              <div className="flex space-x-4">
+                <button
+                  onClick={handleResetPrompt}
+                  className="py-2 px-4 rounded-lg border border-gray-300 hover:border-blue-500"
+                >
+                  Zurücksetzen
+                </button>
+                <button
+                  onClick={handleGenerateText}
+                  disabled={loading}
+                  className={`flex-1 py-2 px-4 rounded-lg text-white font-semibold ${
+                    loading ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'
+                  }`}
+                >
+                  {loading ? 'Generiere Text...' : 'An ChatGPT senden'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
 
-        {/* Fehleranzeige */}
+        {/* Fehlermeldung */}
         {error && (
-          <div className="p-4 bg-red-50 text-red-700 rounded-lg">
+          <div className="p-4 rounded-lg bg-red-50 text-red-700">
             {error}
           </div>
         )}
@@ -285,8 +271,12 @@ export default function SeoTextPage() {
         {generatedText && (
           <div className="mt-8">
             <h2 className="text-xl font-semibold mb-4">Generierter SEO-Text</h2>
-            <div className="p-4 bg-gray-50 rounded-lg whitespace-pre-wrap">
-              {generatedText}
+            <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
+              <div className="prose max-w-none">
+                {generatedText.split('\n').map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
+                ))}
+              </div>
             </div>
           </div>
         )}

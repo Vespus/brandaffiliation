@@ -1,74 +1,53 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { SeoSettings } from '@/types/seo';
+
+interface Settings {
+  hasApiKey: boolean;
+  promptTemplate: string;
+}
 
 export default function SettingsPage() {
-  const [settings, setSettings] = useState<SeoSettings>({
+  const [settings, setSettings] = useState<Settings>({
+    hasApiKey: false,
     promptTemplate: '',
   });
-  const [hasApiKey, setHasApiKey] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Lade Einstellungen von der API
     const loadSettings = async () => {
       try {
         const response = await fetch('/api/settings');
         const data = await response.json();
-        
-        // Lade gespeicherte Einstellungen aus localStorage als Fallback
-        const savedSettings = localStorage.getItem('seoSettings');
-        let localSettings: Partial<SeoSettings> = {};
-        
-        if (savedSettings) {
-          try {
-            localSettings = JSON.parse(savedSettings);
-          } catch (e) {
-            console.error('Fehler beim Laden der lokalen Einstellungen:', e);
-          }
-        }
-
-        setHasApiKey(data.hasApiKey);
         setSettings({
-          promptTemplate: data.promptTemplate || localSettings.promptTemplate || '',
+          hasApiKey: data.hasApiKey,
+          promptTemplate: data.promptTemplate || '',
         });
       } catch (error) {
         console.error('Fehler beim Laden der Einstellungen:', error);
-        setMessage({
-          type: 'error',
-          text: 'Fehler beim Laden der Einstellungen'
-        });
+        setError('Fehler beim Laden der Einstellungen');
+      } finally {
+        setLoading(false);
       }
     };
 
     loadSettings();
   }, []);
 
-  const handleSave = async () => {
-    setSaving(true);
-    setMessage(null);
-
-    try {
-      // Speichere Prompt Template im localStorage
-      localStorage.setItem('seoSettings', JSON.stringify({
-        promptTemplate: settings.promptTemplate
-      }));
-      
-      setMessage({
-        type: 'success',
-        text: 'Einstellungen erfolgreich gespeichert'
-      });
-    } catch (error) {
-      setMessage({
-        type: 'error',
-        text: 'Fehler beim Speichern der Einstellungen'
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
+          <div className="space-y-6">
+            <div className="h-32 bg-gray-200 rounded"></div>
+            <div className="h-64 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -79,45 +58,34 @@ export default function SettingsPage() {
         <div>
           <h2 className="text-xl font-semibold mb-4">OpenAI API Key Status</h2>
           <div className={`p-4 rounded-lg ${
-            hasApiKey ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'
+            settings.hasApiKey ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'
           }`}>
-            {hasApiKey 
+            {settings.hasApiKey 
               ? 'OpenAI API Key ist konfiguriert und aktiv.' 
               : 'OpenAI API Key ist nicht konfiguriert. Bitte konfigurieren Sie den API Key in den Vercel Projekteinstellungen.'}
           </div>
         </div>
 
-        {/* Prompt Template */}
+        {/* Prompt Template (Read-only) */}
         <div>
           <h2 className="text-xl font-semibold mb-4">SEO Prompt Template</h2>
-          <textarea
-            value={settings.promptTemplate}
-            onChange={(e) => setSettings({ ...settings, promptTemplate: e.target.value })}
-            className="w-full p-2 border rounded-lg h-64"
-            placeholder="Geben Sie hier Ihr Prompt-Template ein..."
-          />
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <pre className="whitespace-pre-wrap font-mono text-sm">
+              {settings.promptTemplate || 'Kein Prompt Template konfiguriert.'}
+            </pre>
+          </div>
+          <p className="mt-4 text-sm text-gray-600">
+            Das Prompt Template wird in den Vercel Projekteinstellungen verwaltet. 
+            Änderungen können nur dort vorgenommen werden.
+          </p>
           <p className="mt-2 text-sm text-gray-600">
             Verfügbare Platzhalter: {'{brand}'}, {'{category}'}, {'{season}'}, {'{char1}'}, {'{char2}'}, {'{char3}'}, {'{price}'}, {'{design}'}, {'{fame}'}, {'{range}'}, {'{positioning}'}
           </p>
         </div>
 
-        {/* Speichern Button */}
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className={`w-full py-3 px-4 rounded-lg text-white font-semibold ${
-            saving ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'
-          }`}
-        >
-          {saving ? 'Speichere...' : 'Einstellungen speichern'}
-        </button>
-
-        {/* Statusmeldung */}
-        {message && (
-          <div className={`p-4 rounded-lg ${
-            message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-          }`}>
-            {message.text}
+        {error && (
+          <div className="p-4 rounded-lg bg-red-50 text-red-700">
+            {error}
           </div>
         )}
       </div>
