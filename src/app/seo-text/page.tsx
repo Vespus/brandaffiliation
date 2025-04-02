@@ -11,13 +11,10 @@ const SEASONS: Season[] = [
   { id: 'aw', name: 'Herbst/Winter' }
 ];
 
-const CATEGORIES: Category[] = [
-  { id: 'damen', name: 'Damenmode' },
-  { id: 'herren', name: 'Herrenmode' },
-  { id: 'accessoires', name: 'Accessoires' },
-  { id: 'schuhe', name: 'Schuhe' },
-  { id: 'taschen', name: 'Taschen' }
-];
+interface CategoryData extends Category {
+  seoKeywords: string[];
+  subcategories: string[];
+}
 
 const DEFAULT_PROMPT_TEMPLATE = `Erstelle einen SEO-optimierten Text für die Marke {brand} in der Kategorie {category} für die Saison {season}.
 
@@ -44,6 +41,7 @@ Bitte generiere einen Text von 300-400 Wörtern.`;
 
 export default function SeoTextPage() {
   const [brands, setBrands] = useState<Brand[]>([]);
+  const [categories, setCategories] = useState<CategoryData[]>([]);
   const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
   const [selectedSeason, setSelectedSeason] = useState<Season | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
@@ -52,17 +50,26 @@ export default function SeoTextPage() {
   const [generatedText, setGeneratedText] = useState<string | null>(null);
   const [generatedPrompt, setGeneratedPrompt] = useState<string | null>(null);
 
-  // Lade Marken beim Start
+  // Lade Marken und Kategorien beim Start
   useEffect(() => {
-    async function fetchBrands() {
+    async function fetchData() {
       try {
-        const data = await loadBrands();
-        setBrands(data);
+        // Lade Marken
+        const brandsData = await loadBrands();
+        setBrands(brandsData);
+
+        // Lade Kategorien
+        const categoriesResponse = await fetch('/categories.json');
+        if (!categoriesResponse.ok) {
+          throw new Error('Fehler beim Laden der Kategorien');
+        }
+        const categoriesData = await categoriesResponse.json();
+        setCategories(categoriesData.categories);
       } catch (err) {
-        setError('Fehler beim Laden der Markendaten');
+        setError('Fehler beim Laden der Daten');
       }
     }
-    fetchBrands();
+    fetchData();
   }, []);
 
   const generatePrompt = () => {
@@ -215,7 +222,7 @@ export default function SeoTextPage() {
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Kategorie auswählen</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {CATEGORIES.map((category) => (
+            {categories.map((category) => (
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category)}
@@ -225,7 +232,11 @@ export default function SeoTextPage() {
                     : 'border-gray-200'
                 }`}
               >
-                {category.name}
+                <div className="text-base font-medium">{category.name}</div>
+                <div className="text-sm text-gray-500 mt-1">
+                  {category.subcategories.slice(0, 3).join(', ')}
+                  {category.subcategories.length > 3 && '...'}
+                </div>
               </button>
             ))}
           </div>
