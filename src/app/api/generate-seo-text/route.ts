@@ -27,17 +27,19 @@ Bitte generiere einen Text von 300-400 Wörtern.`;
 
 export async function POST(request: Request) {
   try {
-    // Parse request body
-    const body = await request.json();
-    
-    // Validiere die erforderlichen Felder
-    if (!body.apiKey) {
+    // Prüfe ob API Key in Umgebungsvariablen vorhanden ist
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
       return NextResponse.json(
-        { error: 'API-Key ist erforderlich' },
-        { status: 400 }
+        { error: 'OpenAI API-Key ist nicht konfiguriert' },
+        { status: 500 }
       );
     }
 
+    // Parse request body
+    const body = await request.json();
+    
+    // Validiere das Prompt-Template
     if (!body.promptTemplate) {
       return NextResponse.json(
         { error: 'Prompt-Template ist erforderlich' },
@@ -45,9 +47,9 @@ export async function POST(request: Request) {
       );
     }
 
-    // Initialisiere OpenAI mit dem API-Key aus dem Request
+    // Initialisiere OpenAI mit dem API-Key aus den Umgebungsvariablen
     const openai = new OpenAI({
-      apiKey: body.apiKey
+      apiKey: apiKey
     });
 
     try {

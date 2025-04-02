@@ -9,7 +9,6 @@ export interface Category {
 }
 
 export interface SeoSettings {
-  openaiApiKey: string;
   promptTemplate: string;
 }
 

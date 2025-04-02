@@ -5,9 +5,9 @@ import { SeoSettings } from '@/types/seo';
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<SeoSettings>({
-    openaiApiKey: '',
     promptTemplate: '',
   });
+  const [hasApiKey, setHasApiKey] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -24,16 +24,15 @@ export default function SettingsPage() {
         
         if (savedSettings) {
           try {
-            localSettings = JSON.parse(savedSettings);
+            localSettings = JSON.parse(savedSettings) as Partial<SeoSettings>;
           } catch (e) {
             console.error('Fehler beim Laden der lokalen Einstellungen:', e);
           }
         }
 
+        setHasApiKey(data.hasApiKey);
         setSettings({
-          openaiApiKey: data.hasApiKey ? '********' : '',
-          promptTemplate: data.promptTemplate || '',
-          ...localSettings
+          promptTemplate: data.promptTemplate || localSettings.promptTemplate || '',
         });
       } catch (error) {
         console.error('Fehler beim Laden der Einstellungen:', error);
@@ -52,11 +51,10 @@ export default function SettingsPage() {
     setMessage(null);
 
     try {
-      // Speichere Einstellungen im localStorage
-      localStorage.setItem('seoSettings', JSON.stringify(settings));
-      
-      // Speichere API-Key in der Umgebungsvariable (nur für die aktuelle Sitzung)
-      process.env.OPENAI_API_KEY = settings.openaiApiKey;
+      // Speichere Prompt Template im localStorage
+      localStorage.setItem('seoSettings', JSON.stringify({
+        promptTemplate: settings.promptTemplate
+      }));
       
       setMessage({
         type: 'success',
@@ -77,19 +75,16 @@ export default function SettingsPage() {
       <h1 className="text-3xl font-bold mb-8">Einstellungen</h1>
 
       <div className="space-y-6">
-        {/* OpenAI API Key */}
+        {/* OpenAI API Key Status */}
         <div>
-          <h2 className="text-xl font-semibold mb-4">OpenAI API Key</h2>
-          <input
-            type="password"
-            value={settings.openaiApiKey}
-            onChange={(e) => setSettings({ ...settings, openaiApiKey: e.target.value })}
-            className="w-full p-2 border rounded-lg"
-            placeholder="sk-..."
-          />
-          <p className="mt-2 text-sm text-gray-600">
-            Der API-Key wird nur lokal gespeichert und nicht an Server gesendet.
-          </p>
+          <h2 className="text-xl font-semibold mb-4">OpenAI API Key Status</h2>
+          <div className={`p-4 rounded-lg ${
+            hasApiKey ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'
+          }`}>
+            {hasApiKey 
+              ? 'OpenAI API Key ist konfiguriert und aktiv.' 
+              : 'OpenAI API Key ist nicht konfiguriert. Bitte konfigurieren Sie den API Key in den Vercel Projekteinstellungen.'}
+          </div>
         </div>
 
         {/* Prompt Template */}
