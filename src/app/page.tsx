@@ -30,6 +30,7 @@ export default function Home() {
   const [affinityWeight, setAffinityWeight] = useState(0.6);
   const [affineBrandsCount, setAffineBrandsCount] = useState(5);
   const [scaleWeights, setScaleWeights] = useState(DEFAULT_SCALE_WEIGHTS);
+  const [useAlternativeMethod, setUseAlternativeMethod] = useState(false);
 
   useEffect(() => {
     // Lade gespeicherte Einstellungen beim Start
@@ -84,7 +85,7 @@ export default function Home() {
       .filter(brand => brand.Marke !== selectedBrand.Marke)
       .map(brand => ({
         brand,
-        affinity: calculateAffinity(selectedBrand, brand, affinityWeight, weightsObject)
+        affinity: calculateAffinity(selectedBrand, brand, affinityWeight, weightsObject, useAlternativeMethod)
       }))
       .sort((a, b) => b.affinity.overallSimilarity - a.affinity.overallSimilarity)
       .slice(0, affineBrandsCount);
@@ -136,6 +137,8 @@ export default function Home() {
             <ScaleWeights
               weights={scaleWeights}
               onChange={setScaleWeights}
+              useAlternativeMethod={useAlternativeMethod}
+              onMethodChange={setUseAlternativeMethod}
             />
           </div>
 

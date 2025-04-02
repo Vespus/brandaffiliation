@@ -28,6 +28,7 @@ export default function BrandComparisonPage() {
   const [selectedBrand2, setSelectedBrand2] = useState<Brand | null>(null);
   const [affinityWeight, setAffinityWeight] = useState(0.6);
   const [scaleWeights, setScaleWeights] = useState(DEFAULT_SCALE_WEIGHTS);
+  const [useAlternativeMethod, setUseAlternativeMethod] = useState(false);
 
   useEffect(() => {
     // Lade gespeicherte Skalengewichtungen
@@ -72,7 +73,7 @@ export default function BrandComparisonPage() {
       return acc;
     }, {} as Record<string, number>);
     
-    return calculateAffinity(selectedBrand1, selectedBrand2, affinityWeight, weightsObject);
+    return calculateAffinity(selectedBrand1, selectedBrand2, affinityWeight, weightsObject, useAlternativeMethod);
   };
 
   if (loading) {
@@ -145,6 +146,8 @@ export default function BrandComparisonPage() {
             <ScaleWeights
               weights={scaleWeights}
               onChange={setScaleWeights}
+              useAlternativeMethod={useAlternativeMethod}
+              onMethodChange={setUseAlternativeMethod}
             />
           </div>
 

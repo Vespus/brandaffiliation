@@ -10,9 +10,16 @@ interface ScaleWeight {
 interface ScaleWeightsProps {
   weights: ScaleWeight[];
   onChange: (weights: ScaleWeight[]) => void;
+  useAlternativeMethod: boolean;
+  onMethodChange: (useAlternative: boolean) => void;
 }
 
-export default function ScaleWeights({ weights, onChange }: ScaleWeightsProps) {
+export default function ScaleWeights({ 
+  weights, 
+  onChange, 
+  useAlternativeMethod,
+  onMethodChange 
+}: ScaleWeightsProps) {
   const [localWeights, setLocalWeights] = useState<ScaleWeight[]>(weights);
   const [error, setError] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -37,38 +44,35 @@ export default function ScaleWeights({ weights, onChange }: ScaleWeightsProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 rounded-lg transition-colors"
-      >
-        <div className="flex items-center space-x-3">
-          <svg
-            className={`w-5 h-5 text-gray-500 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-          <h3 className="text-lg font-medium text-gray-900">Skalengewichtungen</h3>
-        </div>
-        <div className="flex items-center space-x-4">
-          <div className="text-sm font-medium">
-            Summe: <span className={error ? "text-red-500" : "text-green-500"}>
-              {totalWeight.toFixed(2)}
-            </span>
+    <div className="bg-white rounded-lg shadow-sm border border-gray-100">
+      <div className="p-4 border-b border-gray-100">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-medium text-gray-900">
+            Skalengewichtungen
+          </h3>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-600">Berechnungsmethode:</span>
+              <button
+                onClick={() => onMethodChange(!useAlternativeMethod)}
+                className={`px-3 py-1 text-sm font-medium rounded-md ${
+                  useAlternativeMethod
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'bg-gray-100 text-gray-700'
+                }`}
+              >
+                {useAlternativeMethod ? 'Alternative' : 'Standard'}
+              </button>
+            </div>
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="text-sm text-blue-600 hover:text-blue-700"
+            >
+              {isExpanded ? 'Ausblenden' : 'Anpassen'}
+            </button>
           </div>
-          <span className="text-sm text-gray-500">
-            {isExpanded ? 'Ausblenden' : 'Anpassen'}
-          </span>
         </div>
-      </button>
+      </div>
 
       {isExpanded && (
         <div className="px-6 pb-6 space-y-4">

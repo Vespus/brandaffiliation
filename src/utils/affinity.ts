@@ -122,15 +122,74 @@ export const calculateScaleSimilarity = (
   };
 };
 
+// Alternative skalenbasierte Ähnlichkeitsberechnung
+export const calculateScaleSimilarityAlternative = (
+  brand1: Brand, 
+  brand2: Brand,
+  customWeights?: Record<string, number>
+) => {
+  const weights = customWeights || DEFAULT_SCALE_WEIGHTS;
+  const scales = Object.keys(weights) as Array<keyof typeof weights>;
+  
+  let totalSimilarity = 0;
+  const scaleDetails: Record<string, {
+    brand1Value: number;
+    brand2Value: number;
+    difference: number;
+    similarity: number;
+    weight: number;
+  }> = {};
+  let totalWeight = 0;
+  
+  for (const scale of scales) {
+    if (brand1[scale] !== undefined && brand1[scale] !== null && 
+        brand2[scale] !== undefined && brand2[scale] !== null) {
+      
+      const weight = weights[scale];
+      totalWeight += weight;
+      
+      const diff = Math.abs(brand1[scale] - brand2[scale]);
+      const maxDiff = scale === 'Positionierung' ? 2 : 4; // 3er vs 5er Skala
+      
+      // Exponentieller Ähnlichkeitsabfall
+      const scaleSimilarity = Math.pow(0.7, diff);
+      totalSimilarity += scaleSimilarity * weight;
+      
+      scaleDetails[scale] = {
+        brand1Value: brand1[scale],
+        brand2Value: brand2[scale],
+        difference: diff,
+        similarity: scaleSimilarity,
+        weight
+      };
+    }
+  }
+  
+  if (totalWeight === 0) {
+    return { 
+      similarity: 0, 
+      scaleDetails: {} 
+    };
+  }
+  
+  return {
+    similarity: totalSimilarity / totalWeight,
+    scaleDetails
+  };
+};
+
 // Kombinierte Affinitätsberechnung
 export const calculateAffinity = (
   brand1: Brand, 
   brand2: Brand, 
   textWeight: number = 0.4,
-  scaleWeights?: Record<string, number>
+  scaleWeights?: Record<string, number>,
+  useAlternativeMethod: boolean = false
 ) => {
   const textSimilarity = calculateTextSimilarity(brand1, brand2);
-  const scaleSimilarity = calculateScaleSimilarity(brand1, brand2, scaleWeights);
+  const scaleSimilarity = useAlternativeMethod 
+    ? calculateScaleSimilarityAlternative(brand1, brand2, scaleWeights)
+    : calculateScaleSimilarity(brand1, brand2, scaleWeights);
   
   // Gewichtete Kombination der Ähnlichkeiten
   const weightedSimilarity = (textSimilarity.similarity * textWeight) + 
