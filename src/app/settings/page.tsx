@@ -20,11 +20,11 @@ export default function SettingsPage() {
         
         // Lade gespeicherte Einstellungen aus localStorage als Fallback
         const savedSettings = localStorage.getItem('seoSettings');
-        let localSettings = {};
+        let localSettings: Partial<SeoSettings> = {};
         
         if (savedSettings) {
           try {
-            localSettings = JSON.parse(savedSettings) as Partial<SeoSettings>;
+            localSettings = JSON.parse(savedSettings);
           } catch (e) {
             console.error('Fehler beim Laden der lokalen Einstellungen:', e);
           }
