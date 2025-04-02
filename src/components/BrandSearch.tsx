@@ -6,13 +6,20 @@ import { Brand } from '@/types/brands';
 interface BrandSearchProps {
   brands: Brand[];
   onSelect: (brand: Brand) => void;
+  selectedBrand: Brand | null;
 }
 
-export default function BrandSearch({ brands, onSelect }: BrandSearchProps) {
+export default function BrandSearch({ brands, onSelect, selectedBrand }: BrandSearchProps) {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (selectedBrand) {
+      setQuery(selectedBrand.Marke);
+    }
+  }, [selectedBrand]);
 
   const filteredBrands = brands.filter(brand =>
     brand.Marke.toLowerCase().includes(query.toLowerCase())
@@ -37,13 +44,18 @@ export default function BrandSearch({ brands, onSelect }: BrandSearchProps) {
     } else if (e.key === 'Enter' && selectedIndex >= 0) {
       onSelect(filteredBrands[selectedIndex]);
       setIsOpen(false);
-      setQuery('');
       setSelectedIndex(-1);
     } else if (e.key === 'Escape') {
       setIsOpen(false);
-      setQuery('');
       setSelectedIndex(-1);
     }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newQuery = e.target.value;
+    setQuery(newQuery);
+    setIsOpen(true);
+    setSelectedIndex(-1);
   };
 
   return (
@@ -52,11 +64,7 @@ export default function BrandSearch({ brands, onSelect }: BrandSearchProps) {
         <input
           type="text"
           value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setIsOpen(true);
-            setSelectedIndex(-1);
-          }}
+          onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onFocus={() => setIsOpen(true)}
           placeholder="Marke suchen..."
@@ -81,7 +89,6 @@ export default function BrandSearch({ brands, onSelect }: BrandSearchProps) {
                 onClick={() => {
                   onSelect(brand);
                   setIsOpen(false);
-                  setQuery('');
                   setSelectedIndex(-1);
                 }}
               >
