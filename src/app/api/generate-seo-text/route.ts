@@ -2,6 +2,14 @@ import { NextResponse } from 'next/server';
 import { SeoTextRequest } from '@/types/seo';
 import { getSettings } from '@/utils/settings';
 
+// Hilfsfunktion für Fehlerbehandlung
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return 'Ein unbekannter Fehler ist aufgetreten';
+}
+
 async function generateWithClaude(prompt: string) {
   const settings = await getSettings();
   
@@ -94,7 +102,7 @@ export async function POST(request: Request) {
         results.chatgpt = chatgptData.choices[0].message.content;
       } catch (error) {
         console.error('ChatGPT Fehler:', error);
-        results.chatgpt = `Fehler bei der ChatGPT-Generierung: ${error.message}`;
+        results.chatgpt = `Fehler bei der ChatGPT-Generierung: ${getErrorMessage(error)}`;
       }
     }
 
@@ -103,7 +111,7 @@ export async function POST(request: Request) {
         results.claude = await generateWithClaude(prompt);
       } catch (error) {
         console.error('Claude Fehler:', error);
-        results.claude = `Fehler bei der Claude-Generierung: ${error.message}`;
+        results.claude = `Fehler bei der Claude-Generierung: ${getErrorMessage(error)}`;
       }
     }
 
@@ -111,7 +119,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('API Fehler:', error);
     return NextResponse.json(
-      { error: 'Interner Server-Fehler' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     );
   }
