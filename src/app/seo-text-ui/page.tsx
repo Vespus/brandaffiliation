@@ -146,6 +146,37 @@ export default function SeoTextUIPage() {
     }
   };
 
+  // Formatierungsfunktionen
+  const formatText = (type: 'bold' | 'italic') => {
+    if (!generatedText) return;
+    
+    const textarea = document.querySelector('textarea') as HTMLTextAreaElement;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = generatedText.substring(start, end);
+    
+    if (selectedText) {
+      const prefix = type === 'bold' ? '**' : '_';
+      const newText = 
+        generatedText.substring(0, start) +
+        `${prefix}${selectedText}${prefix}` +
+        generatedText.substring(end);
+      
+      setGeneratedText(newText);
+      
+      // Setze die Cursor-Position nach der Formatierung
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(
+          start + prefix.length,
+          end + prefix.length
+        );
+      }, 0);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -317,7 +348,7 @@ export default function SeoTextUIPage() {
               <button
                 className="p-2 hover:bg-gray-100 rounded"
                 title="Fett"
-                onClick={() => {/* TODO: Implement formatting */}}
+                onClick={() => formatText('bold')}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 12h8a4 4 0 100-8H6v8zm0 0h8a4 4 0 110 8H6v-8z" />
@@ -326,19 +357,10 @@ export default function SeoTextUIPage() {
               <button
                 className="p-2 hover:bg-gray-100 rounded"
                 title="Kursiv"
-                onClick={() => {/* TODO: Implement formatting */}}
+                onClick={() => formatText('italic')}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6v12h4M14 6h4v12h-4" />
-                </svg>
-              </button>
-              <button
-                className="p-2 hover:bg-gray-100 rounded"
-                title="Kopieren"
-                onClick={() => navigator.clipboard.writeText(generatedText || '')}
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
                 </svg>
               </button>
             </div>
@@ -349,27 +371,38 @@ export default function SeoTextUIPage() {
               className="w-full h-96 p-4 border rounded-lg font-mono text-sm"
             />
 
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <button
                 onClick={() => setCurrentStep(2)}
                 className="px-6 py-2 rounded-lg border border-gray-300 hover:border-blue-500"
               >
                 Zurück
               </button>
-              <button
-                onClick={() => {
-                  setSelectedBrand(null);
-                  setSelectedSeason(null);
-                  setSelectedCategory(null);
-                  setGeneratedPrompt(null);
-                  setEditedPrompt(null);
-                  setGeneratedText(null);
-                  setCurrentStep(1);
-                }}
-                className="px-6 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600"
-              >
-                Neuen Text erstellen
-              </button>
+              <div className="flex items-center space-x-2">
+                <button
+                  className="p-2 hover:bg-gray-100 rounded"
+                  title="Kopieren"
+                  onClick={() => navigator.clipboard.writeText(generatedText || '')}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => {
+                    setSelectedBrand(null);
+                    setSelectedSeason(null);
+                    setSelectedCategory(null);
+                    setGeneratedPrompt(null);
+                    setEditedPrompt(null);
+                    setGeneratedText(null);
+                    setCurrentStep(1);
+                  }}
+                  className="px-6 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600"
+                >
+                  Neuen Text erstellen
+                </button>
+              </div>
             </div>
           </div>
         )}
