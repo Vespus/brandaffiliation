@@ -1,81 +1,86 @@
 import { NextResponse } from 'next/server';
-import { OPENAI_DEFAULTS, OPENAI_LIMITS, SeoSettings } from '@/types/seo';
+import { OPENAI_DEFAULTS, OPENAI_LIMITS, SeoSettings, CLAUDE_DEFAULTS } from '@/types/seo';
 
 // Hilfsfunktion zur Validierung der Werte
 function validateValue(value: number, limits: { min: number; max: number }): number {
   return Math.min(Math.max(value, limits.min), limits.max);
 }
 
-export async function GET() {
-  // Sende die Einstellungen mit Standardwerten für nicht gesetzte Variablen
+export async function getSettings(): Promise<SeoSettings> {
   const settings: SeoSettings = {
-    hasApiKey: !!process.env.OPENAI_API_KEY,
+    hasApiKey: Boolean(process.env.OPENAI_API_KEY),
     promptTemplate: process.env.SEO_PROMPT_TEMPLATE || '',
     openaiSystemRole: process.env.OPENAI_SYSTEM_ROLE || OPENAI_DEFAULTS.systemRole,
-    openaiTemperature: validateValue(
-      parseFloat(process.env.OPENAI_TEMPERATURE || OPENAI_DEFAULTS.temperature.toString()),
-      OPENAI_LIMITS.temperature
-    ),
-    openaiTopP: validateValue(
-      parseFloat(process.env.OPENAI_TOP_P || OPENAI_DEFAULTS.topP.toString()),
-      OPENAI_LIMITS.topP
-    ),
-    openaiPresencePenalty: validateValue(
-      parseFloat(process.env.OPENAI_PRESENCE_PENALTY || OPENAI_DEFAULTS.presencePenalty.toString()),
-      OPENAI_LIMITS.presencePenalty
-    ),
-    openaiFrequencyPenalty: validateValue(
-      parseFloat(process.env.OPENAI_FREQUENCY_PENALTY || OPENAI_DEFAULTS.frequencyPenalty.toString()),
-      OPENAI_LIMITS.frequencyPenalty
-    ),
-    openaiMaxTokens: validateValue(
-      parseInt(process.env.OPENAI_MAX_TOKENS || OPENAI_DEFAULTS.maxTokens.toString()),
-      OPENAI_LIMITS.maxTokens
-    )
+    openaiTemperature: parseFloat(process.env.OPENAI_TEMPERATURE || '') || OPENAI_DEFAULTS.temperature,
+    openaiTopP: parseFloat(process.env.OPENAI_TOP_P || '') || OPENAI_DEFAULTS.topP,
+    openaiPresencePenalty: parseFloat(process.env.OPENAI_PRESENCE_PENALTY || '') || OPENAI_DEFAULTS.presencePenalty,
+    openaiFrequencyPenalty: parseFloat(process.env.OPENAI_FREQUENCY_PENALTY || '') || OPENAI_DEFAULTS.frequencyPenalty,
+    openaiMaxTokens: parseInt(process.env.OPENAI_MAX_TOKENS || '') || OPENAI_DEFAULTS.maxTokens,
+    // Claude-Parameter
+    claudeTemperature: parseFloat(process.env.CLAUDE_TEMPERATURE || '') || CLAUDE_DEFAULTS.temperature,
+    claudeMaxTokens: parseInt(process.env.CLAUDE_MAX_TOKENS || '') || CLAUDE_DEFAULTS.maxTokens,
+    claudeModel: process.env.CLAUDE_MODEL || CLAUDE_DEFAULTS.model
   };
 
-  return NextResponse.json(settings);
+  return settings;
+}
+
+export async function GET() {
+  try {
+    const settings = await getSettings();
+    return NextResponse.json(settings);
+  } catch (error) {
+    console.error('Fehler beim Laden der Einstellungen:', error);
+    return NextResponse.json(
+      { error: 'Fehler beim Laden der Einstellungen' },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const updates = await request.json();
     
     // Validiere die Eingabedaten
     const settings: SeoSettings = {
       hasApiKey: !!process.env.OPENAI_API_KEY,
-      promptTemplate: body.promptTemplate || process.env.SEO_PROMPT_TEMPLATE || '',
-      openaiSystemRole: body.openaiSystemRole || process.env.OPENAI_SYSTEM_ROLE || OPENAI_DEFAULTS.systemRole,
+      promptTemplate: updates.promptTemplate || process.env.SEO_PROMPT_TEMPLATE || '',
+      openaiSystemRole: updates.openaiSystemRole || process.env.OPENAI_SYSTEM_ROLE || OPENAI_DEFAULTS.systemRole,
       openaiTemperature: validateValue(
-        parseFloat(body.openaiTemperature || process.env.OPENAI_TEMPERATURE || OPENAI_DEFAULTS.temperature.toString()),
+        parseFloat(updates.openaiTemperature || process.env.OPENAI_TEMPERATURE || OPENAI_DEFAULTS.temperature.toString()),
         OPENAI_LIMITS.temperature
       ),
       openaiTopP: validateValue(
-        parseFloat(body.openaiTopP || process.env.OPENAI_TOP_P || OPENAI_DEFAULTS.topP.toString()),
+        parseFloat(updates.openaiTopP || process.env.OPENAI_TOP_P || OPENAI_DEFAULTS.topP.toString()),
         OPENAI_LIMITS.topP
       ),
       openaiPresencePenalty: validateValue(
-        parseFloat(body.openaiPresencePenalty || process.env.OPENAI_PRESENCE_PENALTY || OPENAI_DEFAULTS.presencePenalty.toString()),
+        parseFloat(updates.openaiPresencePenalty || process.env.OPENAI_PRESENCE_PENALTY || OPENAI_DEFAULTS.presencePenalty.toString()),
         OPENAI_LIMITS.presencePenalty
       ),
       openaiFrequencyPenalty: validateValue(
-        parseFloat(body.openaiFrequencyPenalty || process.env.OPENAI_FREQUENCY_PENALTY || OPENAI_DEFAULTS.frequencyPenalty.toString()),
+        parseFloat(updates.openaiFrequencyPenalty || process.env.OPENAI_FREQUENCY_PENALTY || OPENAI_DEFAULTS.frequencyPenalty.toString()),
         OPENAI_LIMITS.frequencyPenalty
       ),
       openaiMaxTokens: validateValue(
-        parseInt(body.openaiMaxTokens || process.env.OPENAI_MAX_TOKENS || OPENAI_DEFAULTS.maxTokens.toString()),
+        parseInt(updates.openaiMaxTokens || process.env.OPENAI_MAX_TOKENS || OPENAI_DEFAULTS.maxTokens.toString()),
         OPENAI_LIMITS.maxTokens
-      )
+      ),
+      // Claude-Parameter
+      claudeTemperature: parseFloat(updates.claudeTemperature || process.env.CLAUDE_TEMPERATURE || CLAUDE_DEFAULTS.temperature.toString()) || CLAUDE_DEFAULTS.temperature,
+      claudeMaxTokens: parseInt(updates.claudeMaxTokens || process.env.CLAUDE_MAX_TOKENS || CLAUDE_DEFAULTS.maxTokens.toString()) || CLAUDE_DEFAULTS.maxTokens,
+      claudeModel: updates.claudeModel || process.env.CLAUDE_MODEL || CLAUDE_DEFAULTS.model
     };
 
     // Hier würde normalerweise das Speichern in einer Datenbank erfolgen
     // Da wir Vercel Environment Variables verwenden, können wir nur die GET-Route aktualisieren
     
-    return NextResponse.json(settings);
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Fehler beim Aktualisieren der Einstellungen:', error);
+    console.error('Fehler beim Speichern der Einstellungen:', error);
     return NextResponse.json(
-      { error: 'Fehler beim Aktualisieren der Einstellungen' },
+      { error: 'Fehler beim Speichern der Einstellungen' },
       { status: 500 }
     );
   }

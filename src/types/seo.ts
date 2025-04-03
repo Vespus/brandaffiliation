@@ -29,13 +29,25 @@ export const OPENAI_LIMITS = {
 export interface SeoSettings {
   hasApiKey: boolean;
   promptTemplate: string;
+  openaiApiKey?: string;
   openaiSystemRole: string;
   openaiTemperature: number;
   openaiTopP: number;
   openaiPresencePenalty: number;
   openaiFrequencyPenalty: number;
   openaiMaxTokens: number;
+  // Claude-spezifische Einstellungen
+  claudeTemperature: number;
+  claudeMaxTokens: number;
+  claudeModel: string;
 }
+
+// Standardwerte für Claude
+export const CLAUDE_DEFAULTS = {
+  temperature: 0.7,
+  maxTokens: 1000,
+  model: 'claude-3-sonnet-20240229'
+} as const;
 
 export interface SeoTextRequest {
   brand: {

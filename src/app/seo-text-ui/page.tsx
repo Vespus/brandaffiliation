@@ -23,15 +23,20 @@ export default function SeoTextUIPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
-  const [selectedSeason, setSelectedSeason] = useState<Season | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [selectedSeason, setSelectedSeason] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [generatedText, setGeneratedText] = useState<string | null>(null);
+  const [generatedText, setGeneratedText] = useState<{
+    chatgpt?: string;
+    claude?: string;
+  } | null>(null);
   const [generatedPrompt, setGeneratedPrompt] = useState<string | null>(null);
   const [editedPrompt, setEditedPrompt] = useState<string | null>(null);
   const [promptTemplate, setPromptTemplate] = useState<string>('');
+  const [selectedLLM, setSelectedLLM] = useState<'chatgpt' | 'claude' | 'both'>('chatgpt');
+  const [activeTab, setActiveTab] = useState<'chatgpt' | 'claude'>('chatgpt');
   const [generating, setGenerating] = useState(false);
 
   // Lade Marken, Kategorien und Prompt Template beim Start
@@ -89,8 +94,8 @@ export default function SeoTextUIPage() {
       // Erstelle den Prompt mit den Markendaten
       const prompt = promptTemplate
         .replace('{brand}', selectedBrand.Marke)
-        .replace('{category}', selectedCategory.name)
-        .replace('{season}', selectedSeason.name)
+        .replace('{category}', selectedCategory)
+        .replace('{season}', selectedSeason)
         .replace('{char1}', selectedBrand['Kurzcharakteristik 1'])
         .replace('{char2}', selectedBrand['Kurzcharakteristik 2'])
         .replace('{char3}', selectedBrand['Kurzcharakteristik 3 (optional)'] || 'N/A')
@@ -111,14 +116,9 @@ export default function SeoTextUIPage() {
 
   // Generiere den SEO-Text
   const handleGenerateText = async () => {
-    if (!editedPrompt) {
-      setError('Bitte zuerst den Prompt generieren');
-      return;
-    }
+    if (!editedPrompt) return;
 
     setGenerating(true);
-    setError(null);
-
     try {
       const response = await fetch('/api/generate-seo-text', {
         method: 'POST',
@@ -126,21 +126,22 @@ export default function SeoTextUIPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          promptTemplate: editedPrompt,
+          brand: selectedBrand?.Marke,
+          season: selectedSeason,
+          category: selectedCategory,
+          llm: selectedLLM
         }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || 'Fehler bei der Textgenerierung');
+        throw new Error('Fehler bei der Textgenerierung');
       }
 
-      setGeneratedText(data.text);
+      const result = await response.json();
+      setGeneratedText(result);
       setCurrentStep(3);
-    } catch (err) {
-      console.error('Fehler Details:', err);
-      setError(err instanceof Error ? err.message : 'Fehler bei der Textgenerierung');
+    } catch (error) {
+      setError('Fehler bei der Textgenerierung');
     } finally {
       setGenerating(false);
     }
@@ -155,16 +156,19 @@ export default function SeoTextUIPage() {
 
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
-    const selectedText = generatedText.substring(start, end);
+    const selectedText = generatedText.chatgpt || generatedText.claude || '';
     
     if (selectedText) {
       const prefix = type === 'bold' ? '**' : '_';
       const newText = 
-        generatedText.substring(0, start) +
-        `${prefix}${selectedText}${prefix}` +
-        generatedText.substring(end);
+        selectedText.substring(0, start) +
+        `${prefix}${selectedText.substring(start, end)}${prefix}` +
+        selectedText.substring(end);
       
-      setGeneratedText(newText);
+      setGeneratedText({
+        ...generatedText,
+        [selectedLLM]: newText,
+      });
       
       // Setze die Cursor-Position nach der Formatierung
       setTimeout(() => {
@@ -259,9 +263,9 @@ export default function SeoTextUIPage() {
               {SEASONS.map((season) => (
                 <button
                   key={season.id}
-                  onClick={() => setSelectedSeason(season)}
+                  onClick={() => setSelectedSeason(season.name)}
                   className={`p-4 rounded-lg border text-left transition-colors ${
-                    selectedSeason?.id === season.id
+                    selectedSeason === season.name
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-200 hover:border-blue-500'
                   }`}
@@ -276,9 +280,9 @@ export default function SeoTextUIPage() {
               {categories.map((category) => (
                 <button
                   key={category.id}
-                  onClick={() => setSelectedCategory(category)}
+                  onClick={() => setSelectedCategory(category.name)}
                   className={`p-4 rounded-lg border text-left transition-colors ${
-                    selectedCategory?.id === category.id
+                    selectedCategory === category.name
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-200 hover:border-blue-500'
                   }`}
@@ -308,9 +312,45 @@ export default function SeoTextUIPage() {
         {currentStep === 2 && (
           <div className="space-y-6">
             <div className="text-sm text-gray-600 mb-4">
-              Überprüfen Sie den generierten Prompt und passen Sie ihn bei Bedarf an.
+              Wählen Sie das KI-Modell und überprüfen Sie den generierten Prompt.
             </div>
-            
+
+            <div className="space-y-4 mb-6">
+              <label className="block text-sm font-medium text-gray-700">KI-Modell auswählen</label>
+              <div className="flex space-x-4">
+                <button
+                  className={`px-4 py-2 rounded-lg ${
+                    selectedLLM === 'chatgpt'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}
+                  onClick={() => setSelectedLLM('chatgpt')}
+                >
+                  ChatGPT
+                </button>
+                <button
+                  className={`px-4 py-2 rounded-lg ${
+                    selectedLLM === 'claude'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}
+                  onClick={() => setSelectedLLM('claude')}
+                >
+                  Claude
+                </button>
+                <button
+                  className={`px-4 py-2 rounded-lg ${
+                    selectedLLM === 'both'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}
+                  onClick={() => setSelectedLLM('both')}
+                >
+                  Beide
+                </button>
+              </div>
+            </div>
+
             <textarea
               value={editedPrompt || ''}
               onChange={(e) => setEditedPrompt(e.target.value)}
@@ -327,22 +367,45 @@ export default function SeoTextUIPage() {
               <button
                 onClick={handleGenerateText}
                 disabled={generating}
-                className={`px-6 py-2 rounded-lg text-white font-semibold ${
-                  generating ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
-                }`}
+                className="px-6 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 disabled:bg-gray-400"
               >
-                {generating ? 'Generiere Text...' : 'SEO-Text erstellen'}
+                {generating ? 'Generiere...' : 'Text generieren'}
               </button>
             </div>
           </div>
         )}
 
-        {currentStep === 3 && (
+        {currentStep === 3 && generatedText && (
           <div className="space-y-6">
             <div className="text-sm text-gray-600 mb-4">
               Bearbeiten Sie den generierten SEO-Text nach Ihren Wünschen.
             </div>
-            
+
+            {selectedLLM === 'both' && (
+              <div className="flex space-x-2 mb-4">
+                <button
+                  className={`px-4 py-2 rounded-lg ${
+                    activeTab === 'chatgpt'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}
+                  onClick={() => setActiveTab('chatgpt')}
+                >
+                  ChatGPT Version
+                </button>
+                <button
+                  className={`px-4 py-2 rounded-lg ${
+                    activeTab === 'claude'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}
+                  onClick={() => setActiveTab('claude')}
+                >
+                  Claude Version
+                </button>
+              </div>
+            )}
+
             {/* Formatierungsleiste */}
             <div className="flex items-center space-x-2 border-b border-gray-200 pb-2">
               <button
@@ -366,8 +429,23 @@ export default function SeoTextUIPage() {
             </div>
 
             <textarea
-              value={generatedText || ''}
-              onChange={(e) => setGeneratedText(e.target.value)}
+              value={
+                selectedLLM === 'both'
+                  ? (activeTab === 'chatgpt' ? generatedText.chatgpt : generatedText.claude) || ''
+                  : (generatedText.chatgpt || generatedText.claude) || ''
+              }
+              onChange={(e) => {
+                if (selectedLLM === 'both') {
+                  setGeneratedText({
+                    ...generatedText,
+                    [activeTab]: e.target.value,
+                  });
+                } else {
+                  setGeneratedText({
+                    [selectedLLM]: e.target.value,
+                  });
+                }
+              }}
               className="w-full h-96 p-4 border rounded-lg font-mono text-sm"
             />
 
@@ -382,7 +460,12 @@ export default function SeoTextUIPage() {
                 <button
                   className="p-2 hover:bg-gray-100 rounded"
                   title="Kopieren"
-                  onClick={() => navigator.clipboard.writeText(generatedText || '')}
+                  onClick={() => {
+                    const textToCopy = selectedLLM === 'both'
+                      ? (activeTab === 'chatgpt' ? generatedText.chatgpt : generatedText.claude)
+                      : (generatedText.chatgpt || generatedText.claude);
+                    navigator.clipboard.writeText(textToCopy || '');
+                  }}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />

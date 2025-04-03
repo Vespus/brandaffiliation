@@ -1,182 +1,111 @@
 import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
-import { SeoTextRequest, OPENAI_DEFAULTS, OPENAI_LIMITS } from '@/types/seo';
+import { SeoTextRequest } from '@/types/seo';
+import { getSettings } from '../settings/route';
 
-const DEFAULT_PROMPT_TEMPLATE = `Erstelle einen SEO-optimierten Text für die Marke {brand} in der Kategorie {category} für die Saison {season}.
+async function generateWithClaude(prompt: string) {
+  const settings = await getSettings();
+  
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error('ANTHROPIC_API_KEY ist nicht konfiguriert');
+  }
 
-Markeninformationen:
-- Kurzcharakteristik 1: {char1}
-- Kurzcharakteristik 2: {char2}
-- Kurzcharakteristik 3: {char3}
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': process.env.ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: settings.claudeModel,
+      max_tokens: settings.claudeMaxTokens,
+      messages: [{
+        role: 'user',
+        content: prompt
+      }],
+      temperature: settings.claudeTemperature
+    })
+  });
 
-Markenprofil:
-- Preisniveau: {price}
-- Design: {design}
-- Bekanntheit: {fame}
-- Sortimentsbreite: {range}
-- Positionierung: {positioning}
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(`Claude API Fehler: ${error.message || 'Unbekannter Fehler'}`);
+  }
 
-Der Text sollte:
-1. Natürlich und flüssig lesbar sein
-2. Die wichtigsten Keywords für SEO enthalten
-3. Die Markenidentität und -werte widerspiegeln
-4. Die Zielgruppe ansprechen
-5. Call-to-Actions enthalten
-
-Bitte generiere einen Text von 300-400 Wörtern.`;
-
-export const runtime = 'edge'; // Wichtig für längere Ausführungszeiten
+  const data = await response.json();
+  return data.content[0].text;
+}
 
 export async function POST(request: Request) {
   try {
-    // Prüfe ob API Key in Umgebungsvariablen vorhanden ist
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: 'OpenAI API-Key ist nicht konfiguriert' },
-        { status: 500 }
-      );
-    }
+    const body = await request.json() as SeoTextRequest & { llm?: 'chatgpt' | 'claude' | 'both' };
+    const settings = await getSettings();
 
-    // Parse request body
-    const body = await request.json();
-    
-    // Validiere das Prompt-Template
-    if (!body.promptTemplate) {
-      return NextResponse.json(
-        { error: 'Prompt-Template ist erforderlich' },
-        { status: 400 }
-      );
-    }
+    // Generiere den Prompt aus dem Template
+    const prompt = settings.promptTemplate
+      .replace('{{brand}}', body.brand)
+      .replace('{{season}}', body.season)
+      .replace('{{category}}', body.category);
 
-    // Initialisiere OpenAI mit dem API-Key aus den Umgebungsvariablen
-    const openai = new OpenAI({
-      apiKey: apiKey,
-      timeout: 60000, // 60 Sekunden Timeout
-    });
+    let results: { chatgpt?: string; claude?: string } = {};
 
-    try {
-      // Hole die aktuellen Einstellungen
-      let settings;
+    // Generiere Text basierend auf der LLM-Auswahl
+    if (!body.llm || body.llm === 'chatgpt' || body.llm === 'both') {
       try {
-        const settingsResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/settings`);
-        if (!settingsResponse.ok) {
-          throw new Error('Fehler beim Laden der Einstellungen');
-        }
-        settings = await settingsResponse.json();
-      } catch (settingsError) {
-        console.error('Fehler beim Laden der Einstellungen:', settingsError);
-        // Verwende Standardwerte bei Fehler
-        settings = {
-          openaiSystemRole: OPENAI_DEFAULTS.systemRole,
-          openaiTemperature: OPENAI_DEFAULTS.temperature,
-          openaiTopP: OPENAI_DEFAULTS.topP,
-          openaiPresencePenalty: OPENAI_DEFAULTS.presencePenalty,
-          openaiFrequencyPenalty: OPENAI_DEFAULTS.frequencyPenalty,
-          openaiMaxTokens: OPENAI_DEFAULTS.maxTokens
-        };
-      }
-
-      // Validiere die Einstellungen
-      const validatedSettings = {
-        openaiSystemRole: settings.openaiSystemRole || OPENAI_DEFAULTS.systemRole,
-        openaiTemperature: Math.min(Math.max(
-          settings.openaiTemperature || OPENAI_DEFAULTS.temperature,
-          OPENAI_LIMITS.temperature.min
-        ), OPENAI_LIMITS.temperature.max),
-        openaiTopP: Math.min(Math.max(
-          settings.openaiTopP || OPENAI_DEFAULTS.topP,
-          OPENAI_LIMITS.topP.min
-        ), OPENAI_LIMITS.topP.max),
-        openaiPresencePenalty: Math.min(Math.max(
-          settings.openaiPresencePenalty || OPENAI_DEFAULTS.presencePenalty,
-          OPENAI_LIMITS.presencePenalty.min
-        ), OPENAI_LIMITS.presencePenalty.max),
-        openaiFrequencyPenalty: Math.min(Math.max(
-          settings.openaiFrequencyPenalty || OPENAI_DEFAULTS.frequencyPenalty,
-          OPENAI_LIMITS.frequencyPenalty.min
-        ), OPENAI_LIMITS.frequencyPenalty.max),
-        openaiMaxTokens: Math.min(Math.max(
-          settings.openaiMaxTokens || OPENAI_DEFAULTS.maxTokens,
-          OPENAI_LIMITS.maxTokens.min
-        ), OPENAI_LIMITS.maxTokens.max)
-      };
-
-      // Versuche die OpenAI API aufzurufen
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4",
-        messages: [
-          {
-            role: "system",
-            content: validatedSettings.openaiSystemRole
-          },
-          {
-            role: "user",
-            content: body.promptTemplate
-          }
-        ],
-        temperature: validatedSettings.openaiTemperature,
-        top_p: validatedSettings.openaiTopP,
-        presence_penalty: validatedSettings.openaiPresencePenalty,
-        frequency_penalty: validatedSettings.openaiFrequencyPenalty,
-        max_tokens: validatedSettings.openaiMaxTokens,
-      });
-
-      // Extrahiere den generierten Text
-      const generatedText = completion.choices[0]?.message?.content;
-
-      if (!generatedText) {
-        throw new Error('Keine Antwort von OpenAI erhalten');
-      }
-
-      // Sende erfolgreiche Antwort
-      return new NextResponse(
-        JSON.stringify({ text: generatedText }),
-        {
-          status: 200,
+        const chatgptResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
           },
-        }
-      );
+          body: JSON.stringify({
+            model: 'gpt-4',
+            messages: [
+              {
+                role: 'system',
+                content: settings.openaiSystemRole
+              },
+              {
+                role: 'user',
+                content: prompt
+              }
+            ],
+            temperature: settings.openaiTemperature,
+            top_p: settings.openaiTopP,
+            presence_penalty: settings.openaiPresencePenalty,
+            frequency_penalty: settings.openaiFrequencyPenalty,
+            max_tokens: settings.openaiMaxTokens
+          })
+        });
 
-    } catch (openaiError) {
-      console.error('OpenAI API Fehler:', openaiError);
-      
-      // Spezifische Fehlerbehandlung für OpenAI Fehler
-      let errorMessage = 'Fehler bei der Kommunikation mit OpenAI';
-      let statusCode = 400;
-
-      if (openaiError instanceof Error) {
-        errorMessage = openaiError.message;
-        // Timeout oder Netzwerkfehler
-        if (errorMessage.includes('timeout') || errorMessage.includes('network')) {
-          statusCode = 504;
+        if (!chatgptResponse.ok) {
+          const error = await chatgptResponse.json();
+          throw new Error(`OpenAI API Fehler: ${error.message || 'Unbekannter Fehler'}`);
         }
+
+        const chatgptData = await chatgptResponse.json();
+        results.chatgpt = chatgptData.choices[0].message.content;
+      } catch (error) {
+        console.error('ChatGPT Fehler:', error);
+        results.chatgpt = `Fehler bei der ChatGPT-Generierung: ${error.message}`;
       }
-      
-      return new NextResponse(
-        JSON.stringify({ error: errorMessage }),
-        {
-          status: statusCode,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
     }
 
-  } catch (error) {
-    // Allgemeine Fehlerbehandlung
-    console.error('Server Fehler:', error);
-    return new NextResponse(
-      JSON.stringify({ error: 'Interner Server Fehler' }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+    if (body.llm === 'claude' || body.llm === 'both') {
+      try {
+        results.claude = await generateWithClaude(prompt);
+      } catch (error) {
+        console.error('Claude Fehler:', error);
+        results.claude = `Fehler bei der Claude-Generierung: ${error.message}`;
       }
+    }
+
+    return NextResponse.json(results);
+  } catch (error) {
+    console.error('API Fehler:', error);
+    return NextResponse.json(
+      { error: 'Interner Server-Fehler' },
+      { status: 500 }
     );
   }
 } 
