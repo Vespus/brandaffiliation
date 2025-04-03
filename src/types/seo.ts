@@ -50,17 +50,8 @@ export const CLAUDE_DEFAULTS = {
 } as const;
 
 export interface SeoTextRequest {
-  brand: {
-    Marke: string;
-    'Kurzcharakteristik 1': string;
-    'Kurzcharakteristik 2': string;
-    'Kurzcharakteristik 3 (optional)': string;
-    Preis: number;
-    Design: number;
-    Bekanntheit: number;
-    Sortimentsbreite: number;
-    Positionierung: number;
-  };
-  season: Season;
-  category: Category;
+  brand: string;
+  season: string;
+  category: string;
+  llm?: 'chatgpt' | 'claude' | 'both';
 } 

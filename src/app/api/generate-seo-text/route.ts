@@ -38,14 +38,21 @@ async function generateWithClaude(prompt: string) {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json() as SeoTextRequest & { llm?: 'chatgpt' | 'claude' | 'both' };
+    const body = await request.json() as SeoTextRequest;
     const settings = await getSettings();
 
-    // Generiere den Prompt aus dem Template
-    const prompt = settings.promptTemplate
-      .replace('{{brand}}', body.brand)
-      .replace('{{season}}', body.season)
-      .replace('{{category}}', body.category);
+    // Generiere den Prompt aus dem Template mit einer sichereren Methode
+    let prompt = settings.promptTemplate;
+    const replacements = {
+      '{{brand}}': body.brand,
+      '{{season}}': body.season,
+      '{{category}}': body.category
+    };
+
+    // Führe die Ersetzungen einzeln durch
+    Object.entries(replacements).forEach(([key, value]) => {
+      prompt = prompt.replace(new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), value);
+    });
 
     let results: { chatgpt?: string; claude?: string } = {};
 
