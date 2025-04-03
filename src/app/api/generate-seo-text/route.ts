@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import { SeoTextRequest } from '@/types/seo';
+import { SeoTextRequest, OPENAI_DEFAULTS, OPENAI_LIMITS } from '@/types/seo';
 
 const DEFAULT_PROMPT_TEMPLATE = `Erstelle einen SEO-optimierten Text für die Marke {brand} in der Kategorie {category} für die Saison {season}.
 
@@ -56,21 +56,70 @@ export async function POST(request: Request) {
     });
 
     try {
+      // Hole die aktuellen Einstellungen
+      let settings;
+      try {
+        const settingsResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/settings`);
+        if (!settingsResponse.ok) {
+          throw new Error('Fehler beim Laden der Einstellungen');
+        }
+        settings = await settingsResponse.json();
+      } catch (settingsError) {
+        console.error('Fehler beim Laden der Einstellungen:', settingsError);
+        // Verwende Standardwerte bei Fehler
+        settings = {
+          openaiSystemRole: OPENAI_DEFAULTS.systemRole,
+          openaiTemperature: OPENAI_DEFAULTS.temperature,
+          openaiTopP: OPENAI_DEFAULTS.topP,
+          openaiPresencePenalty: OPENAI_DEFAULTS.presencePenalty,
+          openaiFrequencyPenalty: OPENAI_DEFAULTS.frequencyPenalty,
+          openaiMaxTokens: OPENAI_DEFAULTS.maxTokens
+        };
+      }
+
+      // Validiere die Einstellungen
+      const validatedSettings = {
+        openaiSystemRole: settings.openaiSystemRole || OPENAI_DEFAULTS.systemRole,
+        openaiTemperature: Math.min(Math.max(
+          settings.openaiTemperature || OPENAI_DEFAULTS.temperature,
+          OPENAI_LIMITS.temperature.min
+        ), OPENAI_LIMITS.temperature.max),
+        openaiTopP: Math.min(Math.max(
+          settings.openaiTopP || OPENAI_DEFAULTS.topP,
+          OPENAI_LIMITS.topP.min
+        ), OPENAI_LIMITS.topP.max),
+        openaiPresencePenalty: Math.min(Math.max(
+          settings.openaiPresencePenalty || OPENAI_DEFAULTS.presencePenalty,
+          OPENAI_LIMITS.presencePenalty.min
+        ), OPENAI_LIMITS.presencePenalty.max),
+        openaiFrequencyPenalty: Math.min(Math.max(
+          settings.openaiFrequencyPenalty || OPENAI_DEFAULTS.frequencyPenalty,
+          OPENAI_LIMITS.frequencyPenalty.min
+        ), OPENAI_LIMITS.frequencyPenalty.max),
+        openaiMaxTokens: Math.min(Math.max(
+          settings.openaiMaxTokens || OPENAI_DEFAULTS.maxTokens,
+          OPENAI_LIMITS.maxTokens.min
+        ), OPENAI_LIMITS.maxTokens.max)
+      };
+
       // Versuche die OpenAI API aufzurufen
       const completion = await openai.chat.completions.create({
         model: "gpt-4",
         messages: [
           {
             role: "system",
-            content: "Du bist ein erfahrener SEO-Textautor für Mode und Lifestyle."
+            content: validatedSettings.openaiSystemRole
           },
           {
             role: "user",
             content: body.promptTemplate
           }
         ],
-        temperature: 0.7,
-        max_tokens: 1000,
+        temperature: validatedSettings.openaiTemperature,
+        top_p: validatedSettings.openaiTopP,
+        presence_penalty: validatedSettings.openaiPresencePenalty,
+        frequency_penalty: validatedSettings.openaiFrequencyPenalty,
+        max_tokens: validatedSettings.openaiMaxTokens,
       });
 
       // Extrahiere den generierten Text
