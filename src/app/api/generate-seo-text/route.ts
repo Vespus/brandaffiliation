@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { SeoTextRequest } from '@/types/seo';
 import { getSettings } from '@/utils/settings';
 
+export const runtime = 'edge'; // Wichtig für längere Ausführungszeiten
+
 // Hilfsfunktion für Fehlerbehandlung
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
@@ -46,7 +48,18 @@ async function generateWithClaude(prompt: string) {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json() as SeoTextRequest;
+    const body = await request.json() as SeoTextRequest & {
+      brandDetails?: {
+        char1: string;
+        char2: string;
+        char3?: string;
+        price: string;
+        design: string;
+        fame: string;
+        range: string;
+        positioning: string;
+      }
+    };
     const settings = await getSettings();
 
     // Generiere den Prompt aus dem Template mit einer sichereren Methode
@@ -54,13 +67,25 @@ export async function POST(request: Request) {
     const replacements = {
       '{{brand}}': body.brand,
       '{{season}}': body.season,
-      '{{category}}': body.category
+      '{{category}}': body.category,
+      // Zusätzliche Markendetails
+      '{{char1}}': body.brandDetails?.char1 || '',
+      '{{char2}}': body.brandDetails?.char2 || '',
+      '{{char3}}': body.brandDetails?.char3 || '',
+      '{{price}}': body.brandDetails?.price || '',
+      '{{design}}': body.brandDetails?.design || '',
+      '{{fame}}': body.brandDetails?.fame || '',
+      '{{range}}': body.brandDetails?.range || '',
+      '{{positioning}}': body.brandDetails?.positioning || ''
     };
 
     // Führe die Ersetzungen einzeln durch
     Object.entries(replacements).forEach(([key, value]) => {
       prompt = prompt.replace(new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), value);
     });
+
+    // Debug-Ausgabe des generierten Prompts
+    console.log('Generierter Prompt:', prompt);
 
     let results: { chatgpt?: string; claude?: string } = {};
 

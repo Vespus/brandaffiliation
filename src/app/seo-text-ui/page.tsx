@@ -129,7 +129,17 @@ export default function SeoTextUIPage() {
           brand: selectedBrand?.Marke,
           season: selectedSeason,
           category: selectedCategory,
-          llm: selectedLLM
+          llm: selectedLLM,
+          brandDetails: selectedBrand ? {
+            char1: selectedBrand['Kurzcharakteristik 1'],
+            char2: selectedBrand['Kurzcharakteristik 2'],
+            char3: selectedBrand['Kurzcharakteristik 3 (optional)'],
+            price: selectedBrand.Preis.toString(),
+            design: selectedBrand.Design.toString(),
+            fame: selectedBrand.Bekanntheit.toString(),
+            range: selectedBrand.Sortimentsbreite.toString(),
+            positioning: selectedBrand.Positionierung.toString()
+          } : undefined
         }),
       });
 
