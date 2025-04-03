@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { SeoTextRequest } from '@/types/seo';
-import { getSettings } from '../settings/route';
+import { getSettings } from '@/utils/settings';
 
 async function generateWithClaude(prompt: string) {
   const settings = await getSettings();
