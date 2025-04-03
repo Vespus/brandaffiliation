@@ -93,17 +93,17 @@ export default function SeoTextUIPage() {
 
       // Erstelle den Prompt mit den Markendaten
       const prompt = promptTemplate
-        .replace('{brand}', selectedBrand.Marke)
-        .replace('{category}', selectedCategory)
-        .replace('{season}', selectedSeason)
-        .replace('{char1}', selectedBrand['Kurzcharakteristik 1'])
-        .replace('{char2}', selectedBrand['Kurzcharakteristik 2'])
-        .replace('{char3}', selectedBrand['Kurzcharakteristik 3 (optional)'] || 'N/A')
-        .replace('{price}', priceLevels[selectedBrand.Preis - 1])
-        .replace('{design}', designLevels[selectedBrand.Design - 1])
-        .replace('{fame}', fameLevels[selectedBrand.Bekanntheit - 1])
-        .replace('{range}', rangeLevels[selectedBrand.Sortimentsbreite - 1])
-        .replace('{positioning}', positioningLevels[selectedBrand.Positionierung - 1]);
+        .replace('{{brand}}', selectedBrand.Marke)
+        .replace('{{category}}', selectedCategory)
+        .replace('{{season}}', selectedSeason)
+        .replace('{{char1}}', selectedBrand['Kurzcharakteristik 1'])
+        .replace('{{char2}}', selectedBrand['Kurzcharakteristik 2'])
+        .replace('{{char3}}', selectedBrand['Kurzcharakteristik 3 (optional)'] || 'N/A')
+        .replace('{{price}}', priceLevels[selectedBrand.Preis - 1])
+        .replace('{{design}}', designLevels[selectedBrand.Design - 1])
+        .replace('{{fame}}', fameLevels[selectedBrand.Bekanntheit - 1])
+        .replace('{{range}}', rangeLevels[selectedBrand.Sortimentsbreite - 1])
+        .replace('{{positioning}}', positioningLevels[selectedBrand.Positionierung - 1]);
 
       setGeneratedPrompt(prompt);
       setEditedPrompt(prompt);
