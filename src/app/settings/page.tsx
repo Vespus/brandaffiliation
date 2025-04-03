@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { SeoSettings, OPENAI_DEFAULTS, OPENAI_LIMITS } from '@/types/seo';
+import { SeoSettings, OPENAI_DEFAULTS, OPENAI_LIMITS, CLAUDE_DEFAULTS } from '@/types/seo';
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<SeoSettings>({
@@ -12,7 +12,11 @@ export default function SettingsPage() {
     openaiTopP: OPENAI_DEFAULTS.topP,
     openaiPresencePenalty: OPENAI_DEFAULTS.presencePenalty,
     openaiFrequencyPenalty: OPENAI_DEFAULTS.frequencyPenalty,
-    openaiMaxTokens: OPENAI_DEFAULTS.maxTokens
+    openaiMaxTokens: OPENAI_DEFAULTS.maxTokens,
+    // Claude Parameter
+    claudeTemperature: CLAUDE_DEFAULTS.temperature,
+    claudeMaxTokens: CLAUDE_DEFAULTS.maxTokens,
+    claudeModel: CLAUDE_DEFAULTS.model
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -237,6 +241,71 @@ export default function SettingsPage() {
           <p className="mt-2 text-sm text-gray-600">
             Verfügbare Platzhalter: {'{brand}'}, {'{category}'}, {'{season}'}, {'{char1}'}, {'{char2}'}, {'{char3}'}, {'{price}'}, {'{design}'}, {'{fame}'}, {'{range}'}, {'{positioning}'}
           </p>
+        </div>
+
+        {/* Claude Parameter */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Claude Temperature */}
+          <div>
+            <h3 className="text-lg font-semibold mb-2 flex items-center">
+              Claude Temperature
+              <span className="ml-2 text-gray-400 cursor-help" title="Steuert die Kreativität der Ausgabe von Claude. Niedrigere Werte (0.4-0.7) für konsistentere, vorhersehbare Texte. Höhere Werte (0.9-1.2) für kreativere, variablere Texte.">
+                ⓘ
+              </span>
+            </h3>
+            <input
+              type="range"
+              min={OPENAI_LIMITS.temperature.min}
+              max={OPENAI_LIMITS.temperature.max}
+              step="0.1"
+              value={settings.claudeTemperature}
+              onChange={(e) => setSettings({ ...settings, claudeTemperature: parseFloat(e.target.value) })}
+              className="w-full"
+            />
+            <div className="flex justify-between text-sm text-gray-600 mt-1">
+              <span>Kreativ: {settings.claudeTemperature.toFixed(1)}</span>
+              <span>Empfehlung: 0.4-0.7</span>
+            </div>
+          </div>
+
+          {/* Claude Max Tokens */}
+          <div>
+            <h3 className="text-lg font-semibold mb-2 flex items-center">
+              Claude Max Tokens
+              <span className="ml-2 text-gray-400 cursor-help" title="Begrenzt die Länge des generierten Textes von Claude. 512-800 für Kategorietexte, 1000+ für Blogartikel. Wichtig für die Kostenkontrolle.">
+                ⓘ
+              </span>
+            </h3>
+            <input
+              type="number"
+              min={OPENAI_LIMITS.maxTokens.min}
+              max={OPENAI_LIMITS.maxTokens.max}
+              value={settings.claudeMaxTokens}
+              onChange={(e) => setSettings({ ...settings, claudeMaxTokens: parseInt(e.target.value) })}
+              className="w-full p-2 border rounded"
+            />
+            <div className="text-sm text-gray-600 mt-1">
+              Empfehlung: 512-800 für Kategorietexte, 1000+ für Blogartikel
+            </div>
+          </div>
+
+          {/* Claude Model */}
+          <div>
+            <h3 className="text-lg font-semibold mb-2 flex items-center">
+              Claude Model
+              <span className="ml-2 text-gray-400 cursor-help" title="Wählt das Modell für Claude aus. Claude ist ein KI-Modell, das auf GPT-3 basiert. Es gibt verschiedene Modelle mit unterschiedlichen Eigenschaften.">
+                ⓘ
+              </span>
+            </h3>
+            <select
+              value={settings.claudeModel}
+              onChange={(e) => setSettings({ ...settings, claudeModel: e.target.value })}
+              className="w-full p-2 border rounded"
+            >
+              <option value={CLAUDE_DEFAULTS.model}>Claude</option>
+              {/* Add more options as needed */}
+            </select>
+          </div>
         </div>
 
         {/* Save Button */}
