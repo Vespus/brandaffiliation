@@ -65,18 +65,17 @@ export async function POST(request: Request) {
     // Generiere den Prompt aus dem Template mit einer sichereren Methode
     let prompt = settings.promptTemplate;
     const replacements = {
-      '{{brand}}': body.brand,
-      '{{season}}': body.season,
-      '{{category}}': body.category,
-      // Zusätzliche Markendetails
-      '{{char1}}': body.brandDetails?.char1 || '',
-      '{{char2}}': body.brandDetails?.char2 || '',
-      '{{char3}}': body.brandDetails?.char3 || '',
-      '{{price}}': body.brandDetails?.price || '',
-      '{{design}}': body.brandDetails?.design || '',
-      '{{fame}}': body.brandDetails?.fame || '',
-      '{{range}}': body.brandDetails?.range || '',
-      '{{positioning}}': body.brandDetails?.positioning || ''
+      '{brand}': body.brand,
+      '{season}': body.season,
+      '{category}': body.category,
+      '{char1}': body.brandDetails?.char1 || '',
+      '{char2}': body.brandDetails?.char2 || '',
+      '{char3}': body.brandDetails?.char3 || '',
+      '{price}': body.brandDetails?.price || '',
+      '{design}': body.brandDetails?.design || '',
+      '{fame}': body.brandDetails?.fame || '',
+      '{range}': body.brandDetails?.range || '',
+      '{positioning}': body.brandDetails?.positioning || ''
     };
 
     // Führe die Ersetzungen einzeln durch
