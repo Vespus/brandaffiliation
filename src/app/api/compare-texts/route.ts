@@ -4,7 +4,7 @@ import path from 'path';
 import { getSettings } from '@/utils/settings';
 
 // Konfiguration für längere Timeouts
-export const maxDuration = 300; // 5 Minuten
+export const maxDuration = 60; // 5 Minuten
 export const dynamic = 'force-dynamic';
 
 // Hilfsfunktion für Fehlerbehandlung

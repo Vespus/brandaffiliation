@@ -1,7 +1,6 @@
-[Cursor] Implementiere Textvergleich-Funktionalität
+[Cursor] Erhöhe Timeout-Limit und verbessere Error-Logging für Textvergleich API
 
-- Füge API-Route für Textvergleich hinzu
-- Erstelle TextComparison-Komponente
-- Integriere Vergleich in Hauptseite
-- Implementiere Mock-Funktionalität für Entwicklung
-- Verbessere Fehlerbehandlung 
+- Erhöhe maxDuration auf 5 Minuten
+- Füge force-dynamic Flag hinzu
+- Implementiere detailliertes Error-Logging
+- Füge Zeitmessung für API-Aufrufe hinzu 
