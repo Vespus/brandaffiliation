@@ -1,4 +1,4 @@
-import { SeoSettings, OPENAI_DEFAULTS, CLAUDE_DEFAULTS, PARAMETER_LIMITS } from '@/types/seo';
+import { SeoSettings, PARAMETER_LIMITS } from '@/types/seo';
 
 // Hilfsfunktion zur Validierung der Env-Variablen
 function validateEnvVariable(name: string, value: string | undefined, type: 'number' | 'string'): string {

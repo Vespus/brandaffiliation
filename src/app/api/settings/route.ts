@@ -7,13 +7,21 @@ function validateValue(value: number, limits: { min: number; max: number }): num
   return Math.min(Math.max(value, limits.min), limits.max);
 }
 
-// Hilfsfunktion zum sicheren Parsen von Zahlen
-function safeParseInt(value: any, defaultValue: number): number {
-  if (value === undefined || value === null || value === '') {
-    return defaultValue;
+// Hilfsfunktion zum Validieren von Env-Variablen
+function validateEnvVar(name: string, value: string | undefined): string {
+  if (!value) {
+    throw new Error(`Environment Variable ${name} ist nicht konfiguriert`);
   }
-  const parsed = parseInt(value.toString());
-  return isNaN(parsed) ? defaultValue : parsed;
+  return value;
+}
+
+// Hilfsfunktion zum sicheren Parsen von Zahlen
+function safeParseFloat(name: string, value: string): number {
+  const parsed = parseFloat(value);
+  if (isNaN(parsed)) {
+    throw new Error(`${name}: Ungültiger numerischer Wert "${value}"`);
+  }
+  return parsed;
 }
 
 export async function GET() {
@@ -23,7 +31,7 @@ export async function GET() {
   } catch (error) {
     console.error('Fehler beim Laden der Einstellungen:', error);
     return NextResponse.json(
-      { error: 'Fehler beim Laden der Einstellungen' },
+      { error: error instanceof Error ? error.message : 'Fehler beim Laden der Einstellungen' },
       { status: 500 }
     );
   }
@@ -32,43 +40,53 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const updates = await request.json();
-    console.log('Erhaltene Updates:', updates); // Debug-Log
+    console.log('Erhaltene Updates:', updates);
     
     // Validiere die Eingabedaten
     const settings: SeoSettings = {
       hasApiKey: !!process.env.OPENAI_API_KEY,
-      promptTemplate: updates.promptTemplate || process.env.SEO_PROMPT_TEMPLATE || '',
-      openaiSystemRole: updates.openaiSystemRole || process.env.OPENAI_SYSTEM_ROLE || '',
+      promptTemplate: updates.promptTemplate || validateEnvVar('SEO_PROMPT_TEMPLATE', process.env.SEO_PROMPT_TEMPLATE),
+      openaiSystemRole: updates.openaiSystemRole || validateEnvVar('OPENAI_SYSTEM_ROLE', process.env.OPENAI_SYSTEM_ROLE),
       openaiTemperature: validateValue(
-        parseFloat(updates.openaiTemperature || process.env.OPENAI_TEMPERATURE || '0.7'),
+        safeParseFloat('OPENAI_TEMPERATURE',
+          updates.openaiTemperature?.toString() || validateEnvVar('OPENAI_TEMPERATURE', process.env.OPENAI_TEMPERATURE)
+        ),
         PARAMETER_LIMITS.temperature
       ),
       openaiTopP: validateValue(
-        parseFloat(updates.openaiTopP || process.env.OPENAI_TOP_P || '1.0'),
+        safeParseFloat('OPENAI_TOP_P',
+          updates.openaiTopP?.toString() || validateEnvVar('OPENAI_TOP_P', process.env.OPENAI_TOP_P)
+        ),
         PARAMETER_LIMITS.topP
       ),
       openaiPresencePenalty: validateValue(
-        parseFloat(updates.openaiPresencePenalty || process.env.OPENAI_PRESENCE_PENALTY || '0.0'),
+        safeParseFloat('OPENAI_PRESENCE_PENALTY',
+          updates.openaiPresencePenalty?.toString() || validateEnvVar('OPENAI_PRESENCE_PENALTY', process.env.OPENAI_PRESENCE_PENALTY)
+        ),
         PARAMETER_LIMITS.presencePenalty
       ),
       openaiFrequencyPenalty: validateValue(
-        parseFloat(updates.openaiFrequencyPenalty || process.env.OPENAI_FREQUENCY_PENALTY || '0.0'),
+        safeParseFloat('OPENAI_FREQUENCY_PENALTY',
+          updates.openaiFrequencyPenalty?.toString() || validateEnvVar('OPENAI_FREQUENCY_PENALTY', process.env.OPENAI_FREQUENCY_PENALTY)
+        ),
         PARAMETER_LIMITS.frequencyPenalty
       ),
       openaiMaxTokens: validateValue(
-        parseInt(updates.openaiMaxTokens || process.env.OPENAI_MAX_TOKENS || '800'),
+        parseInt(updates.openaiMaxTokens?.toString() || validateEnvVar('OPENAI_MAX_TOKENS', process.env.OPENAI_MAX_TOKENS)),
         PARAMETER_LIMITS.maxTokens
       ),
       // Claude-Parameter
       claudeTemperature: validateValue(
-        parseFloat(updates.claudeTemperature?.toString() || process.env.CLAUDE_TEMPERATURE || '0.7'),
+        safeParseFloat('CLAUDE_TEMPERATURE',
+          updates.claudeTemperature?.toString() || validateEnvVar('CLAUDE_TEMPERATURE', process.env.CLAUDE_TEMPERATURE)
+        ),
         PARAMETER_LIMITS.temperature
       ),
       claudeMaxTokens: validateValue(
-        safeParseInt(updates.claudeMaxTokens, parseInt(process.env.CLAUDE_MAX_TOKENS || '800')),
+        parseInt(updates.claudeMaxTokens?.toString() || validateEnvVar('CLAUDE_MAX_TOKENS', process.env.CLAUDE_MAX_TOKENS)),
         PARAMETER_LIMITS.maxTokens
       ),
-      claudeModel: updates.claudeModel || process.env.CLAUDE_MODEL || 'claude-2'
+      claudeModel: updates.claudeModel || validateEnvVar('CLAUDE_MODEL', process.env.CLAUDE_MODEL)
     };
     
     // Debug-Ausgabe der aktuellen Einstellungen
@@ -91,7 +109,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Fehler beim Speichern der Einstellungen:', error);
     return NextResponse.json(
-      { error: 'Fehler beim Speichern der Einstellungen' },
+      { error: error instanceof Error ? error.message : 'Fehler beim Speichern der Einstellungen' },
       { status: 500 }
     );
   }
