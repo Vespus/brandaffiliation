@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { OPENAI_DEFAULTS, OPENAI_LIMITS, SeoSettings, CLAUDE_DEFAULTS } from '@/types/seo';
-import { getSettings, updateClaudeMaxTokens } from '@/utils/settings';
+import { getSettings } from '@/utils/settings';
 
 // Hilfsfunktion zur Validierung der Werte
 function validateValue(value: number, limits: { min: number; max: number }): number {
@@ -71,12 +71,6 @@ export async function POST(request: Request) {
       envValue: process.env.CLAUDE_MAX_TOKENS,
       defaultValue: CLAUDE_DEFAULTS.maxTokens
     });
-
-    // Aktualisiere den max_tokens Wert für die Laufzeit
-    if (settings.claudeMaxTokens) {
-      updateClaudeMaxTokens(settings.claudeMaxTokens);
-      console.log('Claude max_tokens aktualisiert:', settings.claudeMaxTokens);
-    }
     
     // Debug-Ausgabe der aktuellen Einstellungen
     console.log('Aktuelle API-Einstellungen:', {
