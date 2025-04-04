@@ -29,6 +29,7 @@ export function TextComparison({ openaiText, anthropicText, textTopic }: TextCom
     });
 
     try {
+      console.log('Sende Anfrage an API...');
       const response = await fetch('/api/compare-texts', {
         method: 'POST',
         headers: {
@@ -41,15 +42,21 @@ export function TextComparison({ openaiText, anthropicText, textTopic }: TextCom
         }),
       });
 
+      console.log('API Antwort erhalten:', response.status, response.statusText);
+      console.log('Content-Type:', response.headers.get('content-type'));
+
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('API Fehler:', errorData);
         throw new Error(errorData.error || 'Ein Fehler ist aufgetreten');
       }
 
       if (!response.body) {
+        console.error('Kein Response Body');
         throw new Error('Keine Antwort vom Server erhalten');
       }
 
+      console.log('Starte Stream-Verarbeitung...');
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let result = '';
@@ -59,18 +66,27 @@ export function TextComparison({ openaiText, anthropicText, textTopic }: TextCom
       try {
         while (true) {
           const { done, value } = await reader.read();
-          if (done) break;
+          if (done) {
+            console.log('Stream beendet');
+            break;
+          }
 
+          console.log('Chunk empfangen:', value);
           const chunk = decoder.decode(value);
+          console.log('Decodierter Chunk:', chunk);
           const lines = chunk.split('\n');
 
           for (const line of lines) {
             if (!line.trim()) continue;
 
             try {
+              console.log('Verarbeite Zeile:', line);
               const data = JSON.parse(line.replace(/^data: /, '').trim());
+              console.log('Parsed Daten:', data);
+              
               if (data.result) {
                 result += data.result;
+                console.log('Aktualisiere UI mit neuem Text');
                 setComparisonResult(result);
                 
                 // Verbesserte Fortschrittsberechnung
@@ -82,20 +98,23 @@ export function TextComparison({ openaiText, anthropicText, textTopic }: TextCom
                 }));
               }
             } catch (e) {
-              console.error('Fehler beim Parsen der Stream-Daten:', e);
+              console.error('Fehler beim Parsen der Stream-Daten:', e, 'Zeile:', line);
             }
           }
         }
       } finally {
+        console.log('Schließe Stream');
         reader.releaseLock();
       }
 
+      console.log('Stream-Verarbeitung abgeschlossen');
       setStreamStatus(prev => ({
         ...prev,
         isComplete: true,
         progress: 100
       }));
     } catch (err) {
+      console.error('Fehler in handleCompare:', err);
       setError(err instanceof Error ? err.message : 'Ein unbekannter Fehler ist aufgetreten');
       setStreamStatus(prev => ({
         ...prev,

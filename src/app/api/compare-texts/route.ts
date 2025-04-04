@@ -177,15 +177,20 @@ export async function POST(request: Request) {
     
     // Ersetze die Variablen im Prompt
     const prompt = replacePromptVariables(promptTemplate, openaiText, anthropicText, textTopic);
+    console.log('Prompt vorbereitet:', prompt.substring(0, 100) + '...');
     
     // Hole den Stream von der Claude API
+    console.log('Rufe Claude API auf...');
     const stream = await compareTextsWithClaude(prompt);
+    console.log('Stream von Claude API erhalten');
     
     // Erstelle einen TransformStream für die Verarbeitung
     const transformStream = new TransformStream({
       async transform(chunk, controller) {
+        console.log('Transformiere Chunk:', chunk);
         // Konvertiere den Chunk zu Text
         const text = new TextDecoder().decode(chunk);
+        console.log('Decodierter Text:', text.substring(0, 100) + '...');
         
         // Verarbeite jede Zeile im Chunk
         const lines = text.split('\n');
@@ -198,12 +203,13 @@ export async function POST(request: Request) {
             if (!jsonStr) continue;
             
             const data = JSON.parse(jsonStr);
+            console.log('Verarbeite Daten:', data);
             
             // Wenn es ein Content-Block ist, sende den Text
             if (data.type === 'content_block_delta' && data.delta?.text) {
-              controller.enqueue(new TextEncoder().encode(
-                `data: ${JSON.stringify({ result: data.delta.text })}\n\n`
-              ));
+              const responseData = `data: ${JSON.stringify({ result: data.delta.text })}\n\n`;
+              console.log('Sende Chunk:', responseData);
+              controller.enqueue(new TextEncoder().encode(responseData));
             }
           } catch (e) {
             console.error('Fehler beim Verarbeiten des Chunks:', e);
@@ -213,9 +219,12 @@ export async function POST(request: Request) {
     });
 
     // Verbinde den Stream mit dem TransformStream
+    console.log('Verbinde Streams...');
     const responseStream = stream.pipeThrough(transformStream);
+    console.log('Streams verbunden');
     
     // Erstelle und gib den Response-Stream zurück
+    console.log('Erstelle Response...');
     return new Response(responseStream, {
       headers: {
         'Content-Type': 'text/event-stream',
