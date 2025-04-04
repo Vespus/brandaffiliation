@@ -7,6 +7,15 @@ function validateValue(value: number, limits: { min: number; max: number }): num
   return Math.min(Math.max(value, limits.min), limits.max);
 }
 
+// Hilfsfunktion zum sicheren Parsen von Zahlen
+function safeParseInt(value: any, defaultValue: number): number {
+  if (value === undefined || value === null || value === '') {
+    return defaultValue;
+  }
+  const parsed = parseInt(value.toString());
+  return isNaN(parsed) ? defaultValue : parsed;
+}
+
 export async function GET() {
   try {
     const settings = await getSettings();
@@ -23,6 +32,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const updates = await request.json();
+    console.log('Erhaltene Updates:', updates); // Debug-Log
     
     // Validiere die Eingabedaten
     const settings: SeoSettings = {
@@ -50,13 +60,20 @@ export async function POST(request: Request) {
         OPENAI_LIMITS.maxTokens
       ),
       // Claude-Parameter
-      claudeTemperature: parseFloat(updates.claudeTemperature || process.env.CLAUDE_TEMPERATURE || CLAUDE_DEFAULTS.temperature.toString()) || CLAUDE_DEFAULTS.temperature,
-      claudeMaxTokens: parseInt(updates.claudeMaxTokens || process.env.CLAUDE_MAX_TOKENS || CLAUDE_DEFAULTS.maxTokens.toString()) || CLAUDE_DEFAULTS.maxTokens,
+      claudeTemperature: parseFloat(updates.claudeTemperature?.toString() || process.env.CLAUDE_TEMPERATURE || CLAUDE_DEFAULTS.temperature.toString()) || CLAUDE_DEFAULTS.temperature,
+      claudeMaxTokens: safeParseInt(updates.claudeMaxTokens, parseInt(process.env.CLAUDE_MAX_TOKENS || '') || CLAUDE_DEFAULTS.maxTokens),
       claudeModel: updates.claudeModel || process.env.CLAUDE_MODEL || CLAUDE_DEFAULTS.model
     };
 
+    console.log('Verarbeitete Claude-Parameter:', {
+      originalValue: updates.claudeMaxTokens,
+      parsedValue: settings.claudeMaxTokens,
+      envValue: process.env.CLAUDE_MAX_TOKENS,
+      defaultValue: CLAUDE_DEFAULTS.maxTokens
+    });
+
     // Aktualisiere den max_tokens Wert für die Laufzeit
-    if (updates.claudeMaxTokens) {
+    if (settings.claudeMaxTokens) {
       updateClaudeMaxTokens(settings.claudeMaxTokens);
       console.log('Claude max_tokens aktualisiert:', settings.claudeMaxTokens);
     }
