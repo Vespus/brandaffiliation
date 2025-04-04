@@ -1,36 +1,45 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { SeoSettings, OPENAI_DEFAULTS, OPENAI_LIMITS, CLAUDE_DEFAULTS } from '@/types/seo';
+import { SeoSettings, PARAMETER_LIMITS } from '@/types/seo';
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<SeoSettings>({
     hasApiKey: false,
     promptTemplate: '',
-    openaiSystemRole: OPENAI_DEFAULTS.systemRole,
-    openaiTemperature: OPENAI_DEFAULTS.temperature,
-    openaiTopP: OPENAI_DEFAULTS.topP,
-    openaiPresencePenalty: OPENAI_DEFAULTS.presencePenalty,
-    openaiFrequencyPenalty: OPENAI_DEFAULTS.frequencyPenalty,
-    openaiMaxTokens: OPENAI_DEFAULTS.maxTokens,
+    openaiSystemRole: '',
+    openaiTemperature: 0,
+    openaiTopP: 0,
+    openaiPresencePenalty: 0,
+    openaiFrequencyPenalty: 0,
+    openaiMaxTokens: 0,
     // Claude Parameter
-    claudeTemperature: CLAUDE_DEFAULTS.temperature,
-    claudeMaxTokens: CLAUDE_DEFAULTS.maxTokens,
-    claudeModel: CLAUDE_DEFAULTS.model
+    claudeTemperature: 0,
+    claudeMaxTokens: 0,
+    claudeModel: ''
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
     const loadSettings = async () => {
       try {
+        setLoading(true);
+        setError(null);
         const response = await fetch('/api/settings');
+        if (!response.ok) {
+          throw new Error('Fehler beim Laden der Einstellungen');
+        }
         const data = await response.json();
+        if (data.error) {
+          throw new Error(data.error);
+        }
         setSettings(data);
       } catch (error) {
         console.error('Fehler beim Laden der Einstellungen:', error);
-        setError('Fehler beim Laden der Einstellungen');
+        setError(error instanceof Error ? error.message : 'Fehler beim Laden der Einstellungen');
       } finally {
         setLoading(false);
       }
@@ -42,6 +51,8 @@ export default function SettingsPage() {
   const handleSave = async () => {
     setSaving(true);
     setError(null);
+    setSaveSuccess(false);
+    
     try {
       const response = await fetch('/api/settings', {
         method: 'POST',
@@ -51,22 +62,21 @@ export default function SettingsPage() {
         body: JSON.stringify(settings),
       });
 
-      if (!response.ok) {
-        throw new Error('Fehler beim Speichern der Einstellungen');
-      }
-
       const result = await response.json();
-      if (!result.success) {
-        throw new Error('Fehler beim Speichern der Einstellungen');
+      
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Fehler beim Speichern der Einstellungen');
       }
 
-      // Aktualisiere die Einstellungen mit den zurückgegebenen Werten
       if (result.settings) {
         setSettings(result.settings);
+        setSaveSuccess(true);
+        // Zeige die Erfolgsmeldung für 3 Sekunden
+        setTimeout(() => setSaveSuccess(false), 3000);
       }
     } catch (error) {
       console.error('Fehler beim Speichern:', error);
-      setError('Fehler beim Speichern der Einstellungen');
+      setError(error instanceof Error ? error.message : 'Fehler beim Speichern der Einstellungen');
     } finally {
       setSaving(false);
     }
@@ -129,8 +139,8 @@ export default function SettingsPage() {
             </h3>
             <input
               type="range"
-              min={OPENAI_LIMITS.temperature.min}
-              max={OPENAI_LIMITS.temperature.max}
+              min={PARAMETER_LIMITS.temperature.min}
+              max={PARAMETER_LIMITS.temperature.max}
               step="0.1"
               value={settings.openaiTemperature}
               onChange={(e) => setSettings({ ...settings, openaiTemperature: parseFloat(e.target.value) })}
@@ -152,8 +162,8 @@ export default function SettingsPage() {
             </h3>
             <input
               type="range"
-              min={OPENAI_LIMITS.topP.min}
-              max={OPENAI_LIMITS.topP.max}
+              min={PARAMETER_LIMITS.topP.min}
+              max={PARAMETER_LIMITS.topP.max}
               step="0.1"
               value={settings.openaiTopP}
               onChange={(e) => setSettings({ ...settings, openaiTopP: parseFloat(e.target.value) })}
@@ -175,8 +185,8 @@ export default function SettingsPage() {
             </h3>
             <input
               type="range"
-              min={OPENAI_LIMITS.presencePenalty.min}
-              max={OPENAI_LIMITS.presencePenalty.max}
+              min={PARAMETER_LIMITS.presencePenalty.min}
+              max={PARAMETER_LIMITS.presencePenalty.max}
               step="0.1"
               value={settings.openaiPresencePenalty}
               onChange={(e) => setSettings({ ...settings, openaiPresencePenalty: parseFloat(e.target.value) })}
@@ -198,8 +208,8 @@ export default function SettingsPage() {
             </h3>
             <input
               type="range"
-              min={OPENAI_LIMITS.frequencyPenalty.min}
-              max={OPENAI_LIMITS.frequencyPenalty.max}
+              min={PARAMETER_LIMITS.frequencyPenalty.min}
+              max={PARAMETER_LIMITS.frequencyPenalty.max}
               step="0.1"
               value={settings.openaiFrequencyPenalty}
               onChange={(e) => setSettings({ ...settings, openaiFrequencyPenalty: parseFloat(e.target.value) })}
@@ -221,8 +231,8 @@ export default function SettingsPage() {
             </h3>
             <input
               type="number"
-              min={OPENAI_LIMITS.maxTokens.min}
-              max={OPENAI_LIMITS.maxTokens.max}
+              min={PARAMETER_LIMITS.maxTokens.min}
+              max={PARAMETER_LIMITS.maxTokens.max}
               value={settings.openaiMaxTokens}
               onChange={(e) => setSettings({ ...settings, openaiMaxTokens: parseInt(e.target.value) })}
               className="w-full p-2 border rounded"
@@ -262,8 +272,8 @@ export default function SettingsPage() {
             </h3>
             <input
               type="range"
-              min={OPENAI_LIMITS.temperature.min}
-              max={OPENAI_LIMITS.temperature.max}
+              min={PARAMETER_LIMITS.temperature.min}
+              max={PARAMETER_LIMITS.temperature.max}
               step="0.1"
               value={settings.claudeTemperature}
               onChange={(e) => setSettings({ ...settings, claudeTemperature: parseFloat(e.target.value) })}
@@ -285,8 +295,8 @@ export default function SettingsPage() {
             </h3>
             <input
               type="number"
-              min={OPENAI_LIMITS.maxTokens.min}
-              max={OPENAI_LIMITS.maxTokens.max}
+              min={PARAMETER_LIMITS.maxTokens.min}
+              max={PARAMETER_LIMITS.maxTokens.max}
               value={settings.claudeMaxTokens}
               onChange={(e) => setSettings({ ...settings, claudeMaxTokens: parseInt(e.target.value) })}
               className="w-full p-2 border rounded"
@@ -309,14 +319,24 @@ export default function SettingsPage() {
               onChange={(e) => setSettings({ ...settings, claudeModel: e.target.value })}
               className="w-full p-2 border rounded"
             >
-              <option value={CLAUDE_DEFAULTS.model}>Claude</option>
+              <option value="Claude">Claude</option>
               {/* Add more options as needed */}
             </select>
           </div>
         </div>
 
-        {/* Save Button */}
-        <div className="flex justify-end">
+        {/* Save Button and Messages */}
+        <div className="flex justify-end items-center space-x-4">
+          {error && (
+            <div className="flex-1 p-4 rounded-lg bg-red-50 text-red-700">
+              {error}
+            </div>
+          )}
+          {saveSuccess && (
+            <div className="flex-1 p-4 rounded-lg bg-green-50 text-green-700">
+              Einstellungen wurden erfolgreich gespeichert
+            </div>
+          )}
           <button
             onClick={handleSave}
             disabled={saving}
@@ -329,12 +349,6 @@ export default function SettingsPage() {
             {saving ? 'Speichern...' : 'Einstellungen speichern'}
           </button>
         </div>
-
-        {error && (
-          <div className="p-4 rounded-lg bg-red-50 text-red-700">
-            {error}
-          </div>
-        )}
       </div>
     </div>
   );
