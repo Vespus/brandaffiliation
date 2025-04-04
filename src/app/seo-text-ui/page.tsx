@@ -203,6 +203,7 @@ export default function SeoTextUIPage() {
     setComparing(true);
     setError(null);
     setComparisonResult(null);
+    setActiveTab('comparison'); // Wechsle sofort zum Vergleich-Tab
 
     try {
       console.log('Sende Anfrage an API...');
@@ -246,7 +247,7 @@ export default function SeoTextUIPage() {
       let result = '';
       let chunkCount = 0;
       let lastUpdateTime = Date.now();
-      const updateInterval = 100; // UI-Update alle 100ms
+      const updateInterval = 50; // Reduziertes Update-Intervall für flüssigere Updates
 
       try {
         while (true) {
@@ -276,7 +277,7 @@ export default function SeoTextUIPage() {
                 result += data.result;
                 chunkCount++;
                 
-                // UI-Update mit Throttling
+                // UI-Update mit kürzerem Intervall
                 const now = Date.now();
                 if (now - lastUpdateTime >= updateInterval) {
                   console.log('Aktualisiere UI mit neuem Text');
@@ -299,7 +300,6 @@ export default function SeoTextUIPage() {
       // Finale UI-Aktualisierung
       console.log('Stream-Verarbeitung abgeschlossen');
       setComparisonResult(result);
-      setActiveTab('comparison');
     } catch (error) {
       console.error('Fehler in handleCompareTexts:', error);
       setError(error instanceof Error ? error.message : 'Ein unbekannter Fehler ist aufgetreten');
@@ -602,9 +602,22 @@ export default function SeoTextUIPage() {
               )}
               {activeTab === 'comparison' && (
                 <div className="prose max-w-none">
-                  {comparisonResult ? (
+                  {comparing ? (
+                    <div className="p-4 border border-gray-300 rounded-md">
+                      <div className="flex items-center space-x-2 mb-4">
+                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blue-500"></div>
+                        <span className="text-sm text-gray-500">Vergleiche Texte...</span>
+                      </div>
+                      {comparisonResult && (
+                        <div 
+                          className="whitespace-pre-wrap"
+                          dangerouslySetInnerHTML={{ __html: comparisonResult.replace(/\n/g, '<br>') }}
+                        />
+                      )}
+                    </div>
+                  ) : comparisonResult ? (
                     <div 
-                      className="p-4 border border-gray-300 rounded-md"
+                      className="p-4 border border-gray-300 rounded-md whitespace-pre-wrap"
                       dangerouslySetInnerHTML={{ __html: comparisonResult.replace(/\n/g, '<br>') }}
                     />
                   ) : (

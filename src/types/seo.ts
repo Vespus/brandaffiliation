@@ -45,7 +45,7 @@ export interface SeoSettings {
 // Standardwerte für Claude
 export const CLAUDE_DEFAULTS = {
   temperature: 0.7,
-  maxTokens: 1000,
+  maxTokens: 4096,
   model: 'claude-3-sonnet-20240229'
 } as const;
 

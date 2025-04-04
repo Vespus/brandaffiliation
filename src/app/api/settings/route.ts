@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { OPENAI_DEFAULTS, OPENAI_LIMITS, SeoSettings, CLAUDE_DEFAULTS } from '@/types/seo';
-import { getSettings } from '@/utils/settings';
+import { getSettings, updateClaudeMaxTokens } from '@/utils/settings';
 
 // Hilfsfunktion zur Validierung der Werte
 function validateValue(value: number, limits: { min: number; max: number }): number {
@@ -55,8 +55,27 @@ export async function POST(request: Request) {
       claudeModel: updates.claudeModel || process.env.CLAUDE_MODEL || CLAUDE_DEFAULTS.model
     };
 
-    // Hier würde normalerweise das Speichern in einer Datenbank erfolgen
-    // Da wir Vercel Environment Variables verwenden, können wir nur die GET-Route aktualisieren
+    // Aktualisiere den max_tokens Wert für die Laufzeit
+    if (updates.claudeMaxTokens) {
+      updateClaudeMaxTokens(settings.claudeMaxTokens);
+      console.log('Claude max_tokens aktualisiert:', settings.claudeMaxTokens);
+    }
+    
+    // Debug-Ausgabe der aktuellen Einstellungen
+    console.log('Aktuelle API-Einstellungen:', {
+      openai: {
+        temperature: settings.openaiTemperature,
+        top_p: settings.openaiTopP,
+        presence_penalty: settings.openaiPresencePenalty,
+        frequency_penalty: settings.openaiFrequencyPenalty,
+        max_tokens: settings.openaiMaxTokens
+      },
+      claude: {
+        temperature: settings.claudeTemperature,
+        max_tokens: settings.claudeMaxTokens,
+        model: settings.claudeModel
+      }
+    });
     
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -99,6 +99,14 @@ async function compareTextsWithClaude(prompt: string, useStream: boolean = false
   console.log('Sende Anfrage an Claude API...');
   const startTime = Date.now();
 
+  // Debug-Ausgabe der API-Parameter
+  console.log('Claude API Parameter:', {
+    model: settings.claudeModel || 'claude-3-opus-20240229',
+    max_tokens: settings.claudeMaxTokens,
+    temperature: settings.claudeTemperature || 0.7,
+    stream: useStream
+  });
+
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -109,7 +117,7 @@ async function compareTextsWithClaude(prompt: string, useStream: boolean = false
       },
       body: JSON.stringify({
         model: settings.claudeModel || 'claude-3-opus-20240229',
-        max_tokens: settings.claudeMaxTokens || 6000,
+        max_tokens: settings.claudeMaxTokens,
         stream: useStream,
         messages: [{
           role: 'user',

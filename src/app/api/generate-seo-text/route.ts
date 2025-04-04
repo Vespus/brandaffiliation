@@ -91,6 +91,16 @@ export async function POST(request: Request) {
     // Generiere Text basierend auf der LLM-Auswahl
     if (!body.llm || body.llm === 'chatgpt' || body.llm === 'both') {
       try {
+        // Debug-Ausgabe der OpenAI API-Parameter
+        console.log('OpenAI API Parameter:', {
+          model: 'gpt-4',
+          temperature: settings.openaiTemperature,
+          top_p: settings.openaiTopP,
+          presence_penalty: settings.openaiPresencePenalty,
+          frequency_penalty: settings.openaiFrequencyPenalty,
+          max_tokens: settings.openaiMaxTokens
+        });
+
         const chatgptResponse = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
@@ -132,6 +142,13 @@ export async function POST(request: Request) {
 
     if (body.llm === 'claude' || body.llm === 'both') {
       try {
+        // Debug-Ausgabe der Claude API-Parameter
+        console.log('Claude API Parameter:', {
+          model: settings.claudeModel,
+          max_tokens: settings.claudeMaxTokens,
+          temperature: settings.claudeTemperature
+        });
+
         results.claude = await generateWithClaude(prompt);
       } catch (error) {
         console.error('Claude Fehler:', error);
