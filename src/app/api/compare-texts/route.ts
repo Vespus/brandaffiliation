@@ -3,6 +3,10 @@ import fs from 'fs';
 import path from 'path';
 import { getSettings } from '@/utils/settings';
 
+// Konfiguration für längere Timeouts
+export const maxDuration = 300; // 5 Minuten
+export const dynamic = 'force-dynamic';
+
 // Hilfsfunktion für Fehlerbehandlung
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
@@ -92,34 +96,49 @@ async function compareTextsWithClaude(prompt: string) {
     throw new Error('ANTHROPIC_API_KEY ist nicht konfiguriert');
   }
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01'
-    },
-    body: JSON.stringify({
-      model: settings.claudeModel || 'claude-3-opus-20240229',
-      max_tokens: settings.claudeMaxTokens || 4000,
-      messages: [{
-        role: 'user',
-        content: prompt
-      }],
-      temperature: settings.claudeTemperature || 0.7
-    })
-  });
+  console.log('Sende Anfrage an Claude API...');
+  const startTime = Date.now();
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(`Claude API Fehler: ${error.message || 'Unbekannter Fehler'}`);
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: settings.claudeModel || 'claude-3-opus-20240229',
+        max_tokens: settings.claudeMaxTokens || 4000,
+        messages: [{
+          role: 'user',
+          content: prompt
+        }],
+        temperature: settings.claudeTemperature || 0.7
+      })
+    });
+
+    const endTime = Date.now();
+    console.log(`Claude API Antwortzeit: ${endTime - startTime}ms`);
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('Claude API Fehler:', error);
+      throw new Error(`Claude API Fehler: ${error.message || 'Unbekannter Fehler'}`);
+    }
+
+    const data = await response.json();
+    return data.content[0].text;
+  } catch (error) {
+    console.error('Fehler bei Claude API Anfrage:', error);
+    throw error;
   }
-
-  const data = await response.json();
-  return data.content[0].text;
 }
 
 export async function POST(request: Request) {
+  console.log('Textvergleich API aufgerufen');
+  const startTime = Date.now();
+
   try {
     // Validiere den Request-Body
     const body = await request.json();
@@ -165,6 +184,9 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
+    
+    const endTime = Date.now();
+    console.log(`Gesamtverarbeitungszeit: ${endTime - startTime}ms`);
     
     return NextResponse.json({ result: comparisonResult });
   } catch (error) {
