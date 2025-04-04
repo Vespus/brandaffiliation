@@ -109,7 +109,7 @@ async function compareTextsWithClaude(prompt: string) {
       },
       body: JSON.stringify({
         model: settings.claudeModel || 'claude-3-opus-20240229',
-        max_tokens: settings.claudeMaxTokens || 4000,
+        max_tokens: settings.claudeMaxTokens || 6000,
         messages: [{
           role: 'user',
           content: prompt
