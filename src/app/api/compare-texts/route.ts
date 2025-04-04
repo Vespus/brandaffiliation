@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { getSettings } from '@/utils/settings';
+import { processStream } from '@/utils/stream';
 
 // Konfiguration für längere Timeouts
 export const maxDuration = 60; // 5 Minuten
@@ -110,6 +111,7 @@ async function compareTextsWithClaude(prompt: string) {
       body: JSON.stringify({
         model: settings.claudeModel || 'claude-3-opus-20240229',
         max_tokens: settings.claudeMaxTokens || 6000,
+        stream: true, // Aktiviere Streaming
         messages: [{
           role: 'user',
           content: prompt
@@ -127,8 +129,13 @@ async function compareTextsWithClaude(prompt: string) {
       throw new Error(`Claude API Fehler: ${error.message || 'Unbekannter Fehler'}`);
     }
 
-    const data = await response.json();
-    return data.content[0].text;
+    if (!response.body) {
+      throw new Error('Keine Antwort von der Claude API erhalten');
+    }
+
+    // Verarbeite den Stream
+    const result = await processStream(response.body);
+    return result;
   } catch (error) {
     console.error('Fehler bei Claude API Anfrage:', error);
     throw error;
