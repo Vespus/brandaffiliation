@@ -1,7 +1,4 @@
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 interface TextComparisonProps {
@@ -49,33 +46,26 @@ export function TextComparison({ openaiText, anthropicText, textTopic }: TextCom
 
   return (
     <div className="space-y-4">
-      <Button
+      <button
         onClick={handleCompare}
         disabled={isLoading}
-        className="w-full"
+        className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {isLoading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Vergleiche Texte...
-          </>
-        ) : (
-          'Texte vergleichen'
-        )}
-      </Button>
+        {isLoading ? 'Vergleiche Texte...' : 'Texte vergleichen'}
+      </button>
 
       {error && (
-        <Card className="p-4 bg-red-50 border-red-200">
+        <div className="p-4 bg-red-50 border border-red-200 rounded">
           <p className="text-red-600">{error}</p>
-        </Card>
+        </div>
       )}
 
       {comparisonResult && (
-        <Card className="p-6">
+        <div className="p-6 border rounded">
           <div className="prose prose-sm max-w-none">
             <ReactMarkdown>{comparisonResult}</ReactMarkdown>
           </div>
-        </Card>
+        </div>
       )}
     </div>
   );
