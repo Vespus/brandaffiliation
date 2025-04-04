@@ -201,7 +201,11 @@ export default function SeoTextUIPage() {
     }
 
     setComparing(true);
+    setError(null);
+    setComparisonResult(null);
+
     try {
+      console.log('Sende Anfrage an API...');
       const response = await fetch('/api/compare-texts', {
         method: 'POST',
         headers: {
@@ -210,19 +214,95 @@ export default function SeoTextUIPage() {
         body: JSON.stringify({
           openaiText: generatedText.chatgpt,
           anthropicText: generatedText.claude,
-          textTopic: `${selectedBrand?.Marke} - ${selectedCategory} (${selectedSeason})`
+          textTopic: `${selectedBrand?.Marke} - ${selectedCategory} (${selectedSeason})`,
+          useStream: true
         }),
       });
 
+      console.log('API Antwort erhalten:', response.status, response.statusText);
+      console.log('Content-Type:', response.headers.get('content-type'));
+
       if (!response.ok) {
-        throw new Error('Fehler beim Textvergleich');
+        const errorData = await response.json();
+        console.error('API Fehler:', errorData);
+        throw new Error(errorData.error || 'Ein Fehler ist aufgetreten');
       }
 
-      const result = await response.json();
-      setComparisonResult(result.result);
+      if (!response.body) {
+        console.error('Kein Response Body');
+        throw new Error('Keine Antwort vom Server erhalten');
+      }
+
+      // Prüfe, ob wir einen Stream erhalten
+      const contentType = response.headers.get('content-type');
+      if (!contentType?.includes('text/event-stream')) {
+        console.error('Unerwarteter Content-Type:', contentType);
+        throw new Error('Server sendet keinen Stream');
+      }
+
+      console.log('Starte Stream-Verarbeitung...');
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let result = '';
+      let chunkCount = 0;
+      let lastUpdateTime = Date.now();
+      const updateInterval = 100; // UI-Update alle 100ms
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          
+          if (done) {
+            console.log('Stream beendet');
+            break;
+          }
+
+          const chunk = decoder.decode(value);
+          console.log('Chunk empfangen, Länge:', chunk.length);
+          
+          // Verarbeite SSE-Format
+          const lines = chunk.split('\n');
+          for (const line of lines) {
+            if (!line.trim() || !line.startsWith('data: ')) continue;
+
+            try {
+              const jsonStr = line.replace(/^data: /, '').trim();
+              if (!jsonStr) continue;
+
+              const data = JSON.parse(jsonStr);
+              console.log('Verarbeite Daten:', data);
+              
+              if (data.result) {
+                result += data.result;
+                chunkCount++;
+                
+                // UI-Update mit Throttling
+                const now = Date.now();
+                if (now - lastUpdateTime >= updateInterval) {
+                  console.log('Aktualisiere UI mit neuem Text');
+                  setComparisonResult(result);
+                  lastUpdateTime = now;
+                }
+              }
+            } catch (e) {
+              console.error('Fehler beim Parsen der Stream-Daten:', e, 'Zeile:', line);
+              // Ignoriere Parsing-Fehler für einzelne Chunks
+              continue;
+            }
+          }
+        }
+      } finally {
+        console.log('Schließe Stream');
+        reader.releaseLock();
+      }
+
+      // Finale UI-Aktualisierung
+      console.log('Stream-Verarbeitung abgeschlossen');
+      setComparisonResult(result);
       setActiveTab('comparison');
     } catch (error) {
-      setError('Fehler beim Textvergleich');
+      console.error('Fehler in handleCompareTexts:', error);
+      setError(error instanceof Error ? error.message : 'Ein unbekannter Fehler ist aufgetreten');
     } finally {
       setComparing(false);
     }

@@ -56,49 +56,65 @@ export function TextComparison({ openaiText, anthropicText, textTopic }: TextCom
         throw new Error('Keine Antwort vom Server erhalten');
       }
 
+      // Prüfe, ob wir einen Stream erhalten
+      const contentType = response.headers.get('content-type');
+      if (!contentType?.includes('text/event-stream')) {
+        console.error('Unerwarteter Content-Type:', contentType);
+        throw new Error('Server sendet keinen Stream');
+      }
+
       console.log('Starte Stream-Verarbeitung...');
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let result = '';
       let chunkCount = 0;
-      const totalExpectedChunks = 100; // Schätzung der Gesamtchunks
+      let lastUpdateTime = Date.now();
+      const updateInterval = 100; // UI-Update alle 100ms
 
       try {
         while (true) {
           const { done, value } = await reader.read();
+          
           if (done) {
             console.log('Stream beendet');
             break;
           }
 
-          console.log('Chunk empfangen:', value);
           const chunk = decoder.decode(value);
-          console.log('Decodierter Chunk:', chunk);
+          console.log('Chunk empfangen, Länge:', chunk.length);
+          
+          // Verarbeite SSE-Format
           const lines = chunk.split('\n');
-
           for (const line of lines) {
-            if (!line.trim()) continue;
+            if (!line.trim() || !line.startsWith('data: ')) continue;
 
             try {
-              console.log('Verarbeite Zeile:', line);
-              const data = JSON.parse(line.replace(/^data: /, '').trim());
-              console.log('Parsed Daten:', data);
+              const jsonStr = line.replace(/^data: /, '').trim();
+              if (!jsonStr) continue;
+
+              const data = JSON.parse(jsonStr);
+              console.log('Verarbeite Daten:', data);
               
               if (data.result) {
                 result += data.result;
-                console.log('Aktualisiere UI mit neuem Text');
-                setComparisonResult(result);
-                
-                // Verbesserte Fortschrittsberechnung
                 chunkCount++;
-                const progress = Math.min(100, (chunkCount / totalExpectedChunks) * 100);
-                setStreamStatus(prev => ({
-                  ...prev,
-                  progress
-                }));
+                
+                // UI-Update mit Throttling
+                const now = Date.now();
+                if (now - lastUpdateTime >= updateInterval) {
+                  console.log('Aktualisiere UI mit neuem Text');
+                  setComparisonResult(result);
+                  setStreamStatus(prev => ({
+                    ...prev,
+                    progress: Math.min(100, (chunkCount / 50) * 100) // Angepasste Fortschrittsberechnung
+                  }));
+                  lastUpdateTime = now;
+                }
               }
             } catch (e) {
               console.error('Fehler beim Parsen der Stream-Daten:', e, 'Zeile:', line);
+              // Ignoriere Parsing-Fehler für einzelne Chunks
+              continue;
             }
           }
         }
@@ -107,7 +123,9 @@ export function TextComparison({ openaiText, anthropicText, textTopic }: TextCom
         reader.releaseLock();
       }
 
+      // Finale UI-Aktualisierung
       console.log('Stream-Verarbeitung abgeschlossen');
+      setComparisonResult(result);
       setStreamStatus(prev => ({
         ...prev,
         isComplete: true,
@@ -115,10 +133,11 @@ export function TextComparison({ openaiText, anthropicText, textTopic }: TextCom
       }));
     } catch (err) {
       console.error('Fehler in handleCompare:', err);
-      setError(err instanceof Error ? err.message : 'Ein unbekannter Fehler ist aufgetreten');
+      const errorMessage = err instanceof Error ? err.message : 'Ein unbekannter Fehler ist aufgetreten';
+      setError(errorMessage);
       setStreamStatus(prev => ({
         ...prev,
-        error: err instanceof Error ? err.message : 'Ein unbekannter Fehler ist aufgetreten'
+        error: errorMessage
       }));
     } finally {
       setIsLoading(false);
