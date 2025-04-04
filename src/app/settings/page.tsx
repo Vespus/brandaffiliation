@@ -55,8 +55,15 @@ export default function SettingsPage() {
         throw new Error('Fehler beim Speichern der Einstellungen');
       }
 
-      const updatedSettings = await response.json();
-      setSettings(updatedSettings);
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error('Fehler beim Speichern der Einstellungen');
+      }
+
+      // Aktualisiere die Einstellungen mit den zurückgegebenen Werten
+      if (result.settings) {
+        setSettings(result.settings);
+      }
     } catch (error) {
       console.error('Fehler beim Speichern:', error);
       setError('Fehler beim Speichern der Einstellungen');

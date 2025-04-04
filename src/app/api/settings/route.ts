@@ -94,7 +94,7 @@ export async function POST(request: Request) {
       }
     });
     
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, settings });
   } catch (error) {
     console.error('Fehler beim Speichern der Einstellungen:', error);
     return NextResponse.json(
