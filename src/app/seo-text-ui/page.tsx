@@ -36,8 +36,10 @@ export default function SeoTextUIPage() {
   const [editedPrompt, setEditedPrompt] = useState<string | null>(null);
   const [promptTemplate, setPromptTemplate] = useState<string>('');
   const [selectedLLM, setSelectedLLM] = useState<'chatgpt' | 'claude' | 'both'>('chatgpt');
-  const [activeTab, setActiveTab] = useState<'chatgpt' | 'claude'>('chatgpt');
+  const [activeTab, setActiveTab] = useState<'chatgpt' | 'claude' | 'comparison'>('chatgpt');
   const [generating, setGenerating] = useState(false);
+  const [comparing, setComparing] = useState(false);
+  const [comparisonResult, setComparisonResult] = useState<string | null>(null);
 
   // Lade Marken, Kategorien und Prompt Template beim Start
   useEffect(() => {
@@ -188,6 +190,41 @@ export default function SeoTextUIPage() {
           end + prefix.length
         );
       }, 0);
+    }
+  };
+
+  // Funktion zum Vergleichen der Texte
+  const handleCompareTexts = async () => {
+    if (!generatedText?.chatgpt || !generatedText?.claude) {
+      setError('Beide Texte müssen generiert sein, um einen Vergleich durchzuführen');
+      return;
+    }
+
+    setComparing(true);
+    try {
+      const response = await fetch('/api/compare-texts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          openaiText: generatedText.chatgpt,
+          anthropicText: generatedText.claude,
+          textTopic: `${selectedBrand?.Marke} - ${selectedCategory} (${selectedSeason})`
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Fehler beim Textvergleich');
+      }
+
+      const result = await response.json();
+      setComparisonResult(result.result);
+      setActiveTab('comparison');
+    } catch (error) {
+      setError('Fehler beim Textvergleich');
+    } finally {
+      setComparing(false);
     }
   };
 
@@ -385,117 +422,123 @@ export default function SeoTextUIPage() {
           </div>
         )}
 
-        {currentStep === 3 && generatedText && (
-          <div className="space-y-6">
-            <div className="text-sm text-gray-600 mb-4">
-              Bearbeiten Sie den generierten SEO-Text nach Ihren Wünschen.
-            </div>
-
-            {selectedLLM === 'both' && (
-              <div className="flex space-x-2 mb-4">
+        {currentStep === 3 && (
+          <div className="space-y-4">
+            {/* Tabs */}
+            <div className="border-b border-gray-200">
+              <nav className="-mb-px flex space-x-8" aria-label="Tabs">
                 <button
-                  className={`px-4 py-2 rounded-lg ${
-                    activeTab === 'chatgpt'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 text-gray-700'
-                  }`}
                   onClick={() => setActiveTab('chatgpt')}
+                  className={`${
+                    activeTab === 'chatgpt'
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
                 >
-                  ChatGPT Version
+                  ChatGPT
                 </button>
                 <button
-                  className={`px-4 py-2 rounded-lg ${
-                    activeTab === 'claude'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 text-gray-700'
-                  }`}
                   onClick={() => setActiveTab('claude')}
+                  className={`${
+                    activeTab === 'claude'
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
                 >
-                  Claude Version
+                  Claude
                 </button>
-              </div>
-            )}
-
-            {/* Formatierungsleiste */}
-            <div className="flex items-center space-x-2 border-b border-gray-200 pb-2">
-              <button
-                className="p-2 hover:bg-gray-100 rounded"
-                title="Fett"
-                onClick={() => formatText('bold')}
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 12h8a4 4 0 100-8H6v8zm0 0h8a4 4 0 110 8H6v-8z" />
-                </svg>
-              </button>
-              <button
-                className="p-2 hover:bg-gray-100 rounded"
-                title="Kursiv"
-                onClick={() => formatText('italic')}
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6v12h4M14 6h4v12h-4" />
-                </svg>
-              </button>
+                {generatedText?.chatgpt && generatedText?.claude && (
+                  <button
+                    onClick={() => setActiveTab('comparison')}
+                    className={`${
+                      activeTab === 'comparison'
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                  >
+                    Textvergleich
+                  </button>
+                )}
+              </nav>
             </div>
 
-            <textarea
-              value={
-                selectedLLM === 'both'
-                  ? (activeTab === 'chatgpt' ? generatedText.chatgpt : generatedText.claude) || ''
-                  : (generatedText.chatgpt || generatedText.claude) || ''
-              }
-              onChange={(e) => {
-                if (selectedLLM === 'both') {
-                  setGeneratedText({
-                    ...generatedText,
-                    [activeTab]: e.target.value,
-                  });
-                } else {
-                  setGeneratedText({
-                    [selectedLLM]: e.target.value,
-                  });
-                }
-              }}
-              className="w-full h-96 p-4 border rounded-lg font-mono text-sm"
-            />
-
-            <div className="flex justify-between items-center">
-              <button
-                onClick={() => setCurrentStep(2)}
-                className="px-6 py-2 rounded-lg border border-gray-300 hover:border-blue-500"
-              >
-                Zurück
-              </button>
-              <div className="flex items-center space-x-2">
+            {/* Toolbar */}
+            <div className="flex items-center justify-between">
+              <div className="flex space-x-2">
                 <button
-                  className="p-2 hover:bg-gray-100 rounded"
-                  title="Kopieren"
-                  onClick={() => {
-                    const textToCopy = selectedLLM === 'both'
-                      ? (activeTab === 'chatgpt' ? generatedText.chatgpt : generatedText.claude)
-                      : (generatedText.chatgpt || generatedText.claude);
-                    navigator.clipboard.writeText(textToCopy || '');
-                  }}
+                  onClick={() => formatText('bold')}
+                  className="px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
-                  </svg>
+                  Fett
                 </button>
                 <button
-                  onClick={() => {
-                    setSelectedBrand(null);
-                    setSelectedSeason(null);
-                    setSelectedCategory(null);
-                    setGeneratedPrompt(null);
-                    setEditedPrompt(null);
-                    setGeneratedText(null);
-                    setCurrentStep(1);
-                  }}
-                  className="px-6 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600"
+                  onClick={() => formatText('italic')}
+                  className="px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
                 >
-                  Neuen Text erstellen
+                  Kursiv
                 </button>
               </div>
+              {generatedText?.chatgpt && generatedText?.claude && !comparing && (
+                <button
+                  onClick={handleCompareTexts}
+                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Texte vergleichen
+                </button>
+              )}
+              {comparing && (
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blue-500"></div>
+                  <span className="text-sm text-gray-500">Vergleiche Texte...</span>
+                </div>
+              )}
+            </div>
+
+            {/* Content */}
+            <div className="mt-4">
+              {activeTab === 'chatgpt' && (
+                <textarea
+                  value={generatedText?.chatgpt || ''}
+                  onChange={(e) =>
+                    setGeneratedText((prev) => ({
+                      ...prev,
+                      chatgpt: e.target.value,
+                    }))
+                  }
+                  className="w-full h-96 p-4 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                />
+              )}
+              {activeTab === 'claude' && (
+                <textarea
+                  value={generatedText?.claude || ''}
+                  onChange={(e) =>
+                    setGeneratedText((prev) => ({
+                      ...prev,
+                      claude: e.target.value,
+                    }))
+                  }
+                  className="w-full h-96 p-4 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                />
+              )}
+              {activeTab === 'comparison' && (
+                <div className="prose max-w-none">
+                  {comparisonResult ? (
+                    <div 
+                      className="p-4 border border-gray-300 rounded-md"
+                      dangerouslySetInnerHTML={{ __html: comparisonResult.replace(/\n/g, '<br>') }}
+                    />
+                  ) : (
+                    <div className="text-center py-12">
+                      <button
+                        onClick={handleCompareTexts}
+                        className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        Texte vergleichen
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}

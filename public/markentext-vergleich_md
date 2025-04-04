@@ -1,0 +1,53 @@
+# Textvergleich-Prompt für Herrenausstatter.de
+
+## Kontext und Anforderungen
+- Herrenausstatter.de ist Deutschlands ältester Online-Shop für hochwertige Herrenmode (seit 1997)
+- Herrenausstatter.de ist seit Gründung von der Gründerin Renata DePauli geführt. Ein Familienunternehmen im besten Sinne deutschen Mittelstandes
+- Zielgruppe: Stilbewusste Männer 45-50 Jahre, hohe Bildung, finanziell etabliert, wertschätzend für Qualität und Handwerkskunst
+- Der "Herrenausstatter-Stil" zeichnet sich aus durch: elegante aber nicht überhobene Sprache, Betonung von Materialqualität und Handwerkskunst, authentisches Storytelling statt Marketing-Floskeln, subtile Eleganz in der Wortwahl
+
+## Zu analysierende Texte
+
+### Text 1 (ChatGPT):
+{{OPENAI_TEXT}}
+
+### Text 2 (Claude):
+{{ANTHROPIC_TEXT}}
+
+### Textthema:
+{{TEXT_TOPIC}}
+
+## Bewertungskriterien
+Analysiere beide Texte in folgenden Kategorien (Bewertung 1-10):
+
+1. **Sprachliche Qualität**: Eleganz, Präzision und Angemessenheit des Stils für gehobene Herrenmode
+2. **SEO-Optimierung**: Keyword-Platzierung, Struktur, Metainformationen
+3. **Zielgruppenansprache**: Passung zur Herrenausstatter-Zielgruppe, konkrete Nutzendarstellung
+4. **Markenpositionierung**: Wie gut wird die Marke im Premium-Segment platziert
+5. **Handlungsaufforderung**: Wirksamkeit des Call-to-Action
+
+## Wichtige Stilmerkmale für Herrenausstatter.de
+- Fundierte Produktkompetenz und Material-Expertise sind unverzichtbar
+- Authentisches Storytelling statt plumper Marketing-Sprache
+- Balance zwischen Tradition/Heritage und moderner Relevanz
+- Wo möglich konkrete Styling-Tipps und Kombinationsmöglichkeiten anbieten
+- Situative Einbettung: Verbindung von Produkt mit Anlass/Lebenssituation 
+- Bei Materialien Herkunft und besondere Eigenschaften hervorheben
+- Für Premium-Marken deren Geschichte und Expertise betonen
+
+## Ausgabeformat
+- Für jeden Text: Bewertung der 5 Kriterien mit Punktzahl und kurzer Begründung
+- Gesamtbewertung mit Durchschnittspunktzahl pro Text
+- Fazit mit Hervorhebung der Stärken und Schwächen beider Texte
+- Konkrete Verbesserungsvorschläge für den schwächeren Text
+
+## Beispiel-Newsletter-Texte zur Stilorientierung
+
+### Beispiel 1: Storytelling über eine Marke mit historischem Kontext
+Als Fred Perry in den 1930er Jahren den Tennissport revolutionierte, war er nicht nur ein herausragender Athlet, sondern auch ein Rebell, der die Konventionen seiner Zeit sprengte. Aus einfachen Verhältnissen kommend, eroberte er den heiligen Rasen von Wimbledon und bewies, dass Talent und Wille wichtiger sind als Herkunft und Stand. 1952 entwarf er ein Polohemd, das ebenfalls Geschichte schreiben sollte. Der gestickte Lorbeerkranz wurde zum Symbol für alle, die anders denken. Heute steht Fred Perry weiterhin für Authentizität & Stil.
+
+### Beispiel 2: Produktbeschreibung mit Materialexpertise
+Kaschmir: Eine Reise von den Höhen des Himalaya in Ihre Garderobe
+Stellen Sie sich die kargen Hochebenen des Himalaya vor, 4000 Meter über dem Meeresspiegel. Hier, wo die Luft dünn und die Winter eisig sind, leben die Kaschmirziegen. Ihr Unterfell - feiner als ein Drittel eines menschlichen Haares - ist eines der wertvollsten Naturmaterialien der Welt.
+Jede Ziege liefert im Frühjahr nur 150 Gramm dieses kostbaren Rohstoffs. Von der behutsamen Gewinnung über die traditionelle Sortierung bis zur meisterlichen Verarbeitung - der Weg zu einem Kaschmirpullover ist eine Geschichte von Geduld, Expertise und höchster Handwerkskunst.
+Das Ergebnis ist ein Naturwunder der besonderen Art: Eine Faser, die wärmt, wenn es kalt ist, kühlt, wenn es warm ist, und dabei so leicht ist, dass Sie sie kaum spüren. Kaschmir ist mehr als Luxus - es ist 3000 Jahre Textilgeschichte, die Sie auf der Haut tragen.

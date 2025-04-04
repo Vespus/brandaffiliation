@@ -9,7 +9,7 @@
 
 ## Design
 - **1** = klassisch/traditionell
-- **2** = leicht modernisiert
+- **2** = klassisch-modisch
 - **3** = modern
 - **4** = modisch-trendig
 - **5** = avantgardistisch

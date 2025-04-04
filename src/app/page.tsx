@@ -9,6 +9,7 @@ import AffinitySlider from '@/components/AffinitySlider';
 import AffinityResults from '@/components/AffinityResults';
 import ScaleWeights from '@/components/ScaleWeights';
 import { calculateAffinity } from '@/utils/affinity';
+import { TextComparison } from '@/components/TextComparison';
 
 const STORAGE_KEY = 'affineBrandsCount';
 const SCALE_WEIGHTS_KEY = 'scaleWeights';
@@ -31,6 +32,9 @@ export default function Home() {
   const [affineBrandsCount, setAffineBrandsCount] = useState(5);
   const [scaleWeights, setScaleWeights] = useState(DEFAULT_SCALE_WEIGHTS);
   const [useAlternativeMethod, setUseAlternativeMethod] = useState(false);
+  const [openaiText, setOpenaiText] = useState('');
+  const [anthropicText, setAnthropicText] = useState('');
+  const [topic, setTopic] = useState('');
 
   useEffect(() => {
     // Lade gespeicherte Einstellungen beim Start
@@ -110,7 +114,7 @@ export default function Home() {
   const similarBrands = selectedBrand ? calculateAffinities() : [];
 
   return (
-    <div className="space-y-6">
+    <main className="container mx-auto p-4 space-y-8">
       <div className="mb-8">
         <BrandSearch
           brands={brands}
@@ -151,6 +155,17 @@ export default function Home() {
           </div>
         </>
       )}
-    </div>
+
+      {openaiText && anthropicText && (
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-4">Textvergleich</h2>
+          <TextComparison
+            openaiText={openaiText}
+            anthropicText={anthropicText}
+            textTopic={topic}
+          />
+        </div>
+      )}
+    </main>
   );
 }

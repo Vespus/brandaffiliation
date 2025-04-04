@@ -1,0 +1,7 @@
+[Cursor] Implementiere Textvergleich-Funktionalität
+
+- Füge API-Route für Textvergleich hinzu
+- Erstelle TextComparison-Komponente
+- Integriere Vergleich in Hauptseite
+- Implementiere Mock-Funktionalität für Entwicklung
+- Verbessere Fehlerbehandlung 
