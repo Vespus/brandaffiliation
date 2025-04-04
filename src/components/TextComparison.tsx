@@ -46,38 +46,48 @@ export function TextComparison({ openaiText, anthropicText, textTopic }: TextCom
         throw new Error(errorData.error || 'Ein Fehler ist aufgetreten');
       }
 
-      const reader = response.body?.getReader();
-      if (!reader) {
+      if (!response.body) {
         throw new Error('Keine Antwort vom Server erhalten');
       }
 
-      let result = '';
+      const reader = response.body.getReader();
       const decoder = new TextDecoder();
+      let result = '';
+      let chunkCount = 0;
+      const totalExpectedChunks = 100; // Schätzung der Gesamtchunks
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
 
-        for (const line of lines) {
-          if (!line.trim()) continue;
+          for (const line of lines) {
+            if (!line.trim()) continue;
 
-          try {
-            const data = JSON.parse(line.replace(/^data: /, '').trim());
-            if (data.result) {
-              result += data.result;
-              setComparisonResult(result);
-              setStreamStatus(prev => ({
-                ...prev,
-                progress: (result.length / 1000) * 100 // Schätzung des Fortschritts
-              }));
+            try {
+              const data = JSON.parse(line.replace(/^data: /, '').trim());
+              if (data.result) {
+                result += data.result;
+                setComparisonResult(result);
+                
+                // Verbesserte Fortschrittsberechnung
+                chunkCount++;
+                const progress = Math.min(100, (chunkCount / totalExpectedChunks) * 100);
+                setStreamStatus(prev => ({
+                  ...prev,
+                  progress
+                }));
+              }
+            } catch (e) {
+              console.error('Fehler beim Parsen der Stream-Daten:', e);
             }
-          } catch (e) {
-            console.error('Fehler beim Parsen der Stream-Daten:', e);
           }
         }
+      } finally {
+        reader.releaseLock();
       }
 
       setStreamStatus(prev => ({
@@ -109,7 +119,7 @@ export function TextComparison({ openaiText, anthropicText, textTopic }: TextCom
       {streamStatus.progress > 0 && !streamStatus.isComplete && (
         <div className="w-full bg-gray-200 rounded-full h-2.5">
           <div
-            className="bg-blue-600 h-2.5 rounded-full"
+            className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
             style={{ width: `${streamStatus.progress}%` }}
           ></div>
         </div>

@@ -111,7 +111,7 @@ async function compareTextsWithClaude(prompt: string) {
       body: JSON.stringify({
         model: settings.claudeModel || 'claude-3-opus-20240229',
         max_tokens: settings.claudeMaxTokens || 6000,
-        stream: true, // Aktiviere Streaming
+        stream: true,
         messages: [{
           role: 'user',
           content: prompt
@@ -133,9 +133,7 @@ async function compareTextsWithClaude(prompt: string) {
       throw new Error('Keine Antwort von der Claude API erhalten');
     }
 
-    // Verarbeite den Stream
-    const result = await processStream(response.body);
-    return result;
+    return response.body;
   } catch (error) {
     console.error('Fehler bei Claude API Anfrage:', error);
     throw error;
@@ -180,22 +178,51 @@ export async function POST(request: Request) {
     // Ersetze die Variablen im Prompt
     const prompt = replacePromptVariables(promptTemplate, openaiText, anthropicText, textTopic);
     
-    // Sende den Prompt an die Claude API
-    let comparisonResult: string;
-    try {
-      comparisonResult = await compareTextsWithClaude(prompt);
-    } catch (error) {
-      console.error('Fehler bei der Claude API:', error);
-      return NextResponse.json(
-        { error: getErrorMessage(error) },
-        { status: 500 }
-      );
-    }
+    // Hole den Stream von der Claude API
+    const stream = await compareTextsWithClaude(prompt);
     
-    const endTime = Date.now();
-    console.log(`Gesamtverarbeitungszeit: ${endTime - startTime}ms`);
+    // Erstelle einen TransformStream für die Verarbeitung
+    const transformStream = new TransformStream({
+      async transform(chunk, controller) {
+        // Konvertiere den Chunk zu Text
+        const text = new TextDecoder().decode(chunk);
+        
+        // Verarbeite jede Zeile im Chunk
+        const lines = text.split('\n');
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          
+          try {
+            // Entferne "data: " Präfix und parse JSON
+            const jsonStr = line.replace(/^data: /, '').trim();
+            if (!jsonStr) continue;
+            
+            const data = JSON.parse(jsonStr);
+            
+            // Wenn es ein Content-Block ist, sende den Text
+            if (data.type === 'content_block_delta' && data.delta?.text) {
+              controller.enqueue(new TextEncoder().encode(
+                `data: ${JSON.stringify({ result: data.delta.text })}\n\n`
+              ));
+            }
+          } catch (e) {
+            console.error('Fehler beim Verarbeiten des Chunks:', e);
+          }
+        }
+      }
+    });
+
+    // Verbinde den Stream mit dem TransformStream
+    const responseStream = stream.pipeThrough(transformStream);
     
-    return NextResponse.json({ result: comparisonResult });
+    // Erstelle und gib den Response-Stream zurück
+    return new Response(responseStream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
   } catch (error) {
     console.error('API Fehler:', error);
     return NextResponse.json(

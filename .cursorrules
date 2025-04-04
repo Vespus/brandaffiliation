@@ -28,3 +28,88 @@ The goal is to help you maintain a big picture as well as the progress of the ta
 - Vercel Hobby Plan hat ein Timeout-Limit von 60 Sekunden für Serverless Functions. maxDuration muss zwischen 1 und 60 Sekunden liegen.
 
 # Scratchpad 
+
+## Streaming-Implementierungsplan für SEO-Text-Vergleich
+
+### 1. API-Ebene (compare-texts/route.ts)
+[X] Analyse des aktuellen Status
+[ ] Implementierung des Streaming-Response
+  - Verwendung von Response.json() durch Response.stream() ersetzen
+  - Chunks der Claude-API direkt weiterleiten
+  - Korrekte Content-Type Header setzen (text/event-stream)
+  - Fehlerbehandlung im Stream-Kontext
+
+### 2. Stream-Verarbeitung (utils/stream.ts)
+[X] Analyse der aktuellen Implementierung
+[ ] Anpassung der Stream-Verarbeitung
+  - Optimierung der Chunk-Verarbeitung
+  - Implementierung von Fortschritts-Tracking
+  - Verbesserung der Fehlerbehandlung
+  - Hinzufügen von Stream-Status-Updates
+
+### 3. Frontend-Komponente (TextComparison.tsx)
+[X] Analyse der aktuellen Implementierung
+[ ] Implementierung des Stream-Handlings
+  - Verwendung von ReadableStream API
+  - Echtzeit-Updates der UI
+  - Präzise Fortschrittsanzeige
+  - Fehlerbehandlung im Stream-Kontext
+
+### 4. Typen und Interfaces
+[ ] Definition der Stream-bezogenen Typen
+  - StreamStatus Interface erweitern
+  - Chunk-Typen definieren
+  - Error-Typen für Stream-Fehler
+  - Progress-Tracking Interface
+
+### 5. Error Handling & Recovery
+[ ] Implementierung von Retry-Logik
+  - Automatische Wiederverbindung
+  - Fehlertolerante Stream-Verarbeitung
+  - Benutzerfreundliche Fehlermeldungen
+  - Graceful Degradation
+
+
+### Detaillierte Implementierungsschritte:
+
+#### API-Ebene:
+1. Response-Stream erstellen
+2. Claude-API Stream verarbeiten
+3. Chunks an Frontend weiterleiten
+4. Fehler im Stream-Kontext behandeln
+
+#### Stream-Verarbeitung:
+1. Chunk-Parsing optimieren
+2. Fortschrittsberechnung implementieren
+3. Stream-Status-Updates definieren
+4. Error-Handling erweitern
+
+#### Frontend:
+1. Stream-Empfang implementieren
+2. UI-Updates in Echtzeit
+3. Fortschrittsanzeige präzisieren
+4. Error-States behandeln
+
+#### Typen:
+1. StreamStatus erweitern
+2. Chunk-Typen definieren
+3. Error-Typen spezifizieren
+4. Progress-Interface erstellen
+
+### Erwartete Verbesserungen:
+1. Echtzeit-Updates im UI
+2. Präzise Fortschrittsanzeige
+3. Bessere Fehlertoleranz
+4. Verbesserte Benutzererfahrung
+
+### Potenzielle Herausforderungen:
+1. Stream-Timeout-Handling
+2. Netzwerk-Instabilität
+3. Browser-Kompatibilität
+4. Performance-Optimierung
+
+### Nächste Schritte:
+1. API-Streaming implementieren
+2. Frontend anpassen
+3. Tests entwickeln
+4. Performance optimieren 
