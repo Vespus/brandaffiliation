@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { OPENAI_DEFAULTS, OPENAI_LIMITS, SeoSettings, CLAUDE_DEFAULTS } from '@/types/seo';
+import { SeoSettings, PARAMETER_LIMITS } from '@/types/seo';
 import { getSettings } from '@/utils/settings';
 
 // Hilfsfunktion zur Validierung der Werte
@@ -38,39 +38,38 @@ export async function POST(request: Request) {
     const settings: SeoSettings = {
       hasApiKey: !!process.env.OPENAI_API_KEY,
       promptTemplate: updates.promptTemplate || process.env.SEO_PROMPT_TEMPLATE || '',
-      openaiSystemRole: updates.openaiSystemRole || process.env.OPENAI_SYSTEM_ROLE || OPENAI_DEFAULTS.systemRole,
+      openaiSystemRole: updates.openaiSystemRole || process.env.OPENAI_SYSTEM_ROLE || '',
       openaiTemperature: validateValue(
-        parseFloat(updates.openaiTemperature || process.env.OPENAI_TEMPERATURE || OPENAI_DEFAULTS.temperature.toString()),
-        OPENAI_LIMITS.temperature
+        parseFloat(updates.openaiTemperature || process.env.OPENAI_TEMPERATURE || '0.7'),
+        PARAMETER_LIMITS.temperature
       ),
       openaiTopP: validateValue(
-        parseFloat(updates.openaiTopP || process.env.OPENAI_TOP_P || OPENAI_DEFAULTS.topP.toString()),
-        OPENAI_LIMITS.topP
+        parseFloat(updates.openaiTopP || process.env.OPENAI_TOP_P || '1.0'),
+        PARAMETER_LIMITS.topP
       ),
       openaiPresencePenalty: validateValue(
-        parseFloat(updates.openaiPresencePenalty || process.env.OPENAI_PRESENCE_PENALTY || OPENAI_DEFAULTS.presencePenalty.toString()),
-        OPENAI_LIMITS.presencePenalty
+        parseFloat(updates.openaiPresencePenalty || process.env.OPENAI_PRESENCE_PENALTY || '0.0'),
+        PARAMETER_LIMITS.presencePenalty
       ),
       openaiFrequencyPenalty: validateValue(
-        parseFloat(updates.openaiFrequencyPenalty || process.env.OPENAI_FREQUENCY_PENALTY || OPENAI_DEFAULTS.frequencyPenalty.toString()),
-        OPENAI_LIMITS.frequencyPenalty
+        parseFloat(updates.openaiFrequencyPenalty || process.env.OPENAI_FREQUENCY_PENALTY || '0.0'),
+        PARAMETER_LIMITS.frequencyPenalty
       ),
       openaiMaxTokens: validateValue(
-        parseInt(updates.openaiMaxTokens || process.env.OPENAI_MAX_TOKENS || OPENAI_DEFAULTS.maxTokens.toString()),
-        OPENAI_LIMITS.maxTokens
+        parseInt(updates.openaiMaxTokens || process.env.OPENAI_MAX_TOKENS || '800'),
+        PARAMETER_LIMITS.maxTokens
       ),
       // Claude-Parameter
-      claudeTemperature: parseFloat(updates.claudeTemperature?.toString() || process.env.CLAUDE_TEMPERATURE || CLAUDE_DEFAULTS.temperature.toString()) || CLAUDE_DEFAULTS.temperature,
-      claudeMaxTokens: safeParseInt(updates.claudeMaxTokens, parseInt(process.env.CLAUDE_MAX_TOKENS || '') || CLAUDE_DEFAULTS.maxTokens),
-      claudeModel: updates.claudeModel || process.env.CLAUDE_MODEL || CLAUDE_DEFAULTS.model
+      claudeTemperature: validateValue(
+        parseFloat(updates.claudeTemperature?.toString() || process.env.CLAUDE_TEMPERATURE || '0.7'),
+        PARAMETER_LIMITS.temperature
+      ),
+      claudeMaxTokens: validateValue(
+        safeParseInt(updates.claudeMaxTokens, parseInt(process.env.CLAUDE_MAX_TOKENS || '800')),
+        PARAMETER_LIMITS.maxTokens
+      ),
+      claudeModel: updates.claudeModel || process.env.CLAUDE_MODEL || 'claude-2'
     };
-
-    console.log('Verarbeitete Claude-Parameter:', {
-      originalValue: updates.claudeMaxTokens,
-      parsedValue: settings.claudeMaxTokens,
-      envValue: process.env.CLAUDE_MAX_TOKENS,
-      defaultValue: CLAUDE_DEFAULTS.maxTokens
-    });
     
     // Debug-Ausgabe der aktuellen Einstellungen
     console.log('Aktuelle API-Einstellungen:', {
