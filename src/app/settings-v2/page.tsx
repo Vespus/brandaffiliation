@@ -5,6 +5,32 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import LLM_CONFIG from '../../../public/api-parameter';
 
+// Typdefinitionen für die Konfiguration
+interface BaseConfig {
+  label: string;
+  type: string;
+  default: any;
+  recommended: any;
+  quicktip: string;
+}
+
+interface SliderConfig extends BaseConfig {
+  type: 'slider';
+  range: [number, number];
+  step?: number;
+  default: number;
+  recommended: number;
+}
+
+interface DropdownConfig extends BaseConfig {
+  type: 'dropdown';
+  options: Array<{ value: string; label: string }>;
+  default: string;
+  recommended: string;
+}
+
+type ConfigType = SliderConfig | DropdownConfig;
+
 interface Settings {
   [key: string]: any;
   apiKeys?: {
@@ -71,7 +97,7 @@ export default function SettingsV2Page() {
   };
 
   // Render einen Slider mit Label und Quicktip
-  const renderSlider = (key: string, config: any) => (
+  const renderSlider = (key: string, config: SliderConfig) => (
     <div className="mb-6" key={key}>
       <div className="flex justify-between items-center mb-2">
         <label className="text-sm font-medium">{config.label}</label>
@@ -148,26 +174,27 @@ export default function SettingsV2Page() {
         <TabsContent value="claude">
           <div className="space-y-4 p-4 bg-white rounded-lg shadow">
             {Object.entries(LLM_CONFIG.claude).map(([key, config]) => {
-              if (config.type === 'slider') {
-                return renderSlider(key, config);
-              } else if (config.type === 'dropdown') {
+              const typedConfig = config as ConfigType;
+              if (typedConfig.type === 'slider') {
+                return renderSlider(key, typedConfig);
+              } else if (typedConfig.type === 'dropdown') {
                 return (
                   <div className="mb-6" key={key}>
                     <div className="flex justify-between items-center mb-2">
-                      <label className="text-sm font-medium">{config.label}</label>
+                      <label className="text-sm font-medium">{typedConfig.label}</label>
                     </div>
                     <select
-                      value={settings[key] || config.default}
+                      value={settings[key] || typedConfig.default}
                       onChange={(e) => updateSetting(key, e.target.value)}
                       className="w-full p-2 border rounded"
                     >
-                      {config.options.map((option: any) => (
+                      {(typedConfig as DropdownConfig).options.map((option) => (
                         <option key={option.value} value={option.value}>
                           {option.label}
                         </option>
                       ))}
                     </select>
-                    <p className="text-xs text-gray-500 mt-1">{config.quicktip}</p>
+                    <p className="text-xs text-gray-500 mt-1">{typedConfig.quicktip}</p>
                   </div>
                 );
               }
