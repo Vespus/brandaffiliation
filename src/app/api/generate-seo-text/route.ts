@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { SeoTextRequest } from '@/types/seo';
-import { getSettings } from '@/utils/settings';
+import { getSetting } from '@/utils/settingsStateV2';
 
 export const runtime = 'edge'; // Wichtig für längere Ausführungszeiten
 
@@ -13,8 +13,6 @@ function getErrorMessage(error: unknown): string {
 }
 
 async function generateWithClaude(prompt: string) {
-  const settings = await getSettings();
-  
   if (!process.env.ANTHROPIC_API_KEY) {
     throw new Error('ANTHROPIC_API_KEY ist nicht konfiguriert');
   }
@@ -27,13 +25,13 @@ async function generateWithClaude(prompt: string) {
       'anthropic-version': '2023-06-01'
     },
     body: JSON.stringify({
-      model: settings.claudeModel,
-      max_tokens: settings.claudeMaxTokens,
+      model: getSetting('CLAUDE_MODEL') || process.env.CLAUDE_MODEL,
+      max_tokens: getSetting('CLAUDE_MAX_TOKENS') || parseInt(process.env.CLAUDE_MAX_TOKENS || '4096'),
       messages: [{
         role: 'user',
         content: prompt
       }],
-      temperature: settings.claudeTemperature
+      temperature: getSetting('CLAUDE_TEMPERATURE') || parseFloat(process.env.CLAUDE_TEMPERATURE || '0.7')
     })
   });
 
@@ -60,10 +58,15 @@ export async function POST(request: Request) {
         positioning: string;
       }
     };
-    const settings = await getSettings();
 
-    // Generiere den Prompt aus dem Template mit einer sichereren Methode
-    let prompt = settings.promptTemplate;
+    // Hole den Prompt-Template aus den Settings
+    const promptTemplate = getSetting('SEO_PROMPT_TEMPLATE') || process.env.SEO_PROMPT_TEMPLATE;
+    if (!promptTemplate) {
+      throw new Error('Prompt-Template ist nicht konfiguriert');
+    }
+
+    // Generiere den Prompt aus dem Template
+    let prompt = promptTemplate;
     const replacements = {
       '{brand}': body.brand,
       '{season}': body.season,
@@ -92,14 +95,16 @@ export async function POST(request: Request) {
     if (!body.llm || body.llm === 'chatgpt' || body.llm === 'both') {
       try {
         // Debug-Ausgabe der OpenAI API-Parameter
-        console.log('OpenAI API Parameter:', {
+        const openaiParams = {
           model: 'gpt-4',
-          temperature: settings.openaiTemperature,
-          top_p: settings.openaiTopP,
-          presence_penalty: settings.openaiPresencePenalty,
-          frequency_penalty: settings.openaiFrequencyPenalty,
-          max_tokens: settings.openaiMaxTokens
-        });
+          temperature: getSetting('OPENAI_TEMPERATURE') || parseFloat(process.env.OPENAI_TEMPERATURE || '0.7'),
+          top_p: getSetting('OPENAI_TOP_P') || parseFloat(process.env.OPENAI_TOP_P || '0.9'),
+          presence_penalty: getSetting('OPENAI_PRESENCE_PENALTY') || parseFloat(process.env.OPENAI_PRESENCE_PENALTY || '0.6'),
+          frequency_penalty: getSetting('OPENAI_FREQUENCY_PENALTY') || parseFloat(process.env.OPENAI_FREQUENCY_PENALTY || '0.3'),
+          max_tokens: getSetting('OPENAI_MAX_TOKENS') || parseInt(process.env.OPENAI_MAX_TOKENS || '3000')
+        };
+
+        console.log('OpenAI API Parameter:', openaiParams);
 
         const chatgptResponse = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
@@ -112,18 +117,14 @@ export async function POST(request: Request) {
             messages: [
               {
                 role: 'system',
-                content: settings.openaiSystemRole
+                content: getSetting('SEO_SYSTEM_ROLE') || process.env.SEO_SYSTEM_ROLE
               },
               {
                 role: 'user',
                 content: prompt
               }
             ],
-            temperature: settings.openaiTemperature,
-            top_p: settings.openaiTopP,
-            presence_penalty: settings.openaiPresencePenalty,
-            frequency_penalty: settings.openaiFrequencyPenalty,
-            max_tokens: settings.openaiMaxTokens
+            ...openaiParams
           })
         });
 
@@ -144,9 +145,9 @@ export async function POST(request: Request) {
       try {
         // Debug-Ausgabe der Claude API-Parameter
         console.log('Claude API Parameter:', {
-          model: settings.claudeModel,
-          max_tokens: settings.claudeMaxTokens,
-          temperature: settings.claudeTemperature
+          model: getSetting('CLAUDE_MODEL') || process.env.CLAUDE_MODEL,
+          max_tokens: getSetting('CLAUDE_MAX_TOKENS') || parseInt(process.env.CLAUDE_MAX_TOKENS || '4096'),
+          temperature: getSetting('CLAUDE_TEMPERATURE') || parseFloat(process.env.CLAUDE_TEMPERATURE || '0.7')
         });
 
         results.claude = await generateWithClaude(prompt);

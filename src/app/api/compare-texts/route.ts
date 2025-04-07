@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { getSettings } from '@/utils/settings';
+import { getSetting } from '@/utils/settingsStateV2';
 
 // Konfiguration für längere Timeouts
 export const maxDuration = 60; // 5 Minuten
@@ -90,8 +90,6 @@ Beide Texte sind gut gelungen, aber Text 2 (Claude) hat eine leicht bessere Gesa
 
 // Funktion zum Senden des Prompts an die Claude API
 async function compareTextsWithClaude(prompt: string, useStream: boolean = false) {
-  const settings = await getSettings();
-  
   if (!process.env.ANTHROPIC_API_KEY) {
     throw new Error('ANTHROPIC_API_KEY ist nicht konfiguriert');
   }
@@ -100,12 +98,14 @@ async function compareTextsWithClaude(prompt: string, useStream: boolean = false
   const startTime = Date.now();
 
   // Debug-Ausgabe der API-Parameter
-  console.log('Claude API Parameter:', {
-    model: settings.claudeModel || 'claude-3-opus-20240229',
-    max_tokens: settings.claudeMaxTokens,
-    temperature: settings.claudeTemperature || 0.7,
+  const claudeParams = {
+    model: getSetting('CLAUDE_MODEL') || process.env.CLAUDE_MODEL || 'claude-3-opus-20240229',
+    max_tokens: getSetting('CLAUDE_MAX_TOKENS') || parseInt(process.env.CLAUDE_MAX_TOKENS || '4096'),
+    temperature: getSetting('CLAUDE_TEMPERATURE') || parseFloat(process.env.CLAUDE_TEMPERATURE || '0.7'),
     stream: useStream
-  });
+  };
+
+  console.log('Claude API Parameter:', claudeParams);
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -116,14 +116,11 @@ async function compareTextsWithClaude(prompt: string, useStream: boolean = false
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: settings.claudeModel || 'claude-3-opus-20240229',
-        max_tokens: settings.claudeMaxTokens,
-        stream: useStream,
+        ...claudeParams,
         messages: [{
           role: 'user',
           content: prompt
-        }],
-        temperature: settings.claudeTemperature || 0.7
+        }]
       })
     });
 
