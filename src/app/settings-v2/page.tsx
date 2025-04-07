@@ -42,11 +42,23 @@ interface Settings {
 export default function SettingsV2Page() {
   const [settings, setSettings] = useState<Settings>({});
   const [loading, setLoading] = useState(true);
+  const [localSliderValues, setLocalSliderValues] = useState<{[key: string]: number}>({});
 
   // Lade die Settings beim ersten Render
   useEffect(() => {
     fetchSettings();
   }, []);
+
+  // Initialisiere lokale Slider-Werte wenn Settings geladen werden
+  useEffect(() => {
+    const sliderValues: {[key: string]: number} = {};
+    Object.entries(settings).forEach(([key, value]) => {
+      if (typeof value === 'number') {
+        sliderValues[key] = value;
+      }
+    });
+    setLocalSliderValues(sliderValues);
+  }, [settings]);
 
   // Lade die aktuellen Settings
   const fetchSettings = async () => {
@@ -73,7 +85,7 @@ export default function SettingsV2Page() {
 
       if (!response.ok) throw new Error('Fehler beim Speichern');
       
-      await fetchSettings(); // Aktualisiere alle Settings
+      await fetchSettings();
       toast.success('Setting erfolgreich aktualisiert');
     } catch (error) {
       toast.error('Setting konnte nicht aktualisiert werden');
@@ -96,13 +108,26 @@ export default function SettingsV2Page() {
     }
   };
 
+  // Lokale Slider-Änderung ohne API-Call
+  const handleSliderChange = (key: string, value: number) => {
+    setLocalSliderValues(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  // Finale Slider-Änderung mit API-Call
+  const handleSliderCommit = (key: string, value: number) => {
+    updateSetting(key, value);
+  };
+
   // Render einen Slider mit Label und Quicktip
   const renderSlider = (key: string, config: SliderConfig) => (
     <div className="mb-6" key={key}>
       <div className="flex justify-between items-center mb-2">
         <label className="text-sm font-medium">{config.label}</label>
         <span className="text-sm text-gray-500">
-          Aktuell: {settings[key]} (Empfohlen: {config.recommended})
+          Aktuell: {localSliderValues[key]?.toFixed(2) || settings[key]} (Empfohlen: {config.recommended})
         </span>
       </div>
       <input
@@ -110,8 +135,10 @@ export default function SettingsV2Page() {
         min={config.range[0]}
         max={config.range[1]}
         step={config.step || 1}
-        value={settings[key] || config.default}
-        onChange={(e) => updateSetting(key, parseFloat(e.target.value))}
+        value={localSliderValues[key] ?? settings[key] ?? config.default}
+        onChange={(e) => handleSliderChange(key, parseFloat(e.target.value))}
+        onMouseUp={(e) => handleSliderCommit(key, parseFloat((e.target as HTMLInputElement).value))}
+        onTouchEnd={(e) => handleSliderCommit(key, parseFloat((e.target as HTMLInputElement).value))}
         className="w-full"
       />
       <p className="text-xs text-gray-500 mt-1">{config.quicktip}</p>
