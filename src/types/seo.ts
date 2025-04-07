@@ -54,4 +54,14 @@ export interface SeoTextRequest {
   season: string;
   category: string;
   llm?: 'chatgpt' | 'claude' | 'both';
+  brandDetails?: {
+    char1: string;
+    char2: string;
+    char3?: string;
+    price: string;
+    design: string;
+    fame: string;
+    range: string;
+    positioning: string;
+  };
 } 

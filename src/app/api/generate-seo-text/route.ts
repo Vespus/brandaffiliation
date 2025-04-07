@@ -46,18 +46,7 @@ async function generateWithClaude(prompt: string) {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json() as SeoTextRequest & {
-      brandDetails?: {
-        char1: string;
-        char2: string;
-        char3?: string;
-        price: string;
-        design: string;
-        fame: string;
-        range: string;
-        positioning: string;
-      }
-    };
+    const body = await request.json() as SeoTextRequest;
 
     // Hole den Prompt-Template aus den Settings
     const promptTemplate = getSetting('SEO_PROMPT_TEMPLATE') || process.env.SEO_PROMPT_TEMPLATE;
@@ -67,24 +56,27 @@ export async function POST(request: Request) {
 
     // Generiere den Prompt aus dem Template
     let prompt = promptTemplate;
-    const replacements = {
-      '{brand}': body.brand,
-      '{season}': body.season,
-      '{category}': body.category,
-      '{char1}': body.brandDetails?.char1 || '',
-      '{char2}': body.brandDetails?.char2 || '',
-      '{char3}': body.brandDetails?.char3 || '',
-      '{price}': body.brandDetails?.price || '',
-      '{design}': body.brandDetails?.design || '',
-      '{fame}': body.brandDetails?.fame || '',
-      '{range}': body.brandDetails?.range || '',
-      '{positioning}': body.brandDetails?.positioning || ''
-    };
+    
+    // Übersetze die Skalenwerte in beschreibende Texte
+    const priceLevels = ['günstig', 'preisgünstig', 'mittleres Preissegment', 'premium', 'luxuriös'];
+    const designLevels = ['einfach', 'klassisch', 'zeitlos', 'modern', 'innovativ'];
+    const fameLevels = ['neu', 'aufstrebend', 'etabliert', 'bekannt', 'Premium-Marke'];
+    const rangeLevels = ['fokussiert', 'spezialisiert', 'breit', 'sehr breit', 'universell'];
+    const positioningLevels = ['Mass Market', 'Premium', 'Luxus'];
 
-    // Führe die Ersetzungen einzeln durch
-    Object.entries(replacements).forEach(([key, value]) => {
-      prompt = prompt.replace(new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), value);
-    });
+    // Erstelle den Prompt mit den Markendaten
+    prompt = prompt
+      .replace('{brand}', body.brand)
+      .replace('{category}', body.category)
+      .replace('{season}', body.season)
+      .replace('{char1}', body.brandDetails?.char1 || '')
+      .replace('{char2}', body.brandDetails?.char2 || '')
+      .replace('{char3}', body.brandDetails?.char3 || 'N/A')
+      .replace('{price}', priceLevels[parseInt(body.brandDetails?.price || '1') - 1])
+      .replace('{design}', designLevels[parseInt(body.brandDetails?.design || '1') - 1])
+      .replace('{fame}', fameLevels[parseInt(body.brandDetails?.fame || '1') - 1])
+      .replace('{range}', rangeLevels[parseInt(body.brandDetails?.range || '1') - 1])
+      .replace('{positioning}', positioningLevels[parseInt(body.brandDetails?.positioning || '1') - 1]);
 
     // Debug-Ausgabe des generierten Prompts
     console.log('Generierter Prompt:', prompt);
