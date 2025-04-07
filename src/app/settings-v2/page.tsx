@@ -164,9 +164,13 @@ export default function SettingsV2Page() {
         {/* ChatGPT Tab */}
         <TabsContent value="chatgpt">
           <div className="space-y-4 p-4 bg-white rounded-lg shadow">
-            {Object.entries(LLM_CONFIG.openai).map(([key, config]) => 
-              renderSlider(key, config)
-            )}
+            {Object.entries(LLM_CONFIG.openai).map(([key, config]) => {
+              const typedConfig = config as ConfigType;
+              if (typedConfig.type === 'slider') {
+                return renderSlider(key, typedConfig);
+              }
+              return null;
+            })}
           </div>
         </TabsContent>
 
