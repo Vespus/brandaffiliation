@@ -58,11 +58,11 @@ export async function POST(request: Request) {
     let prompt = promptTemplate;
     
     // Übersetze die Skalenwerte in beschreibende Texte
-    const priceLevels = ['günstig', 'preisgünstig', 'mittleres Preissegment', 'premium', 'luxuriös'];
-    const designLevels = ['einfach', 'klassisch', 'zeitlos', 'modern', 'innovativ'];
-    const fameLevels = ['neu', 'aufstrebend', 'etabliert', 'bekannt', 'Premium-Marke'];
-    const rangeLevels = ['fokussiert', 'spezialisiert', 'breit', 'sehr breit', 'universell'];
-    const positioningLevels = ['Mass Market', 'Premium', 'Luxus'];
+    const priceLevels = ['sehr günstig', 'günstig-mittleres Segment', 'mittlere Preislage', 'gehoben', 'Luxus'];
+    const designLevels = ['klassisch/traditionell', 'leicht modernisiert', 'modern', 'modisch-trendig', 'avantgardistisch'];
+    const fameLevels = ['Nische', 'klein-regional', 'Große Zahl treuer Markenfans', 'weit verbreitet', 'globaler Mainstream'];
+    const rangeLevels = ['nur 1 Produktkategorie', 'wenige Kategorien', 'moderat diversifiziert', 'breites Sortiment', 'sehr breit (inkl. Unterlinien)'];
+    const positioningLevels = ['sportiv/casual', 'Mix aus Business & Casual', 'Business-orientiert'];
 
     // Erstelle den Prompt mit den Markendaten
     prompt = prompt
