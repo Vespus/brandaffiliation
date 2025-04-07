@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     const body = await request.json() as SeoTextRequest;
 
     // Hole den Prompt-Template aus den Settings
-    const promptTemplate = getSetting('SEO_PROMPT_TEMPLATE') || process.env.SEO_PROMPT_TEMPLATE;
+    const promptTemplate = (getSetting('SEO_PROMPT_TEMPLATE') || process.env.SEO_PROMPT_TEMPLATE || '').toString();
     if (!promptTemplate) {
       throw new Error('Prompt-Template ist nicht konfiguriert');
     }
