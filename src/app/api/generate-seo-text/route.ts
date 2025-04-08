@@ -17,40 +17,71 @@ async function generateWithClaude(prompt: string) {
     throw new Error('ANTHROPIC_API_KEY ist nicht konfiguriert');
   }
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01'
-    },
-    body: JSON.stringify({
-      model: getSetting('CLAUDE_MODEL') || process.env.CLAUDE_MODEL,
-      max_tokens: getSetting('CLAUDE_MAX_TOKENS') || parseInt(process.env.CLAUDE_MAX_TOKENS || '4096'),
-      messages: [{
-        role: 'user',
-        content: prompt
-      }],
-      temperature: getSetting('CLAUDE_TEMPERATURE') || parseFloat(process.env.CLAUDE_TEMPERATURE || '0.7')
-    })
-  });
+  console.log('Starte Claude API Anfrage...');
+  const startTime = Date.now();
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(`Claude API Fehler: ${error.message || 'Unbekannter Fehler'}`);
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: getSetting('CLAUDE_MODEL') || process.env.CLAUDE_MODEL,
+        max_tokens: getSetting('CLAUDE_MAX_TOKENS') || parseInt(process.env.CLAUDE_MAX_TOKENS || '4096'),
+        messages: [{
+          role: 'user',
+          content: prompt
+        }],
+        temperature: getSetting('CLAUDE_TEMPERATURE') || parseFloat(process.env.CLAUDE_TEMPERATURE || '0.7')
+      })
+    });
+
+    const endTime = Date.now();
+    console.log(`Claude API Antwortzeit: ${endTime - startTime}ms`);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Claude API Fehlerdetails:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorData
+      });
+      throw new Error(`Claude API Fehler (${response.status}): ${errorData.error?.message || errorData.message || 'Unbekannter Fehler'}`);
+    }
+
+    const data = await response.json();
+    return data.content[0].text;
+  } catch (error) {
+    console.error('Detaillierter Claude API Fehler:', {
+      error,
+      message: error instanceof Error ? error.message : 'Unbekannter Fehler',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+    throw error;
   }
-
-  const data = await response.json();
-  return data.content[0].text;
 }
 
 export async function POST(request: Request) {
+  console.log('SEO Text Generierung API aufgerufen');
+  const startTime = Date.now();
+
   try {
     const body = await request.json() as SeoTextRequest;
+    console.log('Request Body:', {
+      brand: body.brand,
+      category: body.category,
+      season: body.season,
+      llm: body.llm,
+      brandDetails: body.brandDetails
+    });
 
     // Hole den Prompt-Template aus den Settings
     const promptTemplate = (getSetting('SEO_PROMPT_TEMPLATE') || process.env.SEO_PROMPT_TEMPLATE || '').toString();
     if (!promptTemplate) {
+      console.error('Prompt-Template fehlt in den Einstellungen');
       throw new Error('Prompt-Template ist nicht konfiguriert');
     }
 
@@ -127,7 +158,11 @@ export async function POST(request: Request) {
         const chatgptData = await chatgptResponse.json();
         results.chatgpt = chatgptData.choices[0].message.content;
       } catch (error) {
-        console.error('ChatGPT Fehler:', error);
+        console.error('ChatGPT Fehler:', {
+          error,
+          message: error instanceof Error ? error.message : 'Unbekannter Fehler',
+          stack: error instanceof Error ? error.stack : undefined
+        });
         results.chatgpt = `Fehler bei der ChatGPT-Generierung: ${getErrorMessage(error)}`;
       }
     }
@@ -143,14 +178,24 @@ export async function POST(request: Request) {
 
         results.claude = await generateWithClaude(prompt);
       } catch (error) {
-        console.error('Claude Fehler:', error);
+        console.error('Claude Fehler:', {
+          error,
+          message: error instanceof Error ? error.message : 'Unbekannter Fehler',
+          stack: error instanceof Error ? error.stack : undefined
+        });
         results.claude = `Fehler bei der Claude-Generierung: ${getErrorMessage(error)}`;
       }
     }
 
+    const endTime = Date.now();
+    console.log(`Gesamtverarbeitungszeit: ${endTime - startTime}ms`);
     return NextResponse.json(results);
   } catch (error) {
-    console.error('API Fehler:', error);
+    console.error('API Fehler:', {
+      error,
+      message: error instanceof Error ? error.message : 'Unbekannter Fehler',
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return NextResponse.json(
       { error: getErrorMessage(error) },
       { status: 500 }
