@@ -1,6 +1,6 @@
 import { PreisSkala, DesignSkala, BekannheitSkala, SortimentsbreiteSkala, PositionierungSkala } from '@/types/brands';
 
-export const preisLabels: Record<PreisSkala, string> = {
+export const preisLabels: Record<number, string> = {
   1: 'sehr günstig',
   2: 'günstig-mittleres Segment',
   3: 'mittlere Preislage',
@@ -8,7 +8,7 @@ export const preisLabels: Record<PreisSkala, string> = {
   5: 'Luxus'
 };
 
-export const designLabels: Record<DesignSkala, string> = {
+export const designLabels: Record<number, string> = {
   1: 'klassisch/traditionell',
   2: 'leicht modernisiert',
   3: 'modern',
@@ -16,7 +16,7 @@ export const designLabels: Record<DesignSkala, string> = {
   5: 'avantgardistisch'
 };
 
-export const bekannheitLabels: Record<BekannheitSkala, string> = {
+export const bekannheitLabels: Record<number, string> = {
   1: 'Nische',
   2: 'klein-regional',
   3: 'Große Zahl treuer Markenfans',
@@ -24,7 +24,7 @@ export const bekannheitLabels: Record<BekannheitSkala, string> = {
   5: 'globaler Mainstream'
 };
 
-export const sortimentsbreiteLabels: Record<SortimentsbreiteSkala, string> = {
+export const sortimentsbreiteLabels: Record<number, string> = {
   1: 'nur 1 Produktkategorie',
   2: 'wenige Kategorien',
   3: 'moderat diversifiziert',
@@ -32,7 +32,7 @@ export const sortimentsbreiteLabels: Record<SortimentsbreiteSkala, string> = {
   5: 'sehr breit (inkl. Unterlinien)'
 };
 
-export const positionierungLabels: Record<PositionierungSkala, string> = {
+export const positionierungLabels: Record<number, string> = {
   1: 'sportiv/casual',
   2: 'Mix aus Business & Casual',
   3: 'Business-orientiert'
