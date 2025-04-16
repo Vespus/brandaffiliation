@@ -1,9 +1,9 @@
 import type {Metadata} from "next";
 import {Geist, Geist_Mono} from "next/font/google";
-import "./globals.css";
-import SideMenu from "@/components/SideMenu";
-import {ClerkProvider, SignedIn, SignedOut, SignInButton, SignUpButton, UserButton} from "@clerk/nextjs";
+import {ThemeProvider} from "next-themes";
 import {NuqsAdapter} from "nuqs/adapters/next/app";
+import { Toaster } from "@/components/ui/sonner"
+import "./globals.css";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -26,19 +26,25 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <ClerkProvider
-            signInFallbackRedirectUrl="/dashboard"
-            signUpFallbackRedirectUrl="/dashboard"
+        <html
+            lang="de"
+            suppressHydrationWarning
+            className={`${geistSans.variable} ${geistMono.variable}`}
         >
-            <NuqsAdapter>
-                <html lang="de">
-                    <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-                        <div className="flex min-h-screen">
-                            {children}
-                        </div>
-                    </body>
-                </html>
-            </NuqsAdapter>
-        </ClerkProvider>
+        <body className="bg-background text-foreground">
+        <NuqsAdapter>
+            <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+            >
+                <div className="flex min-h-screen flex-col">
+                    {children}
+                </div>
+                <Toaster richColors />
+            </ThemeProvider>
+        </NuqsAdapter>
+        </body>
+        </html>
     );
 }

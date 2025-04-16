@@ -5,9 +5,7 @@ import {
     Forward,
     MoreHorizontal,
     Trash2,
-    PieChart,
-    Frame,
-    Map
+    GalleryVerticalEnd
 } from "lucide-react"
 
 import {
@@ -29,19 +27,9 @@ import {
 
 const data = [
     {
-        name: "Affine Marken",
-        url: "#",
-        icon: Frame,
-    },
-    {
-        name: "Sales & Marketing",
-        url: "#",
-        icon: PieChart,
-    },
-    {
-        name: "Travel",
-        url: "#",
-        icon: Map,
+        name: "Alle Marken",
+        url: "/dashboard/brands",
+        icon: GalleryVerticalEnd,
     },
 ]
 
