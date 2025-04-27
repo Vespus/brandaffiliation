@@ -16,6 +16,7 @@ interface BrandsTableProps {
 export const BrandTable = ({promise}: BrandsTableProps) => {
     const {data, pageCount} = use(promise)
 
+    console.log(data)
     const columns = getBranchTableColumns()
 
     const { table } = useDataTable({

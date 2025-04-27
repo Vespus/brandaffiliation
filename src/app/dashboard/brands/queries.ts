@@ -5,7 +5,7 @@ import {
     parseAsStringEnum,
 } from "nuqs/server";
 import {getFiltersStateParser, getSortingStateParser} from "@/lib/datatable/parsers";
-import {Brand, brand, BrandWithCharacteristic} from "@/db/schema";
+import {Brand, brand, brandScales, BrandWithCharacteristic} from "@/db/schema";
 import {and, asc, count, desc, gt, ilike} from "drizzle-orm";
 import { db } from "@/db";
 
@@ -39,6 +39,7 @@ export const getBrands = async (input: Awaited<ReturnType<typeof searchParamsCac
             )
             : [asc(brand.name)];
 
+    const allScaleNames = new Set<string>();
     const { data, total } = await db.transaction(async (tx) => {
         const data = await tx.query.brand.findMany({
             where,
@@ -47,8 +48,38 @@ export const getBrands = async (input: Awaited<ReturnType<typeof searchParamsCac
             limit: input.perPage,
             with: {
                 characteristic: true,
+                brandScales: {
+                    with: {
+                        scale: true
+                    }
+                },
             }
-        }) as BrandWithCharacteristic[]
+        })
+
+        for (const brand of data) {
+            for (const bs of brand.brandScales) {
+                allScaleNames.add(bs.scale.name);
+            }
+        }
+
+        const tableData = data.map(brand => {
+            const row: Record<string, typeof data> = {
+                id: brand.id,
+                name: brand.name,
+            };
+
+            // initialize all scales as null
+            for (const scaleName of allScaleNames) {
+                row[scaleName] = null;
+            }
+
+            // fill available values
+            for (const bs of brand.brandScales) {
+                row[bs.scale.name] = bs.value;
+            }
+
+            return row;
+        });
 
         const total = await tx
             .select({
