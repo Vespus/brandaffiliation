@@ -7,12 +7,13 @@ import {useRouter} from "next/navigation";
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
 import {Settings} from "lucide-react";
+import {AISetting} from "@/db/presets";
 
-export const AIModelItem = ({model}: {model: AIModel}) => {
+export const AIModelItem = ({model, settings}: {model: AIModel, settings: AISetting}) => {
     const router = useRouter()
 
     const handleModelSelect = () => {
-        router.push(`/dashboard/configure/${model.id}`)
+        router.push(`/dashboard/configure/${model.modelName}`)
     }
 
     return (
@@ -30,8 +31,8 @@ export const AIModelItem = ({model}: {model: AIModel}) => {
                     {model.provider}
                 </Badge>
             </TableCell>
-            <TableCell>1</TableCell>
-            <TableCell>22222</TableCell>
+            <TableCell>{settings?.temperature}</TableCell>
+            <TableCell>{settings?.maxTokens}</TableCell>
             <TableCell className="text-right">
                 <Button
                     variant="ghost"

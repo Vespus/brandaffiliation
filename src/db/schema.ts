@@ -8,7 +8,7 @@ import {
 	numeric,
 	uuid,
 	varchar,
-	uniqueIndex
+	uniqueIndex, pgView
 } from "drizzle-orm/pg-core"
 
 export const users = pgTable('users', {
@@ -50,11 +50,12 @@ export const aiModels = pgTable('ai_models', {
 export const aiSettingsDefault = pgTable('ai_settings_default', {
 	id: serial('id').primaryKey(),
 	model: text('model').notNull(),
-	temperature: numeric('temperature', { precision: 4, scale: 3 }).default('0.7'),
-	topP: numeric('top_p', { precision: 4, scale: 3 }).default('1.0'),
-	maxTokens: integer('max_tokens').default(4000),
-	frequencyPenalty: numeric('frequency_penalty', { precision: 4, scale: 3 }).default('0.0'),
-	presencePenalty: numeric('presence_penalty', { precision: 4, scale: 3 }).default('0.0'),
+	temperature: integer('temperature'),
+	topP: integer('top_p'),
+	maxTokens: integer('max_tokens'),
+	frequencyPenalty: integer('frequency_penalty'),
+	presencePenalty: integer('presence_penalty'),
+	prompt: text(),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });
@@ -63,11 +64,12 @@ export const aiSettingsUser = pgTable('ai_settings_user', {
 	id: serial('id').primaryKey(),
 	userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
 	model: text('model').notNull(),
-	temperature: numeric('temperature', { precision: 4, scale: 3 }),
-	topP: numeric('top_p', { precision: 4, scale: 3 }),
+	temperature: integer('temperature'),
+	topP: integer('top_p'),
 	maxTokens: integer('max_tokens'),
-	frequencyPenalty: numeric('frequency_penalty', { precision: 4, scale: 3 }),
-	presencePenalty: numeric('presence_penalty', { precision: 4, scale: 3 }),
+	frequencyPenalty: integer('frequency_penalty'),
+	presencePenalty: integer('presence_penalty'),
+	prompt: text(),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 }, (table) => ({

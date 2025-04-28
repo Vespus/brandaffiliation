@@ -1,28 +1,43 @@
 import {Table, TableBody, TableHead, TableHeader, TableRow} from "@/components/ui/table"
 import {db} from "@/db";
 import {AIModelItem} from "@/app/dashboard/configure/ai-model-item";
+import {AISetting, getAISettings} from "@/db/presets";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
 
 export const AIModels = async () => {
-    const aiModels = await db.query.aiModels.findMany()
+    const [AIModels, AISettings] = await Promise.all([
+        db.query.aiModels.findMany(),
+        getAISettings()
+    ])
+
+    const settingsMap = new Map((AISettings as AISetting[]).map(setting => [setting.model, setting]))
 
     return (
-        <Table>
-            <TableHeader>
-                <TableRow>
-                    <TableHead>Model</TableHead>
-                    <TableHead>Provider</TableHead>
-                    <TableHead>Temperature</TableHead>
-                    <TableHead>Max Tokens</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {
-                    aiModels.map((model) => (
-                        <AIModelItem key={model.id} model={model} />
-                    ))
-                }
-            </TableBody>
-        </Table>
+        <Card>
+            <CardHeader>
+                <CardTitle>AI Models</CardTitle>
+                <CardDescription>Select AI model to configure</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Model</TableHead>
+                            <TableHead>Provider</TableHead>
+                            <TableHead>Temperature</TableHead>
+                            <TableHead>Max Tokens</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {
+                            AIModels.map((model) => (
+                                <AIModelItem key={model.id} model={model} settings={settingsMap.get(model.modelName)!}/>
+                            ))
+                        }
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
     )
 }
