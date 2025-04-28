@@ -10,22 +10,6 @@ import {and, asc, count, desc, gte, ilike, lte} from "drizzle-orm";
 import {db} from "@/db";
 import {z} from "zod";
 
-export const searchParamsCache = createSearchParamsCache({
-    page: parseAsInteger.withDefault(1),
-    perPage: parseAsInteger.withDefault(10),
-    sort: getSortingStateParser<Brand>().withDefault([
-        {id: "name", desc: false},
-    ]),
-    name: parseAsString.withDefault(""),
-    price: parseAsArrayOf(z.coerce.number()).withDefault([]),
-    quality: parseAsArrayOf(z.coerce.number()).withDefault([]),
-    focus: parseAsArrayOf(z.coerce.number()).withDefault([]),
-    positioning: parseAsArrayOf(z.coerce.number()).withDefault([]),
-    heritage: parseAsArrayOf(z.coerce.number()).withDefault([]),
-    origin: parseAsArrayOf(z.coerce.number()).withDefault([]),
-    fame: parseAsArrayOf(z.coerce.number()).withDefault([]),
-    sales_volume: parseAsArrayOf(z.coerce.number()).withDefault([]),
-});
 
 export const getBrands = async (input: Awaited<ReturnType<typeof searchParamsCache.parse>>) => {
     const offset = (input.page - 1) * input.perPage;

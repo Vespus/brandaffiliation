@@ -1,14 +1,33 @@
-import { pgTable, serial, integer, text } from "drizzle-orm/pg-core"
+import {
+	pgTable,
+	serial,
+	integer,
+	text,
+	boolean,
+	timestamp,
+	numeric,
+	uuid,
+	varchar,
+	uniqueIndex
+} from "drizzle-orm/pg-core"
 
+export const users = pgTable('users', {
+	id: uuid('id').primaryKey(),
+	fullName: text('full_name'),
+	phone: varchar('phone', { length: 256 }),
+});
 
 export const brand = pgTable("brands", {
 	id: serial().notNull(),
 	name: text().notNull(),
-	attributePrice: integer("attribute_price").default(0),
-	attributeDesign: integer("attribute_design"),
-	attributeFame: integer("attribute_fame"),
-	attributeProductRange: integer("attribute_product_range"),
-	attributePositioning: integer("attribute_positioning"),
+	price: integer(),
+	quality: integer(),
+	focus: integer(),
+	positioning: integer(),
+	heritage: integer(),
+	origin: integer(),
+	fame: integer(),
+	sales_volume: integer(),
 });
 
 export const characteristic = pgTable("characteristics", {
@@ -17,27 +36,48 @@ export const characteristic = pgTable("characteristics", {
 	value: text().notNull(),
 });
 
-export const scaleGroups = pgTable('scale_groups', {
+export const aiModels = pgTable('ai_models', {
 	id: serial('id').primaryKey(),
-	name: text().notNull(),
+	provider: text('provider').notNull(),
+	modelName: text('model_name').notNull().unique(),
+	name: text('name').notNull(),
+	description: text('description'),
+	isActive: boolean('is_active').notNull().default(false),
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });
 
-export const scale = pgTable("scales", {
-	id: serial().notNull(),
-	name: text().notNull(),
-	group_id: integer("group_id").references(() => scaleGroups.id).notNull(),
-})
-
-export const brandScales = pgTable('brand_scales', {
+export const aiSettingsDefault = pgTable('ai_settings_default', {
 	id: serial('id').primaryKey(),
-	brandId: integer("brand_id").references(() => brand.id).notNull(),
-	scaleId: integer('scale_id').references(() => scale.id).notNull(),
-	value: integer('value').notNull(),
+	model: text('model').notNull(),
+	temperature: numeric('temperature', { precision: 4, scale: 3 }).default('0.7'),
+	topP: numeric('top_p', { precision: 4, scale: 3 }).default('1.0'),
+	maxTokens: integer('max_tokens').default(4000),
+	frequencyPenalty: numeric('frequency_penalty', { precision: 4, scale: 3 }).default('0.0'),
+	presencePenalty: numeric('presence_penalty', { precision: 4, scale: 3 }).default('0.0'),
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });
+
+export const aiSettingsUser = pgTable('ai_settings_user', {
+	id: serial('id').primaryKey(),
+	userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+	model: text('model').notNull(),
+	temperature: numeric('temperature', { precision: 4, scale: 3 }),
+	topP: numeric('top_p', { precision: 4, scale: 3 }),
+	maxTokens: integer('max_tokens'),
+	frequencyPenalty: numeric('frequency_penalty', { precision: 4, scale: 3 }),
+	presencePenalty: numeric('presence_penalty', { precision: 4, scale: 3 }),
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+}, (table) => ({
+	userModelUnique: uniqueIndex('ai_settings_user_user_id_model_unique').on(table.userId, table.model),
+}));
 
 export type Brand = typeof brand.$inferSelect;
-export type BrandWithCharacteristic = Brand & { characteristic: Characteristic[] };
-export type NewBrand = typeof brand.$inferInsert;
+export type BrandWithCharacteristic = Brand & { characteristic?: Characteristic[] };
 
 export type Characteristic = typeof characteristic.$inferSelect;
 export type NewCharacteristic = typeof characteristic.$inferInsert;
+
+export type AIModel = typeof aiModels.$inferSelect

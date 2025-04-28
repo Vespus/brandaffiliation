@@ -3,14 +3,23 @@
 import {BrandWithCharacteristic} from "@/db/schema";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
-    ArrowBigRightDash,
+    ArrowBigRightDash, StarIcon,
     Text,
 } from "lucide-react";
 import * as React from "react";
 
 import { DataTableColumnHeader } from "@/components/datatable/data-table-column-header";
 import {SimpleRating} from "@/components/ui/simple-rating";
-import {bekannheitLabels, designLabels, preisLabels, sortimentsbreiteLabels} from "@/utils/scales";
+import {
+    fameLabels,
+    focusLabels,
+    heritageLabels,
+    originLabels,
+    positioningLabels,
+    priceLabels,
+    qualityLabels,
+    salesVolumeLabels,
+} from "@/utils/scales";
 
 export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristic>[] {
     return [
@@ -20,15 +29,16 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristic>[] {
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Marke" />
             ),
-            cell: ({ row }) => <div className="w-20">{row.getValue("name")}</div>,
+            cell: ({ row }) => <div className="min-w-20 font-semibold">{row.getValue("name")}</div>,
             enableSorting: true,
             enableHiding: false,
             meta: {
-                label: "Title",
-                placeholder: "Search titles...",
+                label: "Brand Title",
+                placeholder: "Search brands...",
                 variant: "text",
                 icon: Text,
             },
+            enableColumnFilter: true
         },
         {
             id: "characteristic",
@@ -40,7 +50,7 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristic>[] {
                 const characteristics = row.original.characteristic
                 return (
                     <div className="flex flex-col gap-2">
-                        {characteristics.map(char => (
+                        {characteristics?.map(char => (
                             <div key={char.id} className="flex gap-2 items-center text-xs">
                                 <ArrowBigRightDash size={12} />
                                 <span>{char.value}</span>
@@ -53,74 +63,180 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristic>[] {
             enableColumnFilter: false,
         },
         {
-            id: "attributePrice",
-            accessorKey: "attributePrice",
+            id: "price",
+            accessorKey: "price",
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Preis" />
             ),
             cell: ({ row }) => {
                 return (
-                    <SimpleRating value={row.original.attributePrice || 0}>
-                        <span className="text-xs">{preisLabels[row.original.attributePrice || 1]}</span>
+                    <SimpleRating value={row.original.price || 0}>
+                        <span className="text-xs">{priceLabels[row.original.price || 1]}</span>
                     </SimpleRating>
                 );
             },
+            meta: {
+                label: "Preis",
+                variant: "range",
+                range: [1, 5],
+                unit: "",
+                icon: StarIcon,
+            },
+            enableColumnFilter: true,
         },
         {
-            id: "attributeDesign",
-            accessorKey: "attributeDesign",
+            id: "quality",
+            accessorKey: "quality",
             header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Design" />
+                <DataTableColumnHeader column={column} title="Qualität" />
             ),
             cell: ({ row }) => {
                 return (
-                    <SimpleRating value={row.original.attributeDesign || 0}>
-                        <span className="text-xs">{designLabels[row.original.attributeDesign || 1]}</span>
+                    <SimpleRating value={row.original.quality || 0}>
+                        <span className="text-xs">{qualityLabels[row.original.quality || 1]}</span>
                     </SimpleRating>
                 );
             },
+            meta: {
+                label: "Qualität",
+                variant: "range",
+                range: [1, 5],
+                unit: "",
+                icon: StarIcon,
+            },
+            enableColumnFilter: true,
         },
         {
-            id: "attributeFame",
-            accessorKey: "attributeFame",
+            id: "focus",
+            accessorKey: "focus",
             header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Bekanntheit" />
+                <DataTableColumnHeader column={column} title="Schwerpunkt" />
             ),
             cell: ({ row }) => {
                 return (
-                    <SimpleRating value={row.original.attributeFame || 0}>
-                        <span className="text-xs">{bekannheitLabels[row.original.attributeFame || 1]}</span>
+                    <SimpleRating value={row.original.focus || 0}>
+                        <span className="text-xs">{focusLabels[row.original.focus || 1]}</span>
                     </SimpleRating>
                 );
             },
-        },
-        {
-            id: "attributeProductRange",
-            accessorKey: "attributeProductRange",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Sortimentsbreite" />
-            ),
-            cell: ({ row }) => {
-                return (
-                    <SimpleRating value={row.original.attributeProductRange || 0}>
-                        <span className="text-xs">{sortimentsbreiteLabels[row.original.attributeProductRange || 1]}</span>
-                    </SimpleRating>
-                );
+            meta: {
+                label: "Schwerpunkt",
+                variant: "range",
+                range: [1, 5],
+                unit: "",
+                icon: StarIcon,
             },
+            enableColumnFilter: true,
         },
         {
-            id: "attributePositioning",
-            accessorKey: "attributePositioning",
+            id: "positioning",
+            accessorKey: "positioning",
             header: ({ column }) => (
                 <DataTableColumnHeader column={column} title="Positionierung" />
             ),
             cell: ({ row }) => {
                 return (
-                    <SimpleRating value={row.original.attributePositioning || 0} maxStars={3}>
-                        <span className="text-xs">{sortimentsbreiteLabels[row.original.attributePositioning || 1]}</span>
+                    <SimpleRating value={row.original.positioning || 0}>
+                        <span className="text-xs">{positioningLabels[row.original.positioning || 1]}</span>
                     </SimpleRating>
                 );
             },
+            meta: {
+                label: "Positionierung",
+                variant: "range",
+                range: [1, 5],
+                unit: "",
+                icon: StarIcon,
+            },
+            enableColumnFilter: true,
+        },
+        {
+            id: "fame",
+            accessorKey: "fame",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Bekanntheit" />
+            ),
+            cell: ({ row }) => {
+                return (
+                    <SimpleRating value={row.original.fame || 0}>
+                        <span className="text-xs">{fameLabels[row.original.fame || 1]}</span>
+                    </SimpleRating>
+                );
+            },
+            meta: {
+                label: "Bekanntheit",
+                variant: "range",
+                range: [1, 5],
+                unit: "",
+                icon: StarIcon,
+            },
+            enableColumnFilter: true,
+        },
+        {
+            id: "heritage",
+            accessorKey: "heritage",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Heritage" />
+            ),
+            cell: ({ row }) => {
+                return (
+                    <SimpleRating value={row.original.heritage || 0}>
+                        <span className="text-xs">{heritageLabels[row.original.heritage || 1]}</span>
+                    </SimpleRating>
+                );
+            },
+            meta: {
+                label: "Heritage",
+                variant: "range",
+                range: [1, 5],
+                unit: "",
+                icon: StarIcon,
+            },
+            enableColumnFilter: true,
+        },
+        {
+            id: "origin",
+            accessorKey: "origin",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Herkunft" />
+            ),
+            cell: ({ row }) => {
+                return (
+                    <SimpleRating value={row.original.origin || 0}>
+                        <span className="text-xs">{originLabels[row.original.origin || 1]}</span>
+                    </SimpleRating>
+                );
+            },
+            meta: {
+                label: "Herkunft",
+                variant: "range",
+                range: [1, 5],
+                unit: "",
+                icon: StarIcon,
+            },
+            enableColumnFilter: true,
+        },
+        {
+            id: "sales_volume",
+            accessorKey: "sales_volume",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Umsatz" />
+            ),
+            cell: ({ row }) => {
+                return (
+                    <SimpleRating value={row.original.sales_volume || 0}>
+                        <span className="text-xs">{salesVolumeLabels[row.original.sales_volume || 1]}</span>
+                    </SimpleRating>
+                );
+            },
+            meta: {
+                label: "Umsatz",
+                variant: "range",
+                range: [1, 5],
+                unit: "",
+                icon: StarIcon,
+            },
+            enableColumnFilter: true,
         },
     ];
 }

@@ -2,12 +2,12 @@
 
 import { DataTable } from "@/components/datatable/data-table"
 import { DataTableSortList } from "@/components/datatable/data-table-sort-list"
-import { DataTableToolbar } from "@/components/datatable/data-table-toolbar"
 import {BrandTableActionBar} from "@/app/dashboard/brands/brand-table-action-bar";
 import {getBrands} from "@/app/dashboard/brands/queries";
 import { use } from "react";
 import {useDataTable} from "@/hooks/use-data-table";
 import {getBranchTableColumns} from "@/app/dashboard/brands/brand-table-columns";
+import {DataTableToolbar} from "@/components/datatable/data-table-toolbar";
 
 interface BrandsTableProps {
     promise: Promise<Awaited<ReturnType<typeof getBrands>>>
@@ -16,7 +16,6 @@ interface BrandsTableProps {
 export const BrandTable = ({promise}: BrandsTableProps) => {
     const {data, pageCount} = use(promise)
 
-    console.log(data)
     const columns = getBranchTableColumns()
 
     const { table } = useDataTable({

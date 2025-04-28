@@ -1,6 +1,6 @@
 import { Brand } from '@/types/brands';
-import { preisLabels, designLabels, bekannheitLabels, sortimentsbreiteLabels, positionierungLabels } from '@/utils/scales';
 import { useState } from 'react';
+import {priceLabels} from "@/utils/scales";
 
 interface BrandDetailsProps {
   brand: Brand;
@@ -61,7 +61,7 @@ export default function BrandDetails({ brand }: BrandDetailsProps) {
                   <h4 className="font-medium text-gray-900">Preis</h4>
                   <div className="text-yellow-500">{'★'.repeat(brand.Preis)}{'☆'.repeat(5 - brand.Preis)}</div>
                 </div>
-                <p className="text-sm text-gray-600">{preisLabels[brand.Preis]}</p>
+                <p className="text-sm text-gray-600">{priceLabels[brand.Preis]}</p>
               </div>
 
               {/* Design */}
@@ -70,7 +70,7 @@ export default function BrandDetails({ brand }: BrandDetailsProps) {
                   <h4 className="font-medium text-gray-900">Design</h4>
                   <div className="text-yellow-500">{'★'.repeat(brand.Design)}{'☆'.repeat(5 - brand.Design)}</div>
                 </div>
-                <p className="text-sm text-gray-600">{designLabels[brand.Design]}</p>
+                <p className="text-sm text-gray-600">{priceLabels[brand.Design]}</p>
               </div>
 
               {/* Bekanntheit */}
@@ -79,7 +79,7 @@ export default function BrandDetails({ brand }: BrandDetailsProps) {
                   <h4 className="font-medium text-gray-900">Bekanntheit</h4>
                   <div className="text-yellow-500">{'★'.repeat(brand.Bekanntheit)}{'☆'.repeat(5 - brand.Bekanntheit)}</div>
                 </div>
-                <p className="text-sm text-gray-600">{bekannheitLabels[brand.Bekanntheit]}</p>
+                <p className="text-sm text-gray-600">{priceLabels[brand.Bekanntheit]}</p>
               </div>
 
               {/* Sortimentsbreite */}
@@ -88,7 +88,7 @@ export default function BrandDetails({ brand }: BrandDetailsProps) {
                   <h4 className="font-medium text-gray-900">Sortimentsbreite</h4>
                   <div className="text-yellow-500">{'★'.repeat(brand.Sortimentsbreite)}{'☆'.repeat(5 - brand.Sortimentsbreite)}</div>
                 </div>
-                <p className="text-sm text-gray-600">{sortimentsbreiteLabels[brand.Sortimentsbreite]}</p>
+                <p className="text-sm text-gray-600">{priceLabels[brand.Sortimentsbreite]}</p>
               </div>
 
               {/* Positionierung */}
@@ -97,7 +97,7 @@ export default function BrandDetails({ brand }: BrandDetailsProps) {
                   <h4 className="font-medium text-gray-900">Positionierung</h4>
                   <div className="text-yellow-500">{'★'.repeat(brand.Positionierung)}{'☆'.repeat(3 - brand.Positionierung)}</div>
                 </div>
-                <p className="text-sm text-gray-600">{positionierungLabels[brand.Positionierung]}</p>
+                <p className="text-sm text-gray-600">{priceLabels[brand.Positionierung]}</p>
               </div>
             </div>
           </section>
