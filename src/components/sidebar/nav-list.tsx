@@ -5,7 +5,7 @@ import {
     Forward,
     MoreHorizontal,
     Trash2,
-    GalleryVerticalEnd
+    GalleryVerticalEnd, CogIcon
 } from "lucide-react"
 
 import {
@@ -30,6 +30,11 @@ const data = [
         name: "Alle Marken",
         url: "/dashboard/brands",
         icon: GalleryVerticalEnd,
+    },
+    {
+        name: "Configure",
+        url: "/dashboard/configure",
+        icon: CogIcon,
     },
 ]
 
