@@ -3,10 +3,24 @@ import {db} from "@/db";
 import {AIModelItem} from "@/app/dashboard/configure/ai-model-item";
 import {AISetting, getAISettings} from "@/db/presets";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
+import {aiModels} from "@/db/schema";
+import {eq} from "drizzle-orm";
 
 export const AIModels = async () => {
     const [AIModels, AISettings] = await Promise.all([
-        db.query.aiModels.findMany(),
+        db.query.aiModels.findMany({
+            where: (
+                eq(aiModels.isActive, true)
+            ),
+            with: {
+                provider: {
+                    columns: {
+                        name: true,
+                        code: true
+                    }
+                }
+            }
+        }),
         getAISettings()
     ])
 
@@ -32,7 +46,11 @@ export const AIModels = async () => {
                     <TableBody>
                         {
                             AIModels.map((model) => (
-                                <AIModelItem key={model.id} model={model} settings={settingsMap.get(model.modelName)!}/>
+                                <AIModelItem
+                                    key={model.id}
+                                    model={model}
+                                    settings={settingsMap.get(model.modelName)!}
+                                />
                             ))
                         }
                     </TableBody>

@@ -5,10 +5,9 @@ import {
 	text,
 	boolean,
 	timestamp,
-	numeric,
 	uuid,
 	varchar,
-	uniqueIndex, pgView
+	uniqueIndex
 } from "drizzle-orm/pg-core"
 
 export const users = pgTable('users', {
@@ -22,6 +21,7 @@ export const brand = pgTable("brands", {
 	name: text().notNull(),
 	price: integer(),
 	quality: integer(),
+	design: integer(),
 	focus: integer(),
 	positioning: integer(),
 	heritage: integer(),
@@ -36,9 +36,17 @@ export const characteristic = pgTable("characteristics", {
 	value: text().notNull(),
 });
 
+export const provider = pgTable("ai_providers", {
+	id: serial('id').primaryKey(),
+	name: text('name').notNull(),
+	code: text().notNull().unique(),
+	key: text('key').notNull(),
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+})
+
 export const aiModels = pgTable('ai_models', {
 	id: serial('id').primaryKey(),
-	provider: text('provider').notNull(),
+	providerId: integer('provider_id').references(() => provider.id).notNull(),
 	modelName: text('model_name').notNull().unique(),
 	name: text('name').notNull(),
 	description: text('description'),
@@ -82,4 +90,7 @@ export type BrandWithCharacteristic = Brand & { characteristic?: Characteristic[
 export type Characteristic = typeof characteristic.$inferSelect;
 export type NewCharacteristic = typeof characteristic.$inferInsert;
 
+export type Provider = typeof provider.$inferSelect
+
 export type AIModel = typeof aiModels.$inferSelect
+export type AIModelWithProvider = AIModel & { provider: Provider }

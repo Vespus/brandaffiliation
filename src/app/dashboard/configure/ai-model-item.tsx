@@ -2,14 +2,21 @@
 
 import {TableCell, TableRow} from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import type {AIModel} from "@/db/schema";
+import type {AIModel, Provider} from "@/db/schema";
 import {useRouter} from "next/navigation";
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
 import {Settings} from "lucide-react";
 import {AISetting} from "@/db/presets";
 
-export const AIModelItem = ({model, settings}: {model: AIModel, settings: AISetting}) => {
+type AIModelItemType = {
+    model: AIModel & {
+       provider: Pick<Provider, "name" | "code">
+    },
+    settings: AISetting
+}
+
+export const AIModelItem = ({model, settings}: AIModelItemType) => {
     const router = useRouter()
 
     const handleModelSelect = () => {
@@ -28,7 +35,7 @@ export const AIModelItem = ({model, settings}: {model: AIModel, settings: AISett
             </TableCell>
             <TableCell>
                 <Badge variant="outline" className="text-xs">
-                    {model.provider}
+                    {model.provider.name}
                 </Badge>
             </TableCell>
             <TableCell>{settings?.temperature}</TableCell>

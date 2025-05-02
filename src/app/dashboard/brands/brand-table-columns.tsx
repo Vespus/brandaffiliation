@@ -107,6 +107,28 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristic>[] {
             enableColumnFilter: true,
         },
         {
+            id: "design",
+            accessorKey: "design",
+            header: ({ column }) => (
+                <DataTableColumnHeader column={column} title="Design" />
+            ),
+            cell: ({ row }) => {
+                return (
+                    <SimpleRating value={row.original.design || 0}>
+                        <span className="text-xs">{qualityLabels[row.original.design || 1]}</span>
+                    </SimpleRating>
+                );
+            },
+            meta: {
+                label: "Design",
+                variant: "range",
+                range: [1, 5],
+                unit: "",
+                icon: StarIcon,
+            },
+            enableColumnFilter: true,
+        },
+        {
             id: "focus",
             accessorKey: "focus",
             header: ({ column }) => (

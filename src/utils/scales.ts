@@ -22,6 +22,18 @@ export const focusLabels: Record<number, string> = {
      5: 'avantgardistisch'
 };
 
+export const designLabels: Record<number, string> = {
+     1: 'total klassisch!',
+     1.5: 'klassisch/traditionell',
+     2: 'klassisch/traditionell',
+     2.5: 'leicht modernisiert',
+     3: 'modern',
+     3.5: 'modisch-trendig!',
+     4: 'modisch-trendig',
+     4.5: 'avantgardistisch!',
+     5: 'avantgardistisch'
+}
+
 export const fameLabels: Record<number, string> = {
      1: 'Nische!',
      1.5: 'klein-regional',

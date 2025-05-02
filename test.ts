@@ -1533,13 +1533,14 @@ async function main() {
                 price: getVal(brand,"Preis"),
                 quality: getVal(brand,"Qualität"),
                 focus: getVal(brand,"Schwerpunkt"),
+                design: getVal(brand,"Design"),
                 positioning: getVal(brand,"Positionierung"),
                 heritage: getVal(brand,"Heritage"),
                 origin: getVal(brand,"Herkunft"),
                 fame: getVal(brand,"Bekanntheit"),
                 sales_volume: getVal(brand,"Umsatz")
             }
-            const [ins] = await sql`insert into brands ${sql(updateQ, 'name', 'price', 'quality', 'focus', 'positioning', 'heritage', 'origin', 'fame', 'sales_volume')} returning *`
+            const [ins] = await sql`insert into brands ${sql(updateQ, 'name', 'price', 'quality', 'focus', 'design', 'positioning', 'heritage', 'origin', 'fame', 'sales_volume')} returning *`
 
             const characteristics = [
                 brand["Kurzcharakteristik 1"],
