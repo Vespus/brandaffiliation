@@ -264,7 +264,14 @@ export const ManageForm = () => {
                                 <span>Complete the form and click <strong>Generate Content</strong> to create SEO text for your fashion category page.</span>
                             </div>
                         ) : (
-                            <Textarea className="max-w-2xl bg-background max-h-[500px]" value={result} onChange={e => setResult(e.target.value)}></Textarea>
+                            <div className="max-w-2xl flex flex-col gap-4">
+                                <div className="font-semibold text-xl flex space-x-2 items-center">
+                                    <Sparkles size={32} className="text-green-500"/>
+                                    <span>Generated Content</span>
+                                </div>
+                                <Textarea className=" bg-background max-h-[500px]" value={result}
+                                          onChange={e => setResult(e.target.value)}></Textarea>
+                            </div>
                         )
                 }
             </div>

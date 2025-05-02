@@ -6,8 +6,13 @@ import {NavHeader} from "@/components/sidebar/nav-header"
 import {NavList} from "@/components/sidebar/nav-list";
 import {Sidebar as SidebarUI, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail} from "@/components/ui/sidebar"
 import {ThemeToggle} from "@/components/theme-toggle";
+import {User} from "@supabase/auth-js";
+import {NavUser} from "@/components/sidebar/nav-user";
 
-export function Sidebar({...props}: React.ComponentProps<typeof SidebarUI>) {
+type SidebarType = React.ComponentProps<typeof SidebarUI> & {
+    user: User
+}
+export function Sidebar({user, ...props}: SidebarType) {
     return (
         <SidebarUI collapsible="icon" {...props}>
             <SidebarHeader>
@@ -17,9 +22,7 @@ export function Sidebar({...props}: React.ComponentProps<typeof SidebarUI>) {
                 <NavList/>
             </SidebarContent>
             <SidebarFooter>
-                <div className="flex items-center justify-center gap-2">
-                    <ThemeToggle/>
-                </div>
+                <NavUser user={user} />
             </SidebarFooter>
             <SidebarRail/>
         </SidebarUI>
