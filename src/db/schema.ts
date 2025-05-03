@@ -7,8 +7,24 @@ import {
 	timestamp,
 	uuid,
 	varchar,
-	uniqueIndex
+	uniqueIndex,
+	primaryKey
 } from "drizzle-orm/pg-core"
+
+export const translations = pgTable('translations', {
+	id: serial('id').notNull(),
+	entityType: varchar('entity_type', { length: 20 }).notNull(),
+	entityId: varchar('entity_id', { length: 50 }).notNull(),
+	langCode: varchar('lang_code', { length: 10 }).notNull(),
+	textValue: text('text_value').notNull(),
+}, (table) => ({
+	pk: primaryKey({ columns: [table.id] }),
+	uniqueConstraint: uniqueIndex('translations_entity_type_entity_id_lang_code_key').on(
+		table.entityType, 
+		table.entityId, 
+		table.langCode
+	)
+}));
 
 export const users = pgTable('users', {
 	id: uuid('id').primaryKey(),
@@ -94,3 +110,6 @@ export type Provider = typeof provider.$inferSelect
 
 export type AIModel = typeof aiModels.$inferSelect
 export type AIModelWithProvider = AIModel & { provider: Provider }
+
+export type Translation = typeof translations.$inferSelect
+export type NewTranslation = typeof translations.$inferInsert

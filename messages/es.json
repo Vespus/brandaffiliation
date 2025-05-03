@@ -1,0 +1,19 @@
+{
+  "app": {
+    "title": "Afiliación de Marca",
+    "description": "Gestiona tus afiliaciones de marca"
+  },
+  "common": {
+    "welcome": "Bienvenido",
+    "loading": "Cargando...",
+    "error": "Ha ocurrido un error",
+    "success": "Éxito"
+  },
+  "auth": {
+    "signIn": "Iniciar Sesión",
+    "signUp": "Registrarse",
+    "signOut": "Cerrar Sesión",
+    "email": "Correo Electrónico",
+    "password": "Contraseña"
+  }
+}

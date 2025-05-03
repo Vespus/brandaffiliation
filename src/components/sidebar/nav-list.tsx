@@ -7,7 +7,8 @@ import {
     Trash2,
     GalleryVerticalEnd,
     CogIcon,
-    SparklesIcon
+    SparklesIcon,
+    Languages
 } from "lucide-react"
 
 import {
@@ -42,6 +43,11 @@ const data = [
         name: "Configure",
         url: "/dashboard/configure",
         icon: CogIcon,
+    },
+    {
+        name: "Translations",
+        url: "/dashboard/translations",
+        icon: Languages,
     },
 ]
 

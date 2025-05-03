@@ -1,7 +1,7 @@
 import {createTRPCRouter, publicProcedure} from "@/lib/trpc/trpc";
 import {db} from "@/db";
 import {eq} from "drizzle-orm";
-import {aiModels, brand as brandTable, BrandWithCharacteristic} from "@/db/schema";
+import {aiModels, brand as brandTable, BrandWithCharacteristic, translations} from "@/db/schema";
 import {z} from "zod";
 import {AISetting, getAISettings} from "@/db/presets";
 import {formatPrompt} from "@/app/api/completion/utils";
@@ -70,5 +70,10 @@ export const genericRoute = createTRPCRouter({
                 brand: brand as BrandWithCharacteristic,
                 prompt: settings.prompt
             })
-        })
+        }),
+    getTranslationById: publicProcedure
+        .input(z.object({id: z.number()}))
+        .query(async ({input}) => {
+            return await db.query.translations.findFirst({where: eq(translations.id, input.id)})
+        }),
 })
