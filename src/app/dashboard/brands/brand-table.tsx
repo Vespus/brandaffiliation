@@ -25,8 +25,10 @@ export const BrandTable = ({promise}: BrandsTableProps) => {
         meta: { t },
         columns,
         pageCount,
+        enableColumnPinning: true,
         initialState: {
             sorting: [{ id: "name", desc: false }],
+            columnPinning: {left: ["name"]},
         },
         shallow: false,
         clearOnDefault: true,

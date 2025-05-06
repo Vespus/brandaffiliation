@@ -1,16 +1,17 @@
 "use client";
 
-import type { Column, Table } from "@tanstack/react-table";
-import { X } from "lucide-react";
+import type {Column, Table} from "@tanstack/react-table";
+import {X} from "lucide-react";
 import * as React from "react";
 
-import { DataTableDateFilter } from "@/components/datatable/data-table-date-filter";
-import { DataTableFacetedFilter } from "@/components/datatable/data-table-faceted-filter";
-import { DataTableSliderFilter } from "@/components/datatable/data-table-slider-filter";
-import { DataTableViewOptions } from "@/components/datatable/data-table-view-options";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import {DataTableDateFilter} from "@/components/datatable/data-table-date-filter";
+import {DataTableFacetedFilter} from "@/components/datatable/data-table-faceted-filter";
+import {DataTableSliderFilter} from "@/components/datatable/data-table-slider-filter";
+import {DataTableViewOptions} from "@/components/datatable/data-table-view-options";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {cn} from "@/lib/utils";
+import {useTranslations} from "next-intl";
 
 interface DataTableToolbarProps<TData> extends React.ComponentProps<"div"> {
     table: Table<TData>;
@@ -45,7 +46,7 @@ export function DataTableToolbar<TData>({
         >
             <div className="flex flex-1 flex-wrap items-center gap-2">
                 {columns.map((column) => (
-                    <DataTableToolbarFilter key={column.id} column={column} />
+                    <DataTableToolbarFilter key={column.id} column={column}/>
                 ))}
                 {isFiltered && (
                     <Button
@@ -55,18 +56,19 @@ export function DataTableToolbar<TData>({
                         className="border-dashed"
                         onClick={onReset}
                     >
-                        <X />
+                        <X/>
                         Reset
                     </Button>
                 )}
             </div>
             <div className="flex items-center gap-2">
                 {children}
-                <DataTableViewOptions table={table} />
+                <DataTableViewOptions table={table}/>
             </div>
         </div>
     );
 }
+
 interface DataTableToolbarFilterProps<TData> {
     column: Column<TData>;
 }
@@ -76,6 +78,8 @@ function DataTableToolbarFilter<TData>({
                                        }: DataTableToolbarFilterProps<TData>) {
     {
         const columnMeta = column.columnDef.meta;
+        const t = useTranslations()
+        const label = columnMeta?.labelHasTranslation && columnMeta.label ? t(columnMeta.label) : column.id
 
         const onFilterRender = React.useCallback(() => {
             if (!columnMeta?.variant) return null;
@@ -103,9 +107,10 @@ function DataTableToolbarFilter<TData>({
                                 className={cn("h-8 w-[120px]", columnMeta.unit && "pr-8")}
                             />
                             {columnMeta.unit && (
-                                <span className="absolute top-0 right-0 bottom-0 flex items-center rounded-r-md bg-accent px-2 text-muted-foreground text-sm">
-                  {columnMeta.unit}
-                </span>
+                                <span
+                                    className="absolute top-0 right-0 bottom-0 flex items-center rounded-r-md bg-accent px-2 text-muted-foreground text-sm">
+                                  {columnMeta.unit}
+                                </span>
                             )}
                         </div>
                     );
@@ -114,7 +119,7 @@ function DataTableToolbarFilter<TData>({
                     return (
                         <DataTableSliderFilter
                             column={column}
-                            title={columnMeta.label ?? column.id}
+                            title={label}
                         />
                     );
 
@@ -123,7 +128,7 @@ function DataTableToolbarFilter<TData>({
                     return (
                         <DataTableDateFilter
                             column={column}
-                            title={columnMeta.label ?? column.id}
+                            title={label}
                             multiple={columnMeta.variant === "dateRange"}
                         />
                     );
@@ -133,7 +138,7 @@ function DataTableToolbarFilter<TData>({
                     return (
                         <DataTableFacetedFilter
                             column={column}
-                            title={columnMeta.label ?? column.id}
+                            title={label}
                             options={columnMeta.options ?? []}
                             multiple={columnMeta.variant === "multiSelect"}
                         />

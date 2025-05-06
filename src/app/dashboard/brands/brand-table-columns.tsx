@@ -14,7 +14,7 @@ import {SimpleRating} from "@/components/ui/simple-rating";
 
 declare module '@tanstack/react-table' {
     interface TableMeta<TData extends RowData> {
-        t: (id: string) => void;
+        t: (id: string) => string;
     }
 }
 
@@ -23,12 +23,13 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristicAndSca
         {
             id: "name",
             accessorKey: "name",
-            header: ({column}) => (
-                <DataTableColumnHeader column={column} title="Marke"/>
+            header: ({column, table: {options: {meta}}}) => (
+                <DataTableColumnHeader column={column} title={meta!.t("brand.label")!}/>
             ),
             cell: ({row}) => <div className="min-w-20 font-semibold">{row.getValue("name")}</div>,
             enableSorting: true,
             enableHiding: false,
+            enablePinning: true,
             meta: {
                 label: "Brand Title",
                 placeholder: "Search brands...",
@@ -66,13 +67,12 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristicAndSca
             ),
             cell: ({row}) => {
                 return (
-                    <SimpleRating value={row.original.price || 0}>
-                        {/*<span className="text-xs">{priceLabels[row.original.price || 1]}</span>*/}
-                    </SimpleRating>
+                    <SimpleRating value={row.original.price || 0} scale="price" />
                 );
             },
             meta: {
-                label: "Preis",
+                label: "scale.price",
+                labelHasTranslation: true,
                 variant: "range",
                 range: [1, 5],
                 unit: "",
@@ -88,13 +88,12 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristicAndSca
             ),
             cell: ({row}) => {
                 return (
-                    <SimpleRating value={row.original.quality || 0}>
-                        {/*<span className="text-xs">{qualityLabels[row.original.quality || 1]}</span>*/}
-                    </SimpleRating>
+                    <SimpleRating value={row.original.quality || 0} scale="quality" />
                 );
             },
             meta: {
-                label: "Qualität",
+                label: "scale.quality",
+                labelHasTranslation: true,
                 variant: "range",
                 range: [1, 5],
                 unit: "",
@@ -110,13 +109,12 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristicAndSca
             ),
             cell: ({row}) => {
                 return (
-                    <SimpleRating value={row.original.design || 0}>
-                        {/*<span className="text-xs">{qualityLabels[row.original.design || 1]}</span>*/}
-                    </SimpleRating>
+                    <SimpleRating value={row.original.design || 0} scale="design" />
                 );
             },
             meta: {
-                label: "Design",
+                label: "scale.design",
+                labelHasTranslation: true,
                 variant: "range",
                 range: [1, 5],
                 unit: "",
@@ -132,13 +130,12 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristicAndSca
             ),
             cell: ({row}) => {
                 return (
-                    <SimpleRating value={row.original.focus || 0}>
-                        {/*<span className="text-xs">{focusLabels[row.original.focus || 1]}</span>*/}
-                    </SimpleRating>
+                    <SimpleRating value={row.original.focus || 0} scale="focus" />
                 );
             },
             meta: {
-                label: "Schwerpunkt",
+                label: "scale.focus",
+                labelHasTranslation: true,
                 variant: "range",
                 range: [1, 5],
                 unit: "",
@@ -154,13 +151,12 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristicAndSca
             ),
             cell: ({row}) => {
                 return (
-                    <SimpleRating value={row.original.positioning || 0}>
-                        {/*<span className="text-xs">{positioningLabels[row.original.positioning || 1]}</span>*/}
-                    </SimpleRating>
+                    <SimpleRating value={row.original.positioning || 0} scale="positioning" />
                 );
             },
             meta: {
-                label: "Positionierung",
+                label: "scale.positioning",
+                labelHasTranslation: true,
                 variant: "range",
                 range: [1, 5],
                 unit: "",
@@ -176,13 +172,12 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristicAndSca
             ),
             cell: ({row}) => {
                 return (
-                    <SimpleRating value={row.original.recognition || 0}>
-                        {/*<span className="text-xs">{fameLabels[row.original.fame || 1]}</span>*/}
-                    </SimpleRating>
+                    <SimpleRating value={row.original.recognition || 0} scale="recognition" />
                 );
             },
             meta: {
-                label: "Bekanntheit",
+                label: "scale.recognition",
+                labelHasTranslation: true,
                 variant: "range",
                 range: [1, 5],
                 unit: "",
@@ -198,13 +193,12 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristicAndSca
             ),
             cell: ({row}) => {
                 return (
-                    <SimpleRating value={row.original.heritage || 0}>
-                        {/*<span className="text-xs">{heritageLabels[row.original.heritage || 1]}</span>*/}
-                    </SimpleRating>
+                    <SimpleRating value={row.original.heritage || 0} scale="heritage" />
                 );
             },
             meta: {
-                label: "Heritage",
+                label: "scale.heritage",
+                labelHasTranslation: true,
                 variant: "range",
                 range: [1, 5],
                 unit: "",
@@ -220,13 +214,12 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristicAndSca
             ),
             cell: ({row}) => {
                 return (
-                    <SimpleRating value={row.original.origin || 0}>
-                        {/*<span className="text-xs">{originLabels[row.original.origin || 1]}</span>*/}
-                    </SimpleRating>
+                    <SimpleRating value={row.original.origin || 0} scale="origin" />
                 );
             },
             meta: {
                 label: "scale.origin",
+                labelHasTranslation: true,
                 variant: "range",
                 range: [1, 5],
                 unit: "",
@@ -242,13 +235,12 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristicAndSca
             ),
             cell: ({row}) => {
                 return (
-                    <SimpleRating value={row.original.revenue || 0}>
-                        {/* <span className="text-xs">{salesVolumeLabels[row.original.sales_volume || 1]}</span>*/}
-                    </SimpleRating>
+                    <SimpleRating value={row.original.revenue || 0} scale="revenue" />
                 );
             },
             meta: {
-                label: "Umsatz",
+                label: "scale.revenue",
+                labelHasTranslation: true,
                 variant: "range",
                 range: [1, 5],
                 unit: "",
@@ -258,3 +250,4 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristicAndSca
         },
     ];
 }
+

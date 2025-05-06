@@ -1,9 +1,9 @@
 import {getRequestConfig} from 'next-intl/server';
-import { getTranslations, defaultTranslations } from './translations';
+import {getTranslations, defaultTranslations} from './translations';
 import {cookies, headers} from "next/headers";
 
 // Define supported locales
-const supportedLocales = ['en', 'es'];
+const supportedLocales = ['en', "de", 'es'];
 
 // Helper function to check if a locale is supported
 const isLocaleSupported = (locale: string | undefined | null): boolean => {
@@ -23,8 +23,7 @@ export default getRequestConfig(async () => {
 
     if (isLocaleSupported(cookieLocale)) {
         locale = cookieLocale!;
-    } 
-    else if (isLocaleSupported(browserLocale)) {
+    } else if (isLocaleSupported(browserLocale)) {
         locale = browserLocale!;
     }
 
@@ -32,7 +31,7 @@ export default getRequestConfig(async () => {
         const messages = await getTranslations(locale);
 
         const finalMessages = Object.keys(messages).length > 0
-            ? messages 
+            ? messages
             : defaultTranslations;
 
         return {
