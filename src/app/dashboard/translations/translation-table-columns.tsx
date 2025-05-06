@@ -2,7 +2,7 @@
 
 import { Translation } from "@/db/schema";
 import type { ColumnDef } from "@tanstack/react-table";
-import { Text, Globe, Hash, FileText, Pencil, Trash2 } from "lucide-react";
+import {Text, Hash, FileText, Pencil, Trash2} from "lucide-react";
 import * as React from "react";
 
 import { DataTableColumnHeader } from "@/components/datatable/data-table-column-header";
@@ -59,9 +59,16 @@ export function getTranslationTableColumns(
             enableHiding: false,
             meta: {
                 label: "Language",
-                placeholder: "Search languages...",
-                variant: "text",
-                icon: Globe,
+                variant: "multiSelect",
+                options: [
+                    {label: 'English', value: 'en'},
+                    {label: 'German', value: 'de'},
+                    {label: 'Spanish', value: 'es'},
+                    {label: 'French', value: 'fr'},
+                    {label: 'Italian', value: 'it'},
+                    {label: 'Portuguese', value: 'pt'},
+                    {label: 'Dutch', value: 'nl'},
+                ],
             },
             enableColumnFilter: true
         },

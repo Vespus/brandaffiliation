@@ -4,7 +4,9 @@ import {ThemeProvider} from "next-themes";
 import {NuqsAdapter} from "nuqs/adapters/next/app";
 import {TRPCReactProvider} from "@/lib/trpc/react";
 import {Toaster} from "@/components/ui/sonner"
+import {getLocale} from 'next-intl/server';
 import "./globals.css";
+import {NextIntlClientProvider} from "next-intl";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -21,32 +23,36 @@ export const metadata: Metadata = {
     description: "Entdecken Sie die Vielfalt der Markenwelt",
 };
 
-export default function RootLayout({
-                                       children,
-                                   }: Readonly<{
+export default async function RootLayout({
+                                             children,
+                                         }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const locale = await getLocale();
+
     return (
         <html
-            lang="de"
+            lang={locale}
             suppressHydrationWarning
             className={`${geistSans.variable} ${geistMono.variable}`}
         >
         <body className="bg-background text-foreground">
-        <TRPCReactProvider>
-            <NuqsAdapter>
-                <ThemeProvider
-                    attribute="class"
-                    defaultTheme="system"
-                    enableSystem
-                >
-                    <div className="flex min-h-screen flex-col">
-                        {children}
-                    </div>
-                    <Toaster richColors/>
-                </ThemeProvider>
-            </NuqsAdapter>
-        </TRPCReactProvider>
+        <NextIntlClientProvider>
+            <TRPCReactProvider>
+                <NuqsAdapter>
+                    <ThemeProvider
+                        attribute="class"
+                        defaultTheme="system"
+                        enableSystem
+                    >
+                        <div className="flex min-h-screen flex-col">
+                            {children}
+                        </div>
+                        <Toaster richColors/>
+                    </ThemeProvider>
+                </NuqsAdapter>
+            </TRPCReactProvider>
+        </NextIntlClientProvider>
         </body>
         </html>
     );

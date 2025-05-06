@@ -1,6 +1,6 @@
 "use client";
 
-import {BrandWithCharacteristic} from "@/db/schema";
+import {BrandWithCharacteristic, BrandWithCharacteristicAndScales} from "@/db/schema";
 import type { Table } from "@tanstack/react-table";
 import { Download } from "lucide-react";
 import * as React from "react";
@@ -15,7 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { exportTableToCSV } from "@/lib/datatable/export";
 
 interface BrandTableActionBarProps {
-    table: Table<BrandWithCharacteristic>;
+    table: Table<BrandWithCharacteristicAndScales>;
 }
 
 export function BrandTableActionBar({ table }: BrandTableActionBarProps) {

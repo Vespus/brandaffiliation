@@ -1,35 +1,32 @@
 "use client";
 
-import {BrandWithCharacteristic} from "@/db/schema";
-import type { ColumnDef } from "@tanstack/react-table";
+import {BrandWithCharacteristicAndScales} from "@/db/schema";
+import {ColumnDef, RowData} from "@tanstack/react-table";
 import {
-    ArrowBigRightDash, StarIcon,
+    ArrowBigRightDash,
+    StarIcon,
     Text,
 } from "lucide-react";
 import * as React from "react";
 
-import { DataTableColumnHeader } from "@/components/datatable/data-table-column-header";
+import {DataTableColumnHeader} from "@/components/datatable/data-table-column-header";
 import {SimpleRating} from "@/components/ui/simple-rating";
-import {
-    fameLabels,
-    focusLabels,
-    heritageLabels,
-    originLabels,
-    positioningLabels,
-    priceLabels,
-    qualityLabels,
-    salesVolumeLabels,
-} from "@/utils/scales";
 
-export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristic>[] {
+declare module '@tanstack/react-table' {
+    interface TableMeta<TData extends RowData> {
+        t: (id: string) => void;
+    }
+}
+
+export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristicAndScales>[] {
     return [
         {
             id: "name",
             accessorKey: "name",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Marke" />
+            header: ({column}) => (
+                <DataTableColumnHeader column={column} title="Marke"/>
             ),
-            cell: ({ row }) => <div className="min-w-20 font-semibold">{row.getValue("name")}</div>,
+            cell: ({row}) => <div className="min-w-20 font-semibold">{row.getValue("name")}</div>,
             enableSorting: true,
             enableHiding: false,
             meta: {
@@ -43,16 +40,16 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristic>[] {
         {
             id: "characteristic",
             accessorKey: "characteristic",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Charakteristik" />
+            header: ({column}) => (
+                <DataTableColumnHeader column={column} title="Charakteristik"/>
             ),
-            cell: ({ row }) => {
+            cell: ({row}) => {
                 const characteristics = row.original.characteristic
                 return (
                     <div className="flex flex-col gap-2">
                         {characteristics?.map(char => (
                             <div key={char.id} className="flex gap-2 items-center text-xs">
-                                <ArrowBigRightDash size={12} />
+                                <ArrowBigRightDash size={12}/>
                                 <span>{char.value}</span>
                             </div>
                         ))}
@@ -64,14 +61,13 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristic>[] {
         },
         {
             id: "price",
-            accessorKey: "price",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Preis" />
+            header: ({column, table: {options: {meta}}}) => (
+                <DataTableColumnHeader column={column} title={meta?.t("scale.price") || "Price"}/>
             ),
-            cell: ({ row }) => {
+            cell: ({row}) => {
                 return (
                     <SimpleRating value={row.original.price || 0}>
-                        <span className="text-xs">{priceLabels[row.original.price || 1]}</span>
+                        {/*<span className="text-xs">{priceLabels[row.original.price || 1]}</span>*/}
                     </SimpleRating>
                 );
             },
@@ -87,13 +83,13 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristic>[] {
         {
             id: "quality",
             accessorKey: "quality",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Qualität" />
+            header: ({column, table: {options: {meta}}}) => (
+                <DataTableColumnHeader column={column} title={meta?.t("scale.quality") || "Quality"}/>
             ),
-            cell: ({ row }) => {
+            cell: ({row}) => {
                 return (
                     <SimpleRating value={row.original.quality || 0}>
-                        <span className="text-xs">{qualityLabels[row.original.quality || 1]}</span>
+                        {/*<span className="text-xs">{qualityLabels[row.original.quality || 1]}</span>*/}
                     </SimpleRating>
                 );
             },
@@ -109,13 +105,13 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristic>[] {
         {
             id: "design",
             accessorKey: "design",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Design" />
+            header: ({column, table: {options: {meta}}}) => (
+                <DataTableColumnHeader column={column} title={meta?.t("scale.design") || "Design"}/>
             ),
-            cell: ({ row }) => {
+            cell: ({row}) => {
                 return (
                     <SimpleRating value={row.original.design || 0}>
-                        <span className="text-xs">{qualityLabels[row.original.design || 1]}</span>
+                        {/*<span className="text-xs">{qualityLabels[row.original.design || 1]}</span>*/}
                     </SimpleRating>
                 );
             },
@@ -131,13 +127,13 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristic>[] {
         {
             id: "focus",
             accessorKey: "focus",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Schwerpunkt" />
+            header: ({column, table: {options: {meta}}}) => (
+                <DataTableColumnHeader column={column} title={meta?.t("scale.focus") || "Focus"}/>
             ),
-            cell: ({ row }) => {
+            cell: ({row}) => {
                 return (
                     <SimpleRating value={row.original.focus || 0}>
-                        <span className="text-xs">{focusLabels[row.original.focus || 1]}</span>
+                        {/*<span className="text-xs">{focusLabels[row.original.focus || 1]}</span>*/}
                     </SimpleRating>
                 );
             },
@@ -153,13 +149,13 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristic>[] {
         {
             id: "positioning",
             accessorKey: "positioning",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Positionierung" />
+            header: ({column, table: {options: {meta}}}) => (
+                <DataTableColumnHeader column={column} title={meta?.t("scale.positioning") || "Positioning"}/>
             ),
-            cell: ({ row }) => {
+            cell: ({row}) => {
                 return (
                     <SimpleRating value={row.original.positioning || 0}>
-                        <span className="text-xs">{positioningLabels[row.original.positioning || 1]}</span>
+                        {/*<span className="text-xs">{positioningLabels[row.original.positioning || 1]}</span>*/}
                     </SimpleRating>
                 );
             },
@@ -173,15 +169,15 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristic>[] {
             enableColumnFilter: true,
         },
         {
-            id: "fame",
-            accessorKey: "fame",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Bekanntheit" />
+            id: "recognition",
+            accessorKey: "recognition",
+            header: ({column, table: {options: {meta}}}) => (
+                <DataTableColumnHeader column={column} title={meta?.t("scale.recognition") || "Recognition"}/>
             ),
-            cell: ({ row }) => {
+            cell: ({row}) => {
                 return (
-                    <SimpleRating value={row.original.fame || 0}>
-                        <span className="text-xs">{fameLabels[row.original.fame || 1]}</span>
+                    <SimpleRating value={row.original.recognition || 0}>
+                        {/*<span className="text-xs">{fameLabels[row.original.fame || 1]}</span>*/}
                     </SimpleRating>
                 );
             },
@@ -197,13 +193,13 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristic>[] {
         {
             id: "heritage",
             accessorKey: "heritage",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Heritage" />
+            header: ({column, table: {options: {meta}}}) => (
+                <DataTableColumnHeader column={column} title={meta?.t("scale.heritage") || "Heritage"}/>
             ),
-            cell: ({ row }) => {
+            cell: ({row}) => {
                 return (
                     <SimpleRating value={row.original.heritage || 0}>
-                        <span className="text-xs">{heritageLabels[row.original.heritage || 1]}</span>
+                        {/*<span className="text-xs">{heritageLabels[row.original.heritage || 1]}</span>*/}
                     </SimpleRating>
                 );
             },
@@ -219,18 +215,18 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristic>[] {
         {
             id: "origin",
             accessorKey: "origin",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Herkunft" />
+            header: ({column, table: {options: {meta}}}) => (
+                <DataTableColumnHeader column={column} title={meta?.t("scale.origin") || "Origin"}/>
             ),
-            cell: ({ row }) => {
+            cell: ({row}) => {
                 return (
                     <SimpleRating value={row.original.origin || 0}>
-                        <span className="text-xs">{originLabels[row.original.origin || 1]}</span>
+                        {/*<span className="text-xs">{originLabels[row.original.origin || 1]}</span>*/}
                     </SimpleRating>
                 );
             },
             meta: {
-                label: "Herkunft",
+                label: "scale.origin",
                 variant: "range",
                 range: [1, 5],
                 unit: "",
@@ -239,15 +235,15 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristic>[] {
             enableColumnFilter: true,
         },
         {
-            id: "sales_volume",
-            accessorKey: "sales_volume",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Umsatz" />
+            id: "revenue",
+            accessorKey: "revenue",
+            header: ({column, table: {options: {meta}}}) => (
+                <DataTableColumnHeader column={column} title={meta?.t("scale.revenue") || "Revenue"}/>
             ),
-            cell: ({ row }) => {
+            cell: ({row}) => {
                 return (
-                    <SimpleRating value={row.original.sales_volume || 0}>
-                        <span className="text-xs">{salesVolumeLabels[row.original.sales_volume || 1]}</span>
+                    <SimpleRating value={row.original.revenue || 0}>
+                        {/* <span className="text-xs">{salesVolumeLabels[row.original.sales_volume || 1]}</span>*/}
                     </SimpleRating>
                 );
             },

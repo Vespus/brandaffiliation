@@ -8,6 +8,7 @@ import { use } from "react";
 import {useDataTable} from "@/hooks/use-data-table";
 import {getBranchTableColumns} from "@/app/dashboard/brands/brand-table-columns";
 import {DataTableToolbar} from "@/components/datatable/data-table-toolbar";
+import {useTranslations} from "next-intl";
 
 interface BrandsTableProps {
     promise: Promise<Awaited<ReturnType<typeof getBrands>>>
@@ -15,11 +16,13 @@ interface BrandsTableProps {
 
 export const BrandTable = ({promise}: BrandsTableProps) => {
     const {data, pageCount} = use(promise)
+    const t = useTranslations()
 
     const columns = getBranchTableColumns()
 
     const { table } = useDataTable({
-        data: data,
+        data: data.brands,
+        meta: { t },
         columns,
         pageCount,
         initialState: {
