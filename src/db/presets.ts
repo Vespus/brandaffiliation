@@ -1,18 +1,14 @@
 import {createClient} from "@/db/supabase";
 import {db} from "@/db/index";
-import {and, eq, sql} from "drizzle-orm";
-import {aiSettingsDefault, aiSettingsUser} from "@/db/schema";
-
-export type AISetting = {
-    id: number,
-    model: string;
-    temperature: number;
-    topP: number;
-    maxTokens: number;
-    frequencyPenalty: number;
-    presencePenalty: number;
-    prompt: string;
-}
+import {and, eq, getTableColumns, inArray, sql} from "drizzle-orm";
+import {
+    aiModels,
+    AIModelWithProviderAndSettings,
+    AISetting,
+    aiSettingsDefault,
+    aiSettingsUser, Provider,
+    provider
+} from "@/db/schema";
 
 export const getAISettings = async (model?: string) => {
     const user = await (await createClient()).auth.getUser();
@@ -67,4 +63,27 @@ export const getDefaultSettings = async (model?: string) => {
     }
 
     return result as AISetting[] || null
+}
+
+export const getAIModelsWithProviderAndSettings = async (models: number[]) : Promise<AIModelWithProviderAndSettings[]> => {
+    const user = await (await createClient()).auth.getUser();
+
+    const query = db
+        .select({
+            ...getTableColumns(aiModels),
+            provider: sql<Provider>`jsonb_build_object('id', ${provider.id},'name', ${provider.name},'code', ${provider.code},'key', ${provider.key},'createdAt', ${provider.createdAt})`,
+            settings: sql<AISetting>`jsonb_build_object('model', ${aiSettingsDefault.model},'temperature', COALESCE(${aiSettingsUser.temperature}, ${aiSettingsDefault.temperature}),'topP', COALESCE(${aiSettingsUser.topP}, ${aiSettingsDefault.topP}),'maxTokens', COALESCE(${aiSettingsUser.maxTokens}, ${aiSettingsDefault.maxTokens}),'frequencyPenalty', COALESCE(${aiSettingsUser.frequencyPenalty}, ${aiSettingsDefault.frequencyPenalty}),'presencePenalty', COALESCE(${aiSettingsUser.presencePenalty}, ${aiSettingsDefault.presencePenalty}),'prompt', COALESCE(${aiSettingsUser.prompt}, ${aiSettingsDefault.prompt}))`})
+        .from(aiModels)
+        .innerJoin(aiSettingsDefault, eq(aiModels.modelName, aiSettingsDefault.model))
+        .leftJoin(
+            aiSettingsUser,
+            and(
+                eq(aiSettingsDefault.model, aiSettingsUser.model),
+                !user.error ? eq(aiSettingsUser.userId, user.data.user.id) : undefined
+            )
+        )
+        .innerJoin(provider, eq(aiModels.providerId, provider.id))
+        .where(inArray(aiModels.id, models));
+
+    return await query;
 }

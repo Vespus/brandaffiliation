@@ -10,19 +10,41 @@ import {Stepper, StepperIndicator, StepperItem, StepperSeparator, StepperTrigger
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
 import {AnimatePresence, motion} from "motion/react";
 import {BrandSelect} from "@/app/dashboard/content-generation/form-elements/brand-select";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {Textarea} from "@/components/ui/textarea";
 import {Button} from "@/components/ui/button";
-import {ArrowLeft, ArrowRight, Sparkles} from "lucide-react";
+import {ArrowLeft, ArrowRight, CloudRainIcon, Sparkles, SunIcon} from "lucide-react";
 import {CategorySelect} from "@/app/dashboard/content-generation/form-elements/category-select";
 import {AIModelSelect} from "@/app/dashboard/content-generation/form-elements/ai-model-select";
-import {useCompletion} from "@ai-sdk/react";
-import {useMutation} from "@tanstack/react-query";
 import {PromptArea} from "@/app/dashboard/content-generation/form-elements/prompt-area";
-import {ResultEditor} from "@/app/dashboard/content-generation/form-elements/result-editor";
+import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
+import {useCustomAction} from "@/hooks/use-custom-action";
+import {CompletionStream} from "@/app/dashboard/content-generation/actions";
+import {readStreamableValue} from "ai/rsc";
+import {useContentGenerationStore} from "@/app/dashboard/content-generation/store";
+import { GeneratedContentView } from "@/app/dashboard/content-generation/generated-content-view";
 
 
 const steps = [1, 2]
+const defaultSystemPrompt = `Erstelle einen SEO-optimierten Produktkategorietext für {category} von {brand} für die {season}-Saison mit ca. 200–250 Wörtern.
+
+1. Verwende deine eigenen Kenntnisse über die Marke als Basis.
+2. Als Ergänzung dienen dir diese Informationen:
+{brandFeatures}
+
+Textstruktur:
+1. Einleitung (1–2 Sätze): 
+   - Prägnante Vorstellung der Marke mit Bezug auf die Kategorie
+   - Idealerweise eine prägnante Headline, gefolgt vom eigentlichen Text
+
+2. Hauptteil (3–4 Absätze):
+   - Verbinde die Kernwerte der Marke logisch mit der Produktkategorie
+   - Fokussiere auf die Designsprache und Ästhetik statt auf technische Details
+   - Beschreibe die typischen Stilmerkmale dieser Marke in der Kategorie
+   - Erkläre, für welche Anlässe und zu welchen Outfits die Produkte ideal passen
+
+3. Abschluss (1–2 Sätze): 
+   - Call-to-Action zum Entdecken bei Herrenausstatter
+`
 
 export const ManageForm = () => {
     const form = useForm<z.infer<typeof ContentGenerateSchema>>({
@@ -30,45 +52,28 @@ export const ManageForm = () => {
         defaultValues: {
             brand: undefined,
             category: "",
-            season: "",
-            aiModel: undefined,
-            customPrompt: "",
+            season: "Spring/Summer",
+            aiModel: [],
+            customPrompt: defaultSystemPrompt,
         },
     })
     const [currentStep, setCurrentStep] = useState(1)
-    const [result, setResult] = useState("")
     const [brand, season, category] = form.watch(["brand", "season", "category"])
     const isStep1Valid = ContentGenerationStep1Schema.safeParse({brand, season, category}).success
-    const mutate = useMutation({
-        mutationKey: ["completion", brand, season, category],
-        mutationFn: async (values: z.infer<typeof ContentGenerateSchema>) => {
-            const response = await fetch("/api/completion", {
-                method: "POST",
-                body: JSON.stringify(values),
-            })
-
-            if (!response.body) {
-                setResult('No response')
-                return
-            }
-
-            const reader = response.body.getReader()
-            const decoder = new TextDecoder()
-            let done = false
-
-            while (!done) {
-                const {value, done: doneReading} = await reader.read()
-                done = doneReading
-                const chunk = decoder.decode(value)
-                setResult((prev) => prev + chunk)
-            }
-
-        },
-    })
+    const contentStore = useContentGenerationStore()
 
     async function onSubmit(values: z.infer<typeof ContentGenerateSchema>) {
-        setResult("")
-        mutate.mutate(values)
+        contentStore.setProgressState("started")
+        const response = await CompletionStream(values);
+        contentStore.updateModels(response.aiModelList)
+        contentStore.setProgressState("loading")
+        await Promise.all(values.aiModel.map(async (model) => {
+            const relevantAIModel = response.aiModelList.find((aiModel) => aiModel.id === model)!
+            for await (const value of readStreamableValue(response.streams[model])){
+                contentStore.updateStreams(relevantAIModel, value || "")
+            }
+        }))
+        contentStore.setProgressState("complete")
     }
 
     const nextStep = () => {
@@ -86,11 +91,11 @@ export const ManageForm = () => {
 
     return (
         <>
-            <Card className="h-full overflow-hidden border-b flex-none w-full max-w-lg py-0 gap-0 border-0 shadow-none">
+            <Card className="h-full w-full max-w-lg flex-none gap-0 overflow-hidden border-0 border-b py-0 shadow-none">
                 <CardHeader className="py-6">
-                    <div className="flex justify-between items-center mb-2">
+                    <div className="mb-2 flex items-center justify-between">
                         <CardTitle>Generate SEO Content</CardTitle>
-                        <div className="flex items-center gap-2 w-24">
+                        <div className="flex w-24 items-center gap-2">
                             <Stepper value={currentStep} onValueChange={setCurrentStep}>
                                 {steps.map((step) => (
                                     <StepperItem key={step} step={step} className="not-last:flex-1">
@@ -137,21 +142,11 @@ export const ManageForm = () => {
 
                                             <FormField
                                                 control={form.control}
-                                                name="season"
+                                                name="category"
                                                 render={({field}) => (
                                                     <FormItem>
-                                                        <FormLabel>Season</FormLabel>
-                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                            <FormControl>
-                                                                <SelectTrigger className="w-full">
-                                                                    <SelectValue placeholder="Select a season"/>
-                                                                </SelectTrigger>
-                                                            </FormControl>
-                                                            <SelectContent>
-                                                                <SelectItem value="Spring/Summer">Spring/Summer</SelectItem>
-                                                                <SelectItem value="Fall/Winter">Fall/Winter</SelectItem>
-                                                            </SelectContent>
-                                                        </Select>
+                                                        <FormLabel>Category</FormLabel>
+                                                        <CategorySelect value={field.value} onValueChange={field.onChange}/>
                                                         <FormMessage/>
                                                     </FormItem>
                                                 )}
@@ -159,11 +154,34 @@ export const ManageForm = () => {
 
                                             <FormField
                                                 control={form.control}
-                                                name="category"
+                                                name="season"
                                                 render={({field}) => (
                                                     <FormItem>
-                                                        <FormLabel>Category</FormLabel>
-                                                        <CategorySelect value={field.value} onValueChange={field.onChange}/>
+                                                        <FormLabel>Season</FormLabel>
+                                                        <FormControl>
+                                                            <RadioGroup
+                                                                onValueChange={field.onChange}
+                                                                className="grid-cols-2"
+                                                                defaultValue="Spring/Summer"
+                                                            >
+                                                                <div
+                                                                    className="border-input has-data-[state=checked]:border-primary/50 has-focus-visible:border-ring has-focus-visible:ring-ring/50 relative flex cursor-pointer flex-col items-center gap-3 rounded-md border px-2 py-3 text-center shadow-xs transition-[color,box-shadow] outline-none has-focus-visible:ring-[3px]">
+                                                                    <RadioGroupItem id="summer" value="Spring/Summer" className="sr-only"/>
+                                                                    <SunIcon className="opacity-60" size={20} aria-hidden="true"/>
+                                                                    <label htmlFor="summer" className="after:absolute after:inset-0 cursor-pointer text-xs font-medium leading-none text-foreground">
+                                                                        Spring/Summer
+                                                                    </label>
+                                                                </div>
+                                                                <div
+                                                                    className="border-input has-data-[state=checked]:border-primary/50 has-focus-visible:border-ring has-focus-visible:ring-ring/50 relative flex cursor-pointer flex-col items-center gap-3 rounded-md border px-2 py-3 text-center shadow-xs transition-[color,box-shadow] outline-none has-focus-visible:ring-[3px]">
+                                                                    <RadioGroupItem id="winter" value="Fall/Winter" className="sr-only"/>
+                                                                    <CloudRainIcon className="opacity-60" size={20} aria-hidden="true" />
+                                                                    <label htmlFor="winter" className="after:absolute after:inset-0 cursor-pointer text-xs font-medium leading-none text-foreground">
+                                                                        Fall/Winter
+                                                                    </label>
+                                                                </div>
+                                                            </RadioGroup>
+                                                        </FormControl>
                                                         <FormMessage/>
                                                     </FormItem>
                                                 )}
@@ -217,7 +235,7 @@ export const ManageForm = () => {
                     </Form>
                 </CardContent>
                 <CardFooter
-                    className="flex justify-between p-6 border-t">
+                    className="flex justify-between border-t p-6">
                     {currentStep === 1 ? (
                         <Button
                             key="step-button-1"
@@ -242,7 +260,7 @@ export const ManageForm = () => {
                             <Button
                                 type="button"
                                 onClick={form.handleSubmit(onSubmit)}
-                                className="transition bg-green-600 hover:bg-green-700"
+                                className="bg-green-600 transition hover:bg-green-700"
                             >
                                 <Sparkles className="mr-2 h-4 w-4"/>
                                 Generate Content
@@ -251,29 +269,23 @@ export const ManageForm = () => {
                     )}
                 </CardFooter>
             </Card>
-            <div className="flex-1 bg-muted rounded-lg flex items-center justify-center">
-                {
+            <div className="flex flex-1 items-center justify-center rounded-lg bg-muted">
+                {/*{
                     !result
                         ? (
-                            <div className="w-full max-w-lg flex flex-col items-center justify-center text-center gap-4">
+                            <div className="flex w-full max-w-lg flex-col items-center justify-center gap-4 text-center">
                                 <div
-                                    className="bg-green-100 rounded-full size-16 p-2 flex items-center justify-center text-green-700">
+                                    className="flex items-center justify-center rounded-full bg-green-100 p-2 text-green-700 size-16">
                                     <Sparkles size={32}/>
                                 </div>
-                                <div className="font-semibold text-xl">Ready to Generate Content</div>
+                                <div className="text-xl font-semibold">Ready to Generate Content</div>
                                 <span>Complete the form and click <strong>Generate Content</strong> to create SEO text for your fashion category page.</span>
                             </div>
                         ) : (
-                            <div className="max-w-2xl flex flex-col gap-4">
-                                <div className="font-semibold text-xl flex space-x-2 items-center">
-                                    <Sparkles size={32} className="text-green-500"/>
-                                    <span>Generated Content</span>
-                                </div>
-                                <Textarea className=" bg-background max-h-[500px]" value={result}
-                                          onChange={e => setResult(e.target.value)}></Textarea>
-                            </div>
+
                         )
-                }
+                }*/}
+                <GeneratedContentView/>
             </div>
         </>
     )

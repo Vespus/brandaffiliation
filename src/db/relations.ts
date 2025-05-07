@@ -1,22 +1,22 @@
 import {relations} from "drizzle-orm/relations";
-import {aiModels, brand, brandScales, characteristic, provider, scales} from "./schema";
+import {aiModels, brands, brandScales, characteristic, provider, scales} from "./schema";
 
 export const characteristicRelations = relations(characteristic, ({one}) => ({
-    brand: one(brand, {
+    brand: one(brands, {
         fields: [characteristic.brandId],
-        references: [brand.id]
+        references: [brands.id]
     }),
 }));
 
-export const brandRelations = relations(brand, ({many}) => ({
+export const brandRelations = relations(brands, ({many}) => ({
     characteristic: many(characteristic),
     brandScales: many(brandScales)
 }));
 
 export const brandScalesRelations = relations(brandScales, ({one}) => ({
-    brand: one(brand, {
+    brand: one(brands, {
         fields: [brandScales.brandId],
-        references: [brand.id]
+        references: [brands.id]
     }),
     scale: one(scales, {
         fields: [brandScales.scaleId],

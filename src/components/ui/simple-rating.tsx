@@ -2,7 +2,8 @@
 
 import {Star, StarHalf} from "lucide-react"
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
-import {useFormatter, useTranslations} from "next-intl";
+import {useTranslations} from "next-intl";
+import {roundBothWays} from "@/utils/round-both-ways";
 
 type SimpleRatingProps = React.HTMLAttributes<HTMLDivElement> & {
     value: number,
@@ -11,12 +12,11 @@ type SimpleRatingProps = React.HTMLAttributes<HTMLDivElement> & {
     content?: string[]
 }
 
-export const SimpleRating = ({value, scale, maxStars = 5, content, children}: SimpleRatingProps) => {
+export const SimpleRating = ({value, scale, maxStars = 5}: SimpleRatingProps) => {
     const roundedValue = Math.round(value * 2) / 2
     const wholeStars = Math.floor(roundedValue)
     const halfStar = roundedValue % 1 === 0.5
     const t = useTranslations()
-    const format = useFormatter();
 
     const StarRender = () => {
         return (
@@ -67,12 +67,4 @@ export const SimpleRating = ({value, scale, maxStars = 5, content, children}: Si
             </Tooltip>
         </TooltipProvider>
     )
-}
-
-function roundBothWays(n: number) {
-    if (Number.isInteger(n)) {
-        return [n];
-    } else {
-        return [Math.floor(n), Math.ceil(n)];
-    }
 }

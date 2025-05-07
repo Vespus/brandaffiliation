@@ -1,15 +1,22 @@
 import {createTRPCRouter, publicProcedure} from "@/lib/trpc/trpc";
 import {db} from "@/db";
 import {eq} from "drizzle-orm";
-import {aiModels, brand as brandTable, BrandWithCharacteristic, translations} from "@/db/schema";
+import {
+    aiModels,
+    brands as brandTable,
+    BrandWithCharacteristic,
+    BrandWithCharacteristicAndScales, brandWithScales,
+    translations, userPrompts
+} from "@/db/schema";
 import {z} from "zod";
 import {AISetting, getAISettings} from "@/db/presets";
-import {formatPrompt} from "@/app/api/completion/utils";
+import {formatPrompt} from "@/app/dashboard/content-generation/utils";
+import {createClient} from "@/db/supabase";
 
 export const genericRoute = createTRPCRouter({
     getBrandsWithCharacteristics: publicProcedure
         .query(async () => {
-            const brands = await db.query.brand.findMany({
+            const brands = await db.query.brands.findMany({
                 with: {
                     characteristic: true
                 }
@@ -42,34 +49,33 @@ export const genericRoute = createTRPCRouter({
             brand: z.number(),
             season: z.string(),
             category: z.string(),
-            aiModelId: z.number()
+            prompt: z.string(),
         }))
         .query(async ({input}) => {
-            const [brand, aiModel] = await Promise.all([
-                db.query.brand.findFirst({
-                    where: eq(brandTable.id, input.brand),
-                    with: {
-                        characteristic: true
-                    }
-                }),
-                db.query.aiModels.findFirst({where: eq(aiModels.id, input.aiModelId)})
-            ])
+            const [brand] = await db.select()
+                .from(brandWithScales)
+                .where(eq(brandTable.id, input.brand))
 
-            if(!aiModel){
-                throw new Error("AI Model not found")
-            }
-
-            const settings = await getAISettings(aiModel.modelName) as AISetting
-            if(!settings) {
-                throw new Error("No prompt found for selected model")
+            if (!brand) {
+                throw new Error("Brand not found")
             }
 
             return formatPrompt({
                 category: input.category,
                 season: input.season,
-                brand: brand as BrandWithCharacteristic,
-                prompt: settings.prompt
+                brand: brand,
+                prompt: input.prompt
             })
+        }),
+    getUserPrompts: publicProcedure
+        .query(async () => {
+            const {error, data: {user}} = await (await createClient()).auth.getUser();
+
+            if(error) {
+                throw error
+            }
+
+            return await db.query.userPrompts.findMany({where: eq(userPrompts.userId, user!.id)})
         }),
     getTranslationById: publicProcedure
         .input(z.object({id: z.number()}))

@@ -38,7 +38,7 @@ export const parseCSVString = (csvString: string, options: CSVParseOptions = {})
   return Papa.parse(csvString, defaultOptions).data;
 };
 
-export const convertToCSV = (data: any[], options: CSVParseOptions = {}) => {
+export const convertToCSV = (data: unknown[], options: CSVParseOptions = {}) => {
   const defaultOptions = {
     header: true,
     skipEmptyLines: true,

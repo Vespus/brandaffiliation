@@ -8,6 +8,6 @@ export const ContentGenerationStep1Schema = z.object({
 
 export const ContentGenerateSchema = z.object({
     ...ContentGenerationStep1Schema.shape,
-    aiModel: z.number({message: "Please select an AI model"}),
-    customPrompt: z.string().optional(),
+    aiModel: z.array(z.number(), {message: "Please select an AI model"}),
+    customPrompt: z.string(),
 })

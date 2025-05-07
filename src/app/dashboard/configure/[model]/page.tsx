@@ -2,12 +2,10 @@ import {db} from "@/db";
 import {eq} from "drizzle-orm";
 import {aiModels} from "@/db/schema";
 import {redirect} from "next/navigation";
-import {Button, buttonVariants} from "@/components/ui/button";
+import {buttonVariants} from "@/components/ui/button";
 import {ArrowLeft} from "lucide-react";
 import Link from "next/link";
 import {cn} from "@/lib/utils";
-import {Card, CardContent} from "@/components/ui/card";
-import {Badge} from "@/components/ui/badge";
 import {ManageForm} from "@/app/dashboard/configure/[model]/manage-form";
 import {AISetting, getAISettings, getDefaultSettings} from "@/db/presets";
 

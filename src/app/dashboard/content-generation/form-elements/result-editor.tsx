@@ -6,6 +6,10 @@ import {HistoryPlugin} from '@lexical/react/LexicalHistoryPlugin';
 import {LexicalErrorBoundary} from '@lexical/react/LexicalErrorBoundary';
 import ToolbarPlugin from "@/app/dashboard/content-generation/form-elements/editor/plugin/toolbar-plugin";
 
+
+import {OnChangePlugin} from "@lexical/react/LexicalOnChangePlugin";
+import {EditorState} from "lexical";
+
 const theme = {
     paragraph: 'editor-paragraph',
 }
@@ -14,10 +18,15 @@ export const ResultEditor = () => {
     const initialConfig = {
         namespace: 'MyEditor',
         theme,
+
         onError(error: Error) {
             console.log(error);
         },
     };
+
+    const onChange = (editorState: EditorState) => {
+        console.log(editorState.toJSON())
+    }
 
     return (
         <div className="shadow ring ring-muted/50 rounded p-2 bg-background">
@@ -35,6 +44,7 @@ export const ResultEditor = () => {
                 </div>
                 <HistoryPlugin/>
                 <AutoFocusPlugin/>
+                <OnChangePlugin onChange={onChange} />
             </LexicalComposer>
         </div>
     );

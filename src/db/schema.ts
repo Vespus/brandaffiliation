@@ -33,23 +33,15 @@ export const users = pgTable('users', {
     phone: varchar('phone', {length: 256}),
 });
 
-export const brand = pgTable("brands", {
+export const brands = pgTable("brands", {
     id: serial().notNull(),
     name: text().notNull(),
-    price: integer(),
-    quality: integer(),
-    design: integer(),
-    focus: integer(),
-    positioning: integer(),
-    heritage: integer(),
-    origin: integer(),
-    fame: integer(),
-    sales_volume: integer(),
+    slug: varchar()
 });
 
 export const characteristic = pgTable("characteristics", {
     id: serial().notNull(),
-    brandId: integer("brand_id").references(() => brand.id).notNull(),
+    brandId: integer("brand_id").references(() => brands.id).notNull(),
     value: text().notNull(),
 });
 
@@ -75,7 +67,7 @@ export const scales = pgTable("scales", {
 
 export const brandScales = pgTable("brand_scales", {
     id: serial("id").primaryKey(),
-    brandId: integer("brand_id").references(() => brand.id).notNull(),
+    brandId: integer("brand_id").references(() => brands.id).notNull(),
     scaleId: integer("scale_id").references(() => scales.id).notNull(),
     value: integer("value").notNull(),
 })
@@ -94,11 +86,11 @@ export const aiModels = pgTable('ai_models', {
 export const aiSettingsDefault = pgTable('ai_settings_default', {
     id: serial('id').primaryKey(),
     model: text('model').notNull(),
-    temperature: integer('temperature'),
-    topP: integer('top_p'),
-    maxTokens: integer('max_tokens'),
-    frequencyPenalty: integer('frequency_penalty'),
-    presencePenalty: integer('presence_penalty'),
+    temperature: integer('temperature').notNull(),
+    topP: integer('top_p').notNull(),
+    maxTokens: integer('max_tokens').notNull(),
+    frequencyPenalty: integer('frequency_penalty').notNull(),
+    presencePenalty: integer('presence_penalty').notNull(),
     prompt: text(),
     createdAt: timestamp('created_at', {withTimezone: true}).defaultNow(),
     updatedAt: timestamp('updated_at', {withTimezone: true}).defaultNow(),
@@ -133,9 +125,20 @@ export const brandWithScales = pgView("brand_with_scales", {
     recognition: real('recognition'),
     revenue: real('revenue'),
     characteristic: jsonb('characteristic').$type<{id: number, value: string}[]>(),
+    slug: varchar()
 }).existing()
 
-export type Brand = typeof brand.$inferSelect;
+export const userPrompts = pgTable('user_prompts', {
+    id: integer('id').primaryKey(),
+    userId: uuid('user_id').default('auth.uid()'),
+    name: text('name'),
+    prompt: text('prompt'),
+    isFavorite: boolean('is_favorite').default(false),
+    updatedAt: timestamp('updated_at').defaultNow(),
+    createdAt: timestamp('created_at', {withTimezone: true}).defaultNow().notNull(),
+});
+
+export type Brand = typeof brands.$inferSelect;
 export type BrandWithCharacteristic = Brand & { characteristic?: Characteristic[] };
 export type BrandWithCharacteristicAndScales = typeof brandWithScales.$inferSelect
 
@@ -147,9 +150,12 @@ export type Characteristic = typeof characteristic.$inferSelect;
 export type NewCharacteristic = typeof characteristic.$inferInsert;
 
 export type Provider = typeof provider.$inferSelect
-
+export type AISetting = typeof aiSettingsDefault.$inferSelect
 export type AIModel = typeof aiModels.$inferSelect
 export type AIModelWithProvider = AIModel & { provider: Provider }
+export type AIModelWithProviderAndSettings = AIModelWithProvider & { settings: AISetting }
 
 export type Translation = typeof translations.$inferSelect
 export type NewTranslation = typeof translations.$inferInsert
+export type UserPrompt = typeof userPrompts.$inferSelect
+export type NewUserPrompt = typeof userPrompts.$inferInsert

@@ -1,6 +1,6 @@
 "use client";
 
-import {BrandWithCharacteristic, BrandWithCharacteristicAndScales} from "@/db/schema";
+import {BrandWithCharacteristicAndScales} from "@/db/schema";
 import type { Table } from "@tanstack/react-table";
 import { Download } from "lucide-react";
 import * as React from "react";

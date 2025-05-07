@@ -9,7 +9,6 @@ import Link from "next/link";
 import {useCustomAction} from "@/hooks/use-custom-action";
 import {signInAction} from "@/app/auth/actions";
 import {z} from "zod";
-import {toast} from "sonner";
 
 const loginSchema = z.object({
     email: z.string().email(),
