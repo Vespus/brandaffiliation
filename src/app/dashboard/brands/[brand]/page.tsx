@@ -12,6 +12,8 @@ export default async function Brand(props: BrandPageProps) {
     console.log(brand)
 
     return (
-        <div>a</div>
+        <div>
+            {brand.name}
+        </div>
     )
 }

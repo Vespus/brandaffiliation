@@ -7,7 +7,7 @@ import {useRouter} from "next/navigation";
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
 import {Settings} from "lucide-react";
-import {AISetting} from "@/db/presets";
+import {AISetting} from "@/db/schema";
 
 type AIModelItemType = {
     model: AIModel & {

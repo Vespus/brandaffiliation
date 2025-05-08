@@ -19,6 +19,14 @@ import {
 import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
 import {AnimatePresence, motion} from "motion/react";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
+} from "@/components/ui/dialog";
 
 export const PromptArea = ({...props}: React.ComponentProps<"textarea">) => {
     return (
