@@ -1,19 +1,38 @@
-import {eq} from "drizzle-orm"
-import {db} from "@/db";
-import {brandWithScales} from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { db } from "@/db";
+import { brandWithScales } from "@/db/schema";
+import { Suspense } from "react";
+import { BrandInfoCard } from "./components/brand-info-card";
+import { PerformanceRatingsCard } from "./components/performance-ratings-card";
+import { PerformanceSummaryCard } from "./components/performance-summary-card";
+import { BrandInfoCardSkeleton } from "./components/skeletons/brand-info-card-skeleton";
+import { PerformanceRatingsCardSkeleton } from "./components/skeletons/performance-ratings-card-skeleton";
+import { PerformanceSummaryCardSkeleton } from "./components/skeletons/performance-summary-card-skeleton";
 
 type BrandPageProps = {
-    params: Promise<{ brand: string }>
-}
-export default async function Brand(props: BrandPageProps) {
-    const {brand: brandSlug} = await props.params
-    const [brand] = await db.select().from(brandWithScales).where(eq(brandWithScales.slug, brandSlug)).limit(1)
+    params: Promise<{ brand: string }>;
+};
 
-    console.log(brand)
+export default async function Brand(props: BrandPageProps) {
+    const {brand: brandSlug} = await props.params;
+    const [[brand], scales] = await Promise.all([
+        db.select().from(brandWithScales).where(eq(brandWithScales.slug, brandSlug)).limit(1),
+        db.query.scales.findMany(),
+    ]);
 
     return (
-        <div>
-            {brand.name}
+        <div className="flex max-w-7xl flex-col gap-4">
+            <div className="flex gap-4">
+                <Suspense fallback={<BrandInfoCardSkeleton/>}>
+                    <BrandInfoCard brand={brand}/>
+                </Suspense>
+                <Suspense fallback={<PerformanceRatingsCardSkeleton/>}>
+                    <PerformanceRatingsCard brand={brand} scales={scales}/>
+                </Suspense>
+            </div>
+            <Suspense fallback={<PerformanceSummaryCardSkeleton/>}>
+                <PerformanceSummaryCard brand={brand} scales={scales}/>
+            </Suspense>
         </div>
-    )
+    );
 }
