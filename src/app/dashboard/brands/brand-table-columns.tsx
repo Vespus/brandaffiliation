@@ -1,16 +1,18 @@
 "use client";
 
-import {BrandWithCharacteristicAndScales} from "@/db/schema";
-import {ColumnDef, RowData} from "@tanstack/react-table";
+import { BrandWithCharacteristicAndScales } from "@/db/schema";
+import { ColumnDef, RowData } from "@tanstack/react-table";
 import {
-    ArrowBigRightDash,
+    ArrowBigRightDash, ArrowRight,
     StarIcon,
     Text,
 } from "lucide-react";
 import * as React from "react";
 
-import {DataTableColumnHeader} from "@/components/datatable/data-table-column-header";
-import {SimpleRating} from "@/components/ui/simple-rating";
+import { DataTableColumnHeader } from "@/components/datatable/data-table-column-header";
+import { SimpleRating } from "@/components/ui/simple-rating";
+import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
 
 declare module '@tanstack/react-table' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -21,6 +23,19 @@ declare module '@tanstack/react-table' {
 
 export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristicAndScales>[] {
     return [
+        {
+            id: "link",
+            header: () => "",
+            cell: ({row}) => {
+                return (
+                    <Link href={`/dashboard/brands/${row.original.slug}`} className={buttonVariants({variant: "ghost", size: "icon"})}>
+                        <ArrowRight />
+                    </Link>
+                )
+            },
+            enablePinning: true,
+            maxSize: 50
+        },
         {
             id: "name",
             accessorKey: "name",
@@ -68,7 +83,7 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristicAndSca
             ),
             cell: ({row}) => {
                 return (
-                    <SimpleRating value={row.original.price || 0} scale="price" />
+                    <SimpleRating value={row.original.price || 0} scale="price"/>
                 );
             },
             meta: {
@@ -89,7 +104,7 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristicAndSca
             ),
             cell: ({row}) => {
                 return (
-                    <SimpleRating value={row.original.quality || 0} scale="quality" />
+                    <SimpleRating value={row.original.quality || 0} scale="quality"/>
                 );
             },
             meta: {
@@ -110,7 +125,7 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristicAndSca
             ),
             cell: ({row}) => {
                 return (
-                    <SimpleRating value={row.original.design || 0} scale="design" />
+                    <SimpleRating value={row.original.design || 0} scale="design"/>
                 );
             },
             meta: {
@@ -131,7 +146,7 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristicAndSca
             ),
             cell: ({row}) => {
                 return (
-                    <SimpleRating value={row.original.focus || 0} scale="focus" />
+                    <SimpleRating value={row.original.focus || 0} scale="focus"/>
                 );
             },
             meta: {
@@ -152,7 +167,7 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristicAndSca
             ),
             cell: ({row}) => {
                 return (
-                    <SimpleRating value={row.original.positioning || 0} scale="positioning" />
+                    <SimpleRating value={row.original.positioning || 0} scale="positioning"/>
                 );
             },
             meta: {
@@ -173,7 +188,7 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristicAndSca
             ),
             cell: ({row}) => {
                 return (
-                    <SimpleRating value={row.original.recognition || 0} scale="recognition" />
+                    <SimpleRating value={row.original.recognition || 0} scale="recognition"/>
                 );
             },
             meta: {
@@ -194,7 +209,7 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristicAndSca
             ),
             cell: ({row}) => {
                 return (
-                    <SimpleRating value={row.original.heritage || 0} scale="heritage" />
+                    <SimpleRating value={row.original.heritage || 0} scale="heritage"/>
                 );
             },
             meta: {
@@ -215,7 +230,7 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristicAndSca
             ),
             cell: ({row}) => {
                 return (
-                    <SimpleRating value={row.original.origin || 0} scale="origin" />
+                    <SimpleRating value={row.original.origin || 0} scale="origin"/>
                 );
             },
             meta: {
@@ -236,7 +251,7 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristicAndSca
             ),
             cell: ({row}) => {
                 return (
-                    <SimpleRating value={row.original.revenue || 0} scale="revenue" />
+                    <SimpleRating value={row.original.revenue || 0} scale="revenue"/>
                 );
             },
             meta: {

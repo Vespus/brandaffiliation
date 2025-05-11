@@ -17,7 +17,7 @@ export const BrandInfoCard = ({brand}: BrandInfoCardProps) => {
                             {brand.name[0]}
                         </AvatarFallback>
                     </Avatar>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col text-2xl font-semibold">
                         <div>{brand.name}</div>
                     </div>
                 </div>
