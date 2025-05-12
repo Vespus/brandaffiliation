@@ -5,16 +5,24 @@ import { Suspense } from "react";
 import { BrandInfoCard } from "./components/brand-info-card";
 import { PerformanceRatingsCard } from "./components/performance-ratings-card";
 import { PerformanceSummaryCard } from "./components/performance-summary-card";
+import { NeighborScaleType } from "./components/neighbor-scale-type";
 import { BrandInfoCardSkeleton } from "./components/skeletons/brand-info-card-skeleton";
 import { PerformanceRatingsCardSkeleton } from "./components/skeletons/performance-ratings-card-skeleton";
 import { PerformanceSummaryCardSkeleton } from "./components/skeletons/performance-summary-card-skeleton";
+import { NeighborScaleTypeSkeleton } from "./components/skeletons/neighbor-scale-type-skeleton";
+import { SearchParams } from "nuqs/server";
+import { searchParamsCache } from "@/app/dashboard/brands/[brand]/queries";
 
 type BrandPageProps = {
     params: Promise<{ brand: string }>;
-};
+    searchParams: Promise<SearchParams>
+
+}
 
 export default async function Brand(props: BrandPageProps) {
     const {brand: brandSlug} = await props.params;
+    const searchParams = await props.searchParams;
+
     const [[brand], scales] = await Promise.all([
         db.select().from(brandWithScales).where(eq(brandWithScales.slug, brandSlug)).limit(1),
         db.query.scales.findMany(),
@@ -33,6 +41,13 @@ export default async function Brand(props: BrandPageProps) {
             <Suspense fallback={<PerformanceSummaryCardSkeleton/>}>
                 <PerformanceSummaryCard brand={brand} scales={scales}/>
             </Suspense>
+
+            <h3 className="text-2xl font-bold mt-6">Neighbors</h3>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+                <Suspense fallback={<NeighborScaleTypeSkeleton/>}>
+                    <NeighborScaleType brand={brand} searchParams={searchParams}/>
+                </Suspense>
+            </div>
         </div>
     );
 }
