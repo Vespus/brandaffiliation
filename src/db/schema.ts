@@ -112,7 +112,7 @@ export const aiSettingsUser = pgTable('ai_settings_user', {
     userModelUnique: uniqueIndex('ai_settings_user_user_id_model_unique').on(table.userId, table.model),
 }));
 
-export const brandWithScales = pgView("brand_with_scales", {
+export const brandWithScales = pgTable("brand_with_scales", {
     id: integer('id').notNull(),
     name: text('name').notNull(),
     price: real('price'),
@@ -126,7 +126,7 @@ export const brandWithScales = pgView("brand_with_scales", {
     revenue: real('revenue'),
     characteristic: jsonb('characteristic').$type<{id: number, value: string}[]>(),
     slug: varchar()
-}).existing()
+})
 
 export const userPrompts = pgTable('user_prompts', {
     id: integer('id').primaryKey(),

@@ -22,7 +22,7 @@ export const NeighborScaleType = async ({brand, searchParams}: {brand: BrandWith
 
   return (
       <div>
-        bok
+        test
       </div>
   )
 }

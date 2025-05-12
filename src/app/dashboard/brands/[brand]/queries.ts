@@ -1,8 +1,8 @@
-import {db} from "@/db";
-import {eq, ne, sql} from 'drizzle-orm';
+import { db } from "@/db";
+import { aliasedTable, asc, eq, getTableColumns, ne, sql, ViewBaseConfig } from 'drizzle-orm';
 import { brandWithScales, brands, BrandWithCharacteristicAndScales } from '@/db/schema';
-import {createSearchParamsCache, parseAsFloat} from "nuqs/server";
-import {DEFAULT_SCALE_WEIGHTS} from "@/app/dashboard/brands/[brand]/constant";
+import { createSearchParamsCache, parseAsFloat } from "nuqs/server";
+import { DEFAULT_SCALE_WEIGHTS } from "@/app/dashboard/brands/[brand]/constant";
 
 export const searchParamsCache = createSearchParamsCache({
     price: parseAsFloat.withDefault(DEFAULT_SCALE_WEIGHTS.price),
@@ -24,30 +24,28 @@ export async function findSimilarityByScale(
     customWeights: Record<keyof typeof DEFAULT_SCALE_WEIGHTS, number>,
     limit = 5
 ) {
-    return await db.transaction(async (tx) => {
-        const scaleColumns = Object.keys(customWeights) as (keyof typeof DEFAULT_SCALE_WEIGHTS)[];
-        const weightSum = Object.values(customWeights).join(" + ");
+    const scaleColumns = Object.keys(customWeights) as (keyof typeof DEFAULT_SCALE_WEIGHTS)[];
+    const weightSum = Object.values(customWeights).join(" + ");
 
-        const weightedDiffs = scaleColumns
-            .map((scale) => {
-                const weight = customWeights[scale];
-                return `${weight} * POWER(${brandWithScales[scale].name} - ${brand[scale]}, 2)`;
-            })
-            .join(' + ');
+    const weightedDiffs = scaleColumns
+        .map((scale) => {
+            const weight = customWeights[scale];
+            return `${weight} * POWER(${brandWithScales[scale].name} - ${brand[scale]}, 2)`;
+        })
+        .join(' + ');
 
-        const distanceExpr = sql.raw(`SQRT((${weightedDiffs}) / (${weightSum})) AS distance`);
-        const similarityExpr = sql.raw(`1 - (SQRT((${weightedDiffs}) / (${weightSum})) / 4) as similarity`);
+    const distanceExpr = sql.raw(`SQRT((${weightedDiffs}) / (${weightSum}))`).as("distance");
+    const similarityExpr = sql.raw(`1 - (SQRT((${weightedDiffs}) / (${weightSum})) / 4)`).as("similarity");
 
-        return tx
-            .select({
-                brand: brands,
-                distance: distanceExpr,
-                similarity: similarityExpr,
-            })
-            .from(brandWithScales)
-            .leftJoin(brands, eq(brands.id, brandWithScales.id))
-            .where(ne(brandWithScales.id, brand.id))
-            .orderBy(sql`distance DESC`)
-            .limit(limit);
-    });
+    return db
+        .select({
+            ...getTableColumns(brandWithScales),
+            distance: distanceExpr,
+            similarity: similarityExpr,
+        })
+        .from(brands)
+        .leftJoin(brandWithScales, eq(brands.id, brandWithScales.id))
+        .where(ne(brandWithScales.id, brand.id))
+        .orderBy(asc(sql`distance`))
+        .limit(limit);
 }

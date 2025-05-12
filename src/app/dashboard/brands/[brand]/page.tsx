@@ -43,7 +43,7 @@ export default async function Brand(props: BrandPageProps) {
             </Suspense>
 
             <h3 className="text-2xl font-bold mt-6">Neighbors</h3>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+            <div className="grid grid-cols-2 gap-4">
                 <Suspense fallback={<NeighborScaleTypeSkeleton/>}>
                     <NeighborScaleType brand={brand} searchParams={searchParams}/>
                 </Suspense>
