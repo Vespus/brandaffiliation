@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { desc, eq, getTableColumns, ne, sql } from 'drizzle-orm';
-import { brandWithScales, brands, BrandWithCharacteristicAndScales, characteristic } from '@/db/schema';
+import { brandWithScales, brands, BrandWithCharacteristicAndScales } from '@/db/schema';
 import { searchParamsCache } from "@/app/dashboard/brands/[brand]/search-params";
 
 /**
@@ -26,29 +26,29 @@ export async function findSimilarityByScale(
     const similarity = sql<number>`1 - (${distanceExpr} / 4)`.as("similarity")
     // @formatter:on
 
+    const characteristicValues = sql<string>`jsonb_array_elements(${brandWithScales.characteristic}) as agg_column`;
+
     const target = db.$with("target").as(
         db
             .select({
-                brand_id: brands.id,
-                vector: sql<string>`string_agg
-                    (${characteristic.value}, ' ')`.as("target_vector")
+                brand_id: brandWithScales.id,
+                vector: sql<string>`string_agg(agg_column ->> 'value', ' ')`.as("target_vector")
             })
-            .from(brands)
-            .innerJoin(characteristic, eq(brands.id, characteristic.brandId))
-            .where(eq(brands.id, brand.id))
-            .groupBy(brands.id)
+            .from(brandWithScales)
+            .crossJoinLateral(characteristicValues)
+            .where(eq(brandWithScales.id, brand.id))
+            .groupBy(brandWithScales.id)
     )
     const otherTargets = db.$with("other_targets").as(
         db
             .select({
-                brand_id: brands.id,
-                vector: sql<string>`string_agg
-                    (${characteristic.value}, ' ')`.as("others_vector")
+                brand_id: brandWithScales.id,
+                vector: sql<string>`string_agg(agg_column ->> 'value', ' ')`.as("others_vector")
             })
-            .from(brands)
-            .innerJoin(characteristic, eq(brands.id, characteristic.brandId))
-            .where(ne(brands.id, brand.id))
-            .groupBy(brands.id)
+            .from(brandWithScales)
+            .crossJoinLateral(characteristicValues)
+            .where(ne(brandWithScales.id, brand.id))
+            .groupBy(brandWithScales.id)
     )
     const scale_similarity = db.$with("scale_similarity").as(
         db
@@ -64,7 +64,7 @@ export async function findSimilarityByScale(
             .select({
                 brand_id: scale_similarity.brand_id,
                 scale_similarity: scale_similarity.scale_similarity,
-                text_similarity: sql<number>`strict_word_similarity
+                text_similarity: sql<number>`similarity
                     (${otherTargets.vector}, ${target.vector})`.as("text_similarity")
             })
             .from(scale_similarity)
@@ -74,11 +74,26 @@ export async function findSimilarityByScale(
 
     const combined_similarity = sql<number>`((${with_text_similarity.scale_similarity} * ${input.similarityWeight[0]}) + (${with_text_similarity.text_similarity} * ${input.similarityWeight[1]}))`.as("combined_similarity")
 
-    return db
+    console.log(db
         .with(target, otherTargets, scale_similarity, with_text_similarity)
         .select({
             ...getTableColumns(brandWithScales),
             scale_similarity: similarity,
+            text_similarity: with_text_similarity.text_similarity,
+            combined_similarity: combined_similarity
+        })
+        .from(brands)
+        .innerJoin(brandWithScales, eq(brands.id, brandWithScales.id))
+        .innerJoin(with_text_similarity, eq(with_text_similarity.brand_id, brandWithScales.id))
+        .where(ne(brandWithScales.id, brand.id))
+        .orderBy(desc(combined_similarity))
+        .limit(limit).toSQL())
+
+    return db
+        .with(target, otherTargets, scale_similarity, with_text_similarity)
+        .select({
+            ...getTableColumns(brandWithScales),
+            scale_similarity: with_text_similarity.scale_similarity,
             text_similarity: with_text_similarity.text_similarity,
             combined_similarity: combined_similarity
         })

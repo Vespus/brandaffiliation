@@ -1,6 +1,5 @@
 "use client"
 
-import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Slider } from "@/components/ui/slider"
@@ -10,9 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { DEFAULT_SCALE_WEIGHTS } from "@/app/dashboard/brands/[brand]/constant"
 import { searchParams } from "@/app/dashboard/brands/[brand]/search-params"
-import { toast } from "sonner"
 import { useQueryStates } from "nuqs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Create a schema for form validation
 const ScaleWeightsSchema = z.object({
@@ -114,8 +111,8 @@ export function ScaleWeightsForm() {
                                         />
                                     </FormControl>
                                     <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                        <div>Scale Affinity ({similarityWeight[0] * 100}%)</div>
                                         <div>Characteristics Affinity ({similarityWeight[1] * 100}%)</div>
+                                        <div>Scale Affinity ({similarityWeight[0] * 100}%)</div>
                                     </div>
                                     <FormMessage/>
                                 </FormItem>
