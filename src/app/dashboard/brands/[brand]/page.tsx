@@ -10,8 +10,8 @@ import { BrandInfoCardSkeleton } from "./components/skeletons/brand-info-card-sk
 import { PerformanceRatingsCardSkeleton } from "./components/skeletons/performance-ratings-card-skeleton";
 import { PerformanceSummaryCardSkeleton } from "./components/skeletons/performance-summary-card-skeleton";
 import { NeighborScaleTypeSkeleton } from "./components/skeletons/neighbor-scale-type-skeleton";
+import { ScaleWeightsForm } from "./scale-weights-form";
 import { SearchParams } from "nuqs/server";
-import { searchParamsCache } from "@/app/dashboard/brands/[brand]/queries";
 
 type BrandPageProps = {
     params: Promise<{ brand: string }>;
@@ -42,11 +42,15 @@ export default async function Brand(props: BrandPageProps) {
                 <PerformanceSummaryCard brand={brand} scales={scales}/>
             </Suspense>
 
-            <h3 className="text-2xl font-bold mt-6">Neighbors</h3>
-            <div className="grid grid-cols-2 gap-4">
-                <Suspense fallback={<NeighborScaleTypeSkeleton/>}>
-                    <NeighborScaleType brand={brand} searchParams={searchParams}/>
-                </Suspense>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-2">
+                    <Suspense fallback={<NeighborScaleTypeSkeleton/>}>
+                        <NeighborScaleType brand={brand} searchParams={searchParams}/>
+                    </Suspense>
+                </div>
+                <div>
+                    <ScaleWeightsForm />
+                </div>
             </div>
         </div>
     );

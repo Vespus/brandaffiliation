@@ -1,51 +1,91 @@
 import { db } from "@/db";
-import { aliasedTable, asc, eq, getTableColumns, ne, sql, ViewBaseConfig } from 'drizzle-orm';
-import { brandWithScales, brands, BrandWithCharacteristicAndScales } from '@/db/schema';
-import { createSearchParamsCache, parseAsFloat } from "nuqs/server";
-import { DEFAULT_SCALE_WEIGHTS } from "@/app/dashboard/brands/[brand]/constant";
-
-export const searchParamsCache = createSearchParamsCache({
-    price: parseAsFloat.withDefault(DEFAULT_SCALE_WEIGHTS.price),
-    quality: parseAsFloat.withDefault(DEFAULT_SCALE_WEIGHTS.quality),
-    focus: parseAsFloat.withDefault(DEFAULT_SCALE_WEIGHTS.focus),
-    design: parseAsFloat.withDefault(DEFAULT_SCALE_WEIGHTS.design),
-    positioning: parseAsFloat.withDefault(DEFAULT_SCALE_WEIGHTS.positioning),
-    heritage: parseAsFloat.withDefault(DEFAULT_SCALE_WEIGHTS.heritage),
-    origin: parseAsFloat.withDefault(DEFAULT_SCALE_WEIGHTS.origin),
-    recognition: parseAsFloat.withDefault(DEFAULT_SCALE_WEIGHTS.recognition),
-    revenue: parseAsFloat.withDefault(DEFAULT_SCALE_WEIGHTS.revenue),
-});
+import { desc, eq, getTableColumns, ne, sql } from 'drizzle-orm';
+import { brandWithScales, brands, BrandWithCharacteristicAndScales, characteristic } from '@/db/schema';
+import { searchParamsCache } from "@/app/dashboard/brands/[brand]/search-params";
 
 /**
  * Finds most similar brands to a target brand by its name using weighted scales.
  */
 export async function findSimilarityByScale(
     brand: BrandWithCharacteristicAndScales,
-    customWeights: Record<keyof typeof DEFAULT_SCALE_WEIGHTS, number>,
-    limit = 5
+    input: Awaited<ReturnType<typeof searchParamsCache.parse>>,
+    limit = 6
 ) {
-    const scaleColumns = Object.keys(customWeights) as (keyof typeof DEFAULT_SCALE_WEIGHTS)[];
-    const weightSum = Object.values(customWeights).join(" + ");
+    // @formatter:off
+    const distanceExpr = sql<number>`SQRT((
+        ${input.price}::float * POWER(${brandWithScales.price} - ${brand.price}, 2) +
+        ${input.quality}::float * POWER(${brandWithScales.quality} - ${brand.quality}, 2) +
+        ${input.focus}::float * POWER(${brandWithScales.focus} - ${brand.focus}, 2) +
+        ${input.design}::float * POWER(${brandWithScales.design} - ${brand.design}, 2) +
+        ${input.positioning}::float * POWER(${brandWithScales.positioning} - ${brand.positioning}, 2) +
+        ${input.heritage}::float * POWER(${brandWithScales.heritage} - ${brand.heritage}, 2) +
+        ${input.origin}::float * POWER(${brandWithScales.origin} - ${brand.origin}, 2) +
+        ${input.recognition}::float * POWER(${brandWithScales.recognition} - ${brand.recognition}, 2) +
+        ${input.revenue}::float * POWER(${brandWithScales.revenue} - ${brand.revenue}, 2)
+    ) / 1)`
+    const similarity = sql<number>`1 - (${distanceExpr} / 4)`.as("similarity")
+    // @formatter:on
 
-    const weightedDiffs = scaleColumns
-        .map((scale) => {
-            const weight = customWeights[scale];
-            return `${weight} * POWER(${brandWithScales[scale].name} - ${brand[scale]}, 2)`;
-        })
-        .join(' + ');
+    const target = db.$with("target").as(
+        db
+            .select({
+                brand_id: brands.id,
+                vector: sql<string>`string_agg
+                    (${characteristic.value}, ' ')`.as("target_vector")
+            })
+            .from(brands)
+            .innerJoin(characteristic, eq(brands.id, characteristic.brandId))
+            .where(eq(brands.id, brand.id))
+            .groupBy(brands.id)
+    )
+    const otherTargets = db.$with("other_targets").as(
+        db
+            .select({
+                brand_id: brands.id,
+                vector: sql<string>`string_agg
+                    (${characteristic.value}, ' ')`.as("others_vector")
+            })
+            .from(brands)
+            .innerJoin(characteristic, eq(brands.id, characteristic.brandId))
+            .where(ne(brands.id, brand.id))
+            .groupBy(brands.id)
+    )
+    const scale_similarity = db.$with("scale_similarity").as(
+        db
+            .select({
+                brand_id: brandWithScales.id,
+                scale_similarity: similarity
+            })
+            .from(brandWithScales)
+            .where(ne(brandWithScales.id, brand.id))
+    )
+    const with_text_similarity = db.$with("text_similarity").as(
+        db
+            .select({
+                brand_id: scale_similarity.brand_id,
+                scale_similarity: scale_similarity.scale_similarity,
+                text_similarity: sql<number>`strict_word_similarity
+                    (${otherTargets.vector}, ${target.vector})`.as("text_similarity")
+            })
+            .from(scale_similarity)
+            .innerJoin(otherTargets, eq(scale_similarity.brand_id, otherTargets.brand_id))
+            .crossJoin(target)
+    )
 
-    const distanceExpr = sql.raw(`SQRT((${weightedDiffs}) / (${weightSum}))`).as("distance");
-    const similarityExpr = sql.raw(`1 - (SQRT((${weightedDiffs}) / (${weightSum})) / 4)`).as("similarity");
+    const combined_similarity = sql<number>`((${with_text_similarity.scale_similarity} * ${input.similarityWeight[0]}) + (${with_text_similarity.text_similarity} * ${input.similarityWeight[1]}))`.as("combined_similarity")
 
     return db
+        .with(target, otherTargets, scale_similarity, with_text_similarity)
         .select({
             ...getTableColumns(brandWithScales),
-            distance: distanceExpr,
-            similarity: similarityExpr,
+            scale_similarity: similarity,
+            text_similarity: with_text_similarity.text_similarity,
+            combined_similarity: combined_similarity
         })
         .from(brands)
-        .leftJoin(brandWithScales, eq(brands.id, brandWithScales.id))
+        .innerJoin(brandWithScales, eq(brands.id, brandWithScales.id))
+        .innerJoin(with_text_similarity, eq(with_text_similarity.brand_id, brandWithScales.id))
         .where(ne(brandWithScales.id, brand.id))
-        .orderBy(asc(sql`distance`))
+        .orderBy(desc(combined_similarity))
         .limit(limit);
 }

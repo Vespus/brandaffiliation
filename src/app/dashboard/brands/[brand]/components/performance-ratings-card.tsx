@@ -16,12 +16,10 @@ export const PerformanceRatingsCard = async ({brand, scales}: PerformanceRatings
     return (
         <Card className="flex-1">
             <CardContent className="flex flex-col gap-4">
-                <div>
-                    <CardHeader className="flex items-center px-0 space-x-2">
-                        <ChartAreaIcon/>
-                        Performance Ratings
-                    </CardHeader>
-                </div>
+                <CardHeader className="flex items-center px-0 space-x-2">
+                    <ChartAreaIcon/>
+                    Performance Ratings
+                </CardHeader>
                 <div>
                     <div className="grid grid-cols-3 gap-6">
                         {scales.map((scale) => (
@@ -29,8 +27,8 @@ export const PerformanceRatingsCard = async ({brand, scales}: PerformanceRatings
                                 <div className="flex justify-between gap-4 text-xs">
                                     <span>{t(`scale.${scale.label}`)}</span>
                                     <span className="text-indigo-500">
-                    {brand[scale.label as keyof typeof brand] as number}/5
-                  </span>
+                                        {brand[scale.label as keyof typeof brand] as number}/5
+                                    </span>
                                 </div>
                                 <SimpleRating
                                     value={brand[scale.label as keyof typeof brand] as number}

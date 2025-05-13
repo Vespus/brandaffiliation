@@ -1,22 +1,21 @@
 "use client"
 
-import {AISetting} from "@/db/presets";
-import {useForm} from "react-hook-form";
-import {z} from "zod";
-import {zodResolver} from "@hookform/resolvers/zod";
-import {Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
-import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
-import {Slider} from "@/components/ui/slider";
-import {HelpTooltip} from "@/components/help-tooltip";
-import {Input} from "@/components/ui/input";
-import {Textarea} from "@/components/ui/textarea";
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
-import {Button} from "@/components/ui/button";
-import {AISettingsSaveSchema} from "@/app/dashboard/configure/[model]/schema";
-import {AIModel} from "@/db/schema";
-import {useCustomAction} from "@/hooks/use-custom-action";
-import {saveSettingsAction} from "@/app/dashboard/configure/[model]/actions";
-import {toast} from "sonner";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Slider } from "@/components/ui/slider";
+import { HelpTooltip } from "@/components/help-tooltip";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { AISettingsSaveSchema } from "@/app/dashboard/configure/[model]/schema";
+import { AIModel, AISetting } from "@/db/schema";
+import { useCustomAction } from "@/hooks/use-custom-action";
+import { saveSettingsAction } from "@/app/dashboard/configure/[model]/actions";
+import { toast } from "sonner";
 import {
     AlertDialog, AlertDialogAction, AlertDialogCancel,
     AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
@@ -78,10 +77,10 @@ export const ManageForm = ({data, defaultConfig, model}: {
                                     render={({field}) => (
                                         <FormItem className="space-y-4">
                                             <FormLabel className="justify-between items-center">
-                                        <span className="inline-flex space-x-2">
-                                            <span>Temperature</span>
-                                            <HelpTooltip>Temperature is a value between 0 and 2. Higher values make the output more random, while lower values make the output more focused and deterministic.</HelpTooltip>
-                                        </span>
+                                                <span className="inline-flex space-x-2">
+                                                    <span>Temperature</span>
+                                                    <HelpTooltip>Temperature is a value between 0 and 2. Higher values make the output more random, while lower values make the output more focused and deterministic.</HelpTooltip>
+                                                </span>
                                                 <span>{field.value}</span>
                                             </FormLabel>
                                             <FormControl>
@@ -287,7 +286,9 @@ export const ManageForm = ({data, defaultConfig, model}: {
                         <AlertDialogContent>
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Reset to Defaults?</AlertDialogTitle>
-                                <AlertDialogDescription>This will reset all settings to their default values. You can still refresh page to restore your custom settings if you have any.</AlertDialogDescription>
+                                <AlertDialogDescription>This will reset all settings to their default values. You can
+                                    still refresh page to restore your custom settings if you have
+                                    any.</AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
