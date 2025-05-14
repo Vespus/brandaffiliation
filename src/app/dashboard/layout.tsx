@@ -6,7 +6,7 @@ export default async function DashboardLayout({children}: Readonly<{ children: R
     const {data: {user}} = await (await createClient()).auth.getUser();
 
     return (
-        <SidebarProvider>
+        <SidebarProvider className="h-0">
             <Sidebar user={user}/>
             <SidebarInset className="max-w-full overflow-hidden">
                 <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
@@ -14,7 +14,7 @@ export default async function DashboardLayout({children}: Readonly<{ children: R
                         <SidebarTrigger className="-ml-1" />
                     </div>
                 </header>
-                <main className="flex flex-col flex-1 px-4 mb-8">
+                <main className="flex flex-col flex-1 px-4 mb-8 min-h-0">
                     {children}
                 </main>
             </SidebarInset>

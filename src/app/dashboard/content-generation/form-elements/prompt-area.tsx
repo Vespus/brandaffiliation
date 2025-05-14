@@ -1,8 +1,8 @@
 import * as React from "react";
-import {Textarea} from "@/components/ui/textarea";
-import {useFormContext} from "react-hook-form";
-import {api} from "@/lib/trpc/react";
-import {Check, ChevronsUpDown, Trash2Icon} from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { useFormContext } from "react-hook-form";
+import { api } from "@/lib/trpc/react";
+import { Check, ChevronsUpDown, Trash2Icon } from "lucide-react";
 import {
     Command,
     CommandEmpty,
@@ -16,31 +16,59 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import {cn} from "@/lib/utils";
-import {Button} from "@/components/ui/button";
-import {AnimatePresence, motion} from "motion/react";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger
-} from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { AnimatePresence, motion } from "motion/react";
+import { useCreateEditor } from "@/components/editor/use-create-editor";
+import { Editor, EditorContainer } from "@/components/editor/ui/editor";
+import { Plate, PlateEditor } from "@udecode/plate/react";
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { MarkdownPlugin } from "@udecode/plate-markdown";
+import { useEffect } from "react";
+import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
 
-export const PromptArea = ({...props}: React.ComponentProps<"textarea">) => {
+type PromptAreaType = React.ComponentProps<"textarea"> & {
+    onChange: (val: string) => void
+}
+
+export const PromptArea = ({...props}: PromptAreaType) => {
+    const runOnce = React.useRef(true)
+    const debounce = useDebouncedCallback((val: string) => props.onChange(val), 800)
+    const editor = useCreateEditor({
+        skipInitialization: true
+    });
+
+    useEffect(() => {
+        if(runOnce.current && props.value) {
+            runOnce.current = false
+            editor.tf.init({ value: editor.getApi(MarkdownPlugin).markdown.deserialize(props.value as string), autoSelect: 'start' });
+        }
+    }, [props.value]);
+
     return (
-        <div className="flex flex-col gap-2" data-registry="plate">
-            <UserPrompts/>
-            <Textarea
+        <div className="flex flex-col gap-4 min-w-0" data-registry="plate">
+            <UserPrompts editor={editor}/>
+            <DndProvider backend={HTML5Backend}>
+                <Plate editor={editor} onChange={({editor, value}) => {
+                    debounce(editor.api.markdown.serialize({value}))
+                }}>
+                    <EditorContainer>
+                        <Editor placeholder="Type..."/>
+                    </EditorContainer>
+                </Plate>
+            </DndProvider>
+
+            {/*<Textarea
                 {...props}
+                onChange={onChange}
                 className="max-h-96"
-            />
+            />*/}
         </div>
     )
 }
 
-const UserPrompts = () => {
+const UserPrompts = ({editor}: {editor: PlateEditor}) => {
     const {data} = api.genericRoute.getUserPrompts.useQuery()
     const formContext = useFormContext()
     const [value, setValue] = React.useState<number | undefined>(undefined)
@@ -50,6 +78,7 @@ const UserPrompts = () => {
         const prompt = data?.find((prompt) => prompt.id === val)
 
         if (prompt) {
+            editor.tf.setValue(editor.getApi(MarkdownPlugin).markdown.deserialize(prompt.prompt as string))
             formContext.setValue("customPrompt", prompt.prompt)
             setValue(val)
         }
@@ -62,7 +91,7 @@ const UserPrompts = () => {
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
-            <div className="flex gap-2 overflow-hidden">
+            <div className="flex gap-2">
                 <PopoverTrigger asChild>
                     <Button
                         variant="outline"
@@ -90,7 +119,7 @@ const UserPrompts = () => {
                                 className="flex-none"
                                 onClick={resetPrompt}
                             >
-                                <Trash2Icon />
+                                <Trash2Icon/>
                                 Reset
                             </Button>
                         </motion.div>

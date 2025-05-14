@@ -1,12 +1,12 @@
-import type {Metadata} from "next";
-import {Geist, Geist_Mono} from "next/font/google";
-import {ThemeProvider} from "next-themes";
-import {NuqsAdapter} from "nuqs/adapters/next/app";
-import {TRPCReactProvider} from "@/lib/trpc/react";
-import {Toaster} from "@/components/ui/sonner"
-import {getLocale} from 'next-intl/server';
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import { ThemeProvider } from "next-themes";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { TRPCReactProvider } from "@/lib/trpc/react";
+import { Toaster } from "@/components/ui/sonner"
+import { getLocale } from 'next-intl/server';
 import "./globals.css";
-import {NextIntlClientProvider} from "next-intl";
+import { NextIntlClientProvider } from "next-intl";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -36,24 +36,24 @@ export default async function RootLayout({
             suppressHydrationWarning
             className={`${geistSans.variable} ${geistMono.variable}`}
         >
-        <body className="bg-background text-foreground">
-        <NextIntlClientProvider>
-            <TRPCReactProvider>
-                <NuqsAdapter>
-                    <ThemeProvider
-                        attribute="class"
-                        defaultTheme="system"
-                        enableSystem
-                    >
-                        <div className="flex min-h-screen flex-col">
-                            {children}
-                        </div>
-                        <Toaster richColors/>
-                    </ThemeProvider>
-                </NuqsAdapter>
-            </TRPCReactProvider>
-        </NextIntlClientProvider>
-        </body>
+            <body className="bg-background text-foreground">
+                <NextIntlClientProvider>
+                    <TRPCReactProvider>
+                        <NuqsAdapter>
+                            <ThemeProvider
+                                attribute="class"
+                                defaultTheme="system"
+                                enableSystem
+                            >
+                                <>
+                                    {children}
+                                </>
+                                <Toaster richColors/>
+                            </ThemeProvider>
+                        </NuqsAdapter>
+                    </TRPCReactProvider>
+                </NextIntlClientProvider>
+            </body>
         </html>
     );
 }
