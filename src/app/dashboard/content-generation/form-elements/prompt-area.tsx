@@ -40,9 +40,12 @@ export const PromptArea = ({...props}: PromptAreaType) => {
     });
 
     useEffect(() => {
-        if(runOnce.current && props.value) {
+        if (runOnce.current && props.value) {
             runOnce.current = false
-            editor.tf.init({ value: editor.getApi(MarkdownPlugin).markdown.deserialize(props.value as string), autoSelect: 'start' });
+            editor.tf.init({
+                value: editor.getApi(MarkdownPlugin).markdown.deserialize(props.value as string),
+                autoSelect: 'start'
+            });
         }
     }, [props.value]);
 
@@ -50,11 +53,14 @@ export const PromptArea = ({...props}: PromptAreaType) => {
         <div className="flex flex-col gap-4 min-w-0" data-registry="plate">
             <UserPrompts editor={editor}/>
             <DndProvider backend={HTML5Backend}>
-                <Plate editor={editor} onChange={({editor, value}) => {
-                    debounce(editor.api.markdown.serialize({value}))
-                }}>
+                <Plate editor={editor}>
                     <EditorContainer>
-                        <Editor placeholder="Type..."/>
+                        <Editor
+                            onBlur={() => {
+                                editor.api.markdown.serialize({value: editor.children})
+                            }}
+                            placeholder="Type..."
+                        />
                     </EditorContainer>
                 </Plate>
             </DndProvider>
@@ -68,7 +74,7 @@ export const PromptArea = ({...props}: PromptAreaType) => {
     )
 }
 
-const UserPrompts = ({editor}: {editor: PlateEditor}) => {
+const UserPrompts = ({editor}: { editor: PlateEditor }) => {
     const {data} = api.genericRoute.getUserPrompts.useQuery()
     const formContext = useFormContext()
     const [value, setValue] = React.useState<number | undefined>(undefined)

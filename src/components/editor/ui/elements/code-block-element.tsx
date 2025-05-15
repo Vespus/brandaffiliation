@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { CodeBlockCombobox } from './code-block-combobox';
 
 export function CodeBlockElement(props: PlateElementProps<TCodeBlockElement>) {
-    const { editor, element } = props;
+    const {editor, element} = props;
 
     return (
         <PlateElement
@@ -24,10 +24,10 @@ export function CodeBlockElement(props: PlateElementProps<TCodeBlockElement>) {
             {...props}
         >
             <div className="relative rounded-md bg-muted/50">
-        <pre className="overflow-x-auto p-8 pr-4 font-mono text-sm leading-[normal] [tab-size:2] print:break-inside-avoid">
-          <code>{props.children}</code>
-        </pre>
-
+                <pre
+                    className="overflow-x-auto p-8 pr-4 font-mono text-sm leading-[normal] [tab-size:2] print:break-inside-avoid">
+                  <code>{props.children}</code>
+                </pre>
                 <div
                     className="absolute top-1 right-1 z-10 flex gap-0.5 select-none"
                     contentEditable={false}
@@ -37,14 +37,14 @@ export function CodeBlockElement(props: PlateElementProps<TCodeBlockElement>) {
                             size="icon"
                             variant="ghost"
                             className="size-6 text-xs"
-                            onClick={() => formatCodeBlock(editor, { element })}
+                            onClick={() => formatCodeBlock(editor, {element})}
                             title="Format code"
                         >
-                            <BracesIcon className="!size-3.5 text-muted-foreground" />
+                            <BracesIcon className="!size-3.5 text-muted-foreground"/>
                         </Button>
                     )}
 
-                    <CodeBlockCombobox />
+                    <CodeBlockCombobox/>
 
                     <CopyButton
                         size="icon"
@@ -85,9 +85,9 @@ function CopyButton({
         >
             <span className="sr-only">Copy</span>
             {hasCopied ? (
-                <CheckIcon className="!size-3" />
+                <CheckIcon className="!size-3"/>
             ) : (
-                <CopyIcon className="!size-3" />
+                <CopyIcon className="!size-3"/>
             )}
         </Button>
     );
