@@ -27,7 +27,7 @@ export const CompletionStream = async (parsedInput: z.infer<typeof ContentGenera
     // Initialize streamable values for each model
     models.forEach(model => {
         streamableValues.set(model.id, createStreamableValue<string, string>(''));
-    });
+    })
 
     Promise.all(models.map(async (model) => {
         try {

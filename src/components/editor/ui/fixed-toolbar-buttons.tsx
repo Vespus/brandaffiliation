@@ -70,7 +70,7 @@ export function FixedToolbarButtons() {
                     <ToolbarGroup>
                         <InsertDropdownMenu />
                         <TurnIntoDropdownMenu />
-                        <FontSizeToolbarButton />
+                        {/*<FontSizeToolbarButton />*/}
                     </ToolbarGroup>
 
                     <ToolbarGroup>
@@ -113,21 +113,21 @@ export function FixedToolbarButtons() {
                         <IndentTodoToolbarButton />
                     </ToolbarGroup>
 
-                    <ToolbarGroup>
+                    {/*<ToolbarGroup>
                         <LinkToolbarButton />
                         <TableDropdownMenu />
                         <EmojiDropdownMenu />
-                    </ToolbarGroup>
+                    </ToolbarGroup>*/}
 
-                    <ToolbarGroup>
+                    {/*<ToolbarGroup>
                         <LineHeightDropdownMenu />
                         <OutdentToolbarButton />
                         <IndentToolbarButton />
-                    </ToolbarGroup>
+                    </ToolbarGroup>*/}
 
-                    <ToolbarGroup>
+                    {/*<ToolbarGroup>
                         <MoreDropdownMenu />
-                    </ToolbarGroup>
+                    </ToolbarGroup>*/}
                 </>
             )}
 

@@ -25,11 +25,12 @@ import { GeneratedContentView } from "@/app/dashboard/content-generation/generat
 
 
 const steps = [1, 2]
-const defaultSystemPrompt = `Erstelle einen SEO-optimierten Produktkategorietext für {category} von {brand} für die {season}-Saison mit ca. 200–250 Wörtern.
+const defaultSystemPrompt = `Erstelle einen SEO-optimierten Produktkategorietext für {form.category} von {brand.name} für die {form.season}-Saison mit ca. 200–250 Wörtern.
 
 1. Verwende deine eigenen Kenntnisse über die Marke als Basis.
 2. Als Ergänzung dienen dir diese Informationen:
-{brandFeatures}
+{brand.characteristics}
+{brand.scales}
 
 Textstruktur:
 1. Einleitung (1–2 Sätze): 

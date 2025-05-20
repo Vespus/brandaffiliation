@@ -4,14 +4,14 @@ import {eq} from "drizzle-orm";
 import {
     aiModels,
     brands as brandTable,
-    BrandWithCharacteristic,
-    BrandWithCharacteristicAndScales, brandWithScales,
-    translations, userPrompts
+    brandWithScales,
+    translations,
+    userPrompts
 } from "@/db/schema";
 import {z} from "zod";
-import {AISetting, getAISettings} from "@/db/presets";
 import {formatPrompt} from "@/app/dashboard/content-generation/utils";
 import {createClient} from "@/db/supabase";
+import { ContentGenerateSchema } from "@/app/dashboard/content-generation/schema";
 
 export const genericRoute = createTRPCRouter({
     getBrandsWithCharacteristics: publicProcedure
@@ -82,4 +82,26 @@ export const genericRoute = createTRPCRouter({
         .query(async ({input}) => {
             return await db.query.translations.findFirst({where: eq(translations.id, input.id)})
         }),
+    getBrand: publicProcedure
+        .input(z.number())
+        .query(async ({input}) => {
+            const [brand] = await db.select().from(brandWithScales).where(eq(brandWithScales.id, input))
+
+            if (!brand) {
+                throw new Error("Brand not found")
+            }
+
+            return brand
+        }),
+    promptPreview: publicProcedure
+        .input(ContentGenerateSchema)
+        .query(async ({input}) => {
+            const [brand] = await db.select().from(brandWithScales).where(eq(brandWithScales.id, input.brand))
+            return formatPrompt({
+                category: input.category,
+                season: input.season,
+                brand: brand,
+                prompt: input.customPrompt
+            })
+        })
 })
