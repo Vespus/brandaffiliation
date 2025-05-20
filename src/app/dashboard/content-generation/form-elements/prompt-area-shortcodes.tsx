@@ -71,7 +71,7 @@ export const ShortcodeWrapper = ({
                 {shortCodes.map(shortCode => (
                     <ContextMenuItem
                         key={shortCode.val}
-                        onClick={(e) => {
+                        onClick={() => {
                             appendText(shortCode.val)
                         }}
                     >

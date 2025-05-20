@@ -131,7 +131,7 @@ const CHUNKING_REGEXPS = {
 };
 
 export async function POST(req: NextRequest) {
-    const { apiKey: key, messages, system } = await req.json();
+    const { messages, system } = await req.json();
     const aiModel = await db.query.aiModels.findFirst({
         where: (aiModels) => eq(aiModels.modelName, "gpt-4o"),
         with: {

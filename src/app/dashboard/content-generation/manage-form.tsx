@@ -5,23 +5,19 @@ import {ContentGenerateSchema, ContentGenerationStep1Schema} from "@/app/dashboa
 import {z} from "zod";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {useState} from "react";
-import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
 import {Stepper, StepperIndicator, StepperItem, StepperSeparator, StepperTrigger} from "@/components/ui/stepper";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
 import {AnimatePresence, motion} from "motion/react";
 import {BrandSelect} from "@/app/dashboard/content-generation/form-elements/brand-select";
-import {Textarea} from "@/components/ui/textarea";
 import {Button} from "@/components/ui/button";
 import {ArrowLeft, ArrowRight, CloudRainIcon, Sparkles, SunIcon} from "lucide-react";
 import {CategorySelect} from "@/app/dashboard/content-generation/form-elements/category-select";
 import {AIModelSelect} from "@/app/dashboard/content-generation/form-elements/ai-model-select";
 import {PromptArea} from "@/app/dashboard/content-generation/form-elements/prompt-area";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
-import {useCustomAction} from "@/hooks/use-custom-action";
 import {CompletionStream} from "@/app/dashboard/content-generation/actions";
 import {readStreamableValue} from "ai/rsc";
 import {useContentGenerationStore} from "@/app/dashboard/content-generation/store";
-import { GeneratedContentView } from "@/app/dashboard/content-generation/generated-content-view";
 
 
 const steps = [1, 2]

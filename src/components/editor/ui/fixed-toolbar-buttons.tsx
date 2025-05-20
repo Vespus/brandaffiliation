@@ -9,19 +9,12 @@ import {
     StrikethroughPlugin,
     UnderlinePlugin,
 } from '@udecode/plate-basic-marks/react';
-import {
-    FontBackgroundColorPlugin,
-    FontColorPlugin,
-} from '@udecode/plate-font/react';
+
 import { useEditorReadOnly } from '@udecode/plate/react';
 import {
-    ArrowUpToLineIcon,
-    BaselineIcon,
     BoldIcon,
     Code2Icon,
-    HighlighterIcon,
     ItalicIcon,
-    PaintBucketIcon,
     StrikethroughIcon,
     UnderlineIcon,
     WandSparklesIcon,
@@ -70,7 +63,7 @@ export function FixedToolbarButtons() {
                     <ToolbarGroup>
                         <InsertDropdownMenu />
                         <TurnIntoDropdownMenu />
-                        {/*<FontSizeToolbarButton />*/}
+                        <FontSizeToolbarButton />
                     </ToolbarGroup>
 
                     <ToolbarGroup>
@@ -113,21 +106,21 @@ export function FixedToolbarButtons() {
                         <IndentTodoToolbarButton />
                     </ToolbarGroup>
 
-                    {/*<ToolbarGroup>
+                    <ToolbarGroup>
                         <LinkToolbarButton />
                         <TableDropdownMenu />
                         <EmojiDropdownMenu />
-                    </ToolbarGroup>*/}
+                    </ToolbarGroup>
 
-                    {/*<ToolbarGroup>
+                    <ToolbarGroup>
                         <LineHeightDropdownMenu />
                         <OutdentToolbarButton />
                         <IndentToolbarButton />
-                    </ToolbarGroup>*/}
+                    </ToolbarGroup>
 
-                    {/*<ToolbarGroup>
+                    <ToolbarGroup>
                         <MoreDropdownMenu />
-                    </ToolbarGroup>*/}
+                    </ToolbarGroup>
                 </>
             )}
 

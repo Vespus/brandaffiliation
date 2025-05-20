@@ -15,7 +15,6 @@ import { TocPlugin } from '@udecode/plate-heading/react';
 import { INDENT_LIST_KEYS, ListStyleType } from '@udecode/plate-indent-list';
 import { IndentListPlugin } from '@udecode/plate-indent-list/react';
 
-import { SuggestionPlugin } from '@udecode/plate-suggestion/react';
 import {
     TableCellPlugin,
     TablePlugin,

@@ -27,7 +27,6 @@ import { ColumnItemPlugin, ColumnPlugin } from '@udecode/plate-layout/react';
 import { LinkPlugin } from '@udecode/plate-link/react';
 
 import { SlashInputPlugin } from '@udecode/plate-slash-command/react';
-import { SuggestionPlugin } from '@udecode/plate-suggestion/react';
 import {
     TableCellHeaderPlugin,
     TableCellPlugin,

@@ -17,8 +17,6 @@ import {
 } from '@udecode/plate/react';
 import {
     CheckIcon,
-    ChevronRightIcon,
-    Columns3Icon,
     FileCodeIcon,
     Heading1Icon,
     Heading2Icon,

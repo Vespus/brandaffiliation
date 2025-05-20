@@ -80,21 +80,21 @@ const groups: Group[] = [
                 label: 'Heading 3',
                 value: HEADING_KEYS.h3,
             },
-           /* {
+            {
                 icon: <TableIcon />,
                 label: 'Table',
                 value: TablePlugin.key,
-            },*/
+            },
             {
                 icon: <FileCodeIcon />,
                 label: 'Code',
                 value: CodeBlockPlugin.key,
             },
-            /*{
+            {
                 icon: <QuoteIcon />,
                 label: 'Quote',
                 value: BlockquotePlugin.key,
-            },*/
+            },
         ].map((item) => ({
             ...item,
             onSelect: (editor, value) => {
@@ -128,7 +128,7 @@ const groups: Group[] = [
         })),
     },
 
-/*    {
+    {
         group: 'Advanced blocks',
         items: [
             {
@@ -147,7 +147,7 @@ const groups: Group[] = [
                 insertBlock(editor, value);
             },
         })),
-    }*/
+    }
 ];
 
 export function InsertDropdownMenu(props: DropdownMenuProps) {

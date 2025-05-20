@@ -8,7 +8,7 @@ import {
     uuid,
     varchar,
     uniqueIndex,
-    primaryKey, pgView,
+    primaryKey,
     real, jsonb
 } from "drizzle-orm/pg-core"
 
@@ -139,15 +139,12 @@ export const userPrompts = pgTable('user_prompts', {
 });
 
 export type Brand = typeof brands.$inferSelect;
-export type BrandWithCharacteristic = Brand & { characteristic?: Characteristic[] };
 export type BrandWithCharacteristicAndScales = typeof brandWithScales.$inferSelect
 
 export type Scale = typeof scales.$inferSelect
 export type BrandScale = typeof brandScales.$inferSelect
-export type BrandScaleWithScale = BrandScale & { scale: Scale }
 
 export type Characteristic = typeof characteristic.$inferSelect;
-export type NewCharacteristic = typeof characteristic.$inferInsert;
 
 export type Provider = typeof provider.$inferSelect
 export type AISetting = typeof aiSettingsDefault.$inferSelect
@@ -156,6 +153,3 @@ export type AIModelWithProvider = AIModel & { provider: Provider }
 export type AIModelWithProviderAndSettings = AIModelWithProvider & { settings: AISetting }
 
 export type Translation = typeof translations.$inferSelect
-export type NewTranslation = typeof translations.$inferInsert
-export type UserPrompt = typeof userPrompts.$inferSelect
-export type NewUserPrompt = typeof userPrompts.$inferInsert

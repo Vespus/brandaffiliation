@@ -1,5 +1,5 @@
 import { AIModelWithProvider, BrandWithCharacteristicAndScales } from "@/db/schema";
-import { getTranslations, getFormatter, getLocale } from 'next-intl/server';
+import { getTranslations, getLocale } from 'next-intl/server';
 import { createOpenAI, openai } from "@ai-sdk/openai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { get } from 'es-toolkit/compat';
