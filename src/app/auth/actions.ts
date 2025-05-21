@@ -6,6 +6,11 @@ import {headers} from "next/headers";
 import {redirect} from "next/navigation";
 import {actionClient} from "@/lib/action-client";
 import {z} from "zod";
+import { signIn } from "@/auth";
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { genSaltSync, hashSync } from "bcrypt-ts";
 
 export const signUpAction = actionClient
     .schema(z.object({
@@ -13,38 +18,21 @@ export const signUpAction = actionClient
         password: z.string().min(8),
     }))
     .action(async ({parsedInput: {email, password}}) => {
-        const supabase = await createClient();
-        function getRootURL() {
-            let url =
-                process?.env?.NEXT_PUBLIC_ROOT_DOMAIN_URL ?? // Set this to your site URL in production env.
-                process?.env?.NEXT_PUBLIC_VERCEL_BRANCH_URL ?? // Automatically set by Vercel.
-                process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel.
-                "http://localhost:3000";
-            // Make sure to include `https://` when not localhost.
-            url = url.includes("http") ? url : `https://${url}`;
-            // Make sure to include a trailing `/`.
-            url = url.charAt(url.length - 1) === "/" ? url : `${url}/`;
-            return url;
+        const [user] = await db.select().from(users).where(eq(users.email, email));
+        if(user){
+            throw new Error("A user with this identifier already exists")
         }
 
-        const {error} = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                emailRedirectTo: getRootURL(),
-            },
-        });
+        const salt = genSaltSync(10);
+        const hash = hashSync(password, salt);
 
-        if (error) {
-            console.error(error.code + " " + error.message);
-            throw error;
-        } else {
-            return encodedRedirect(
-                "success",
-                "/auth/sign-up",
-                "Thanks for signing up! Please check your email for a verification link.",
-            );
-        }
+        await db.insert(users).values({ email: email, password: hash });
+
+        return encodedRedirect(
+            "success",
+            "/auth/sign-in",
+            "Thanks for signing up! Please check your email for a verification link.",
+        );
     })
 
 
@@ -54,12 +42,7 @@ export const signInAction = actionClient
         password: z.string().min(8),
     }))
     .action(async ({parsedInput: {email, password}}) => {
-        const supabase = await createClient();
-
-        const {error} = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
+        const {error} = await signIn("credentials", {email, password});
 
         if (error) {
             throw error;

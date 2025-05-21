@@ -18,10 +18,11 @@ export const config = {
 
 import { type NextRequest } from "next/server";
 import { updateSession } from "@/utils/supabase/middleware";
+import { auth } from "@/auth"
 
-export async function middleware(request: NextRequest) {
-    return await updateSession(request);
-}
+export default auth((req) => {
+    // req.auth
+})
 
 export const config = {
     matcher: [
