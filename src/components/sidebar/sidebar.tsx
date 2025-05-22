@@ -6,7 +6,7 @@ import {NavHeader} from "@/components/sidebar/nav-header"
 import {NavList} from "@/components/sidebar/nav-list";
 import {Sidebar as SidebarUI, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail} from "@/components/ui/sidebar"
 import {NavUser} from "@/components/sidebar/nav-user";
-import { User } from "next-auth";
+import { User } from "better-auth";
 
 type SidebarType = React.ComponentProps<typeof SidebarUI> & {
     user: User | null

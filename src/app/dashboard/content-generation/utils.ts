@@ -1,9 +1,9 @@
-import { AIModelWithProvider, BrandWithCharacteristicAndScales } from "@/db/schema";
 import { getTranslations, getLocale } from 'next-intl/server';
 import { createOpenAI, openai } from "@ai-sdk/openai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { get } from 'es-toolkit/compat';
 import { roundBothWays } from "@/utils/round-both-ways";
+import { AIModelWithProvider, BrandWithCharacteristicAndScales } from "@/db/types";
 
 export const getDriver = (modelWithProvider: AIModelWithProvider) => {
     switch (modelWithProvider.provider.code) {

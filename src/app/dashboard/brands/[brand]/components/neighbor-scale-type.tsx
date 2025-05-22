@@ -1,14 +1,14 @@
+import { DEFAULT_SCALE_WEIGHTS } from "@/app/dashboard/brands/[brand]/constant";
 import { findSimilarityByScale } from "@/app/dashboard/brands/[brand]/queries";
-import { SearchParams } from "nuqs/server";
-import { BrandWithCharacteristicAndScales } from "@/db/schema";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { searchParamsCache } from "@/app/dashboard/brands/[brand]/search-params";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { BrandWithCharacteristicAndScales } from "@/db/types";
+import { cn } from "@/lib/utils";
 import { ArrowBigRightDash, ArrowUp, GitCompareIcon } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
-import { DEFAULT_SCALE_WEIGHTS } from "@/app/dashboard/brands/[brand]/constant";
-import { cn } from "@/lib/utils";
-import { searchParamsCache } from "@/app/dashboard/brands/[brand]/search-params";
+import { SearchParams } from "nuqs/server";
 
 export const NeighborScaleType = async ({brand, searchParams}: {
     brand: BrandWithCharacteristicAndScales,

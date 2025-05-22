@@ -1,28 +1,32 @@
 "use client"
 
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Slider } from "@/components/ui/slider";
-import { HelpTooltip } from "@/components/help-tooltip";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { AISettingsSaveSchema } from "@/app/dashboard/configure/[model]/schema";
-import { AIModel, AISetting } from "@/db/schema";
-import { useCustomAction } from "@/hooks/use-custom-action";
 import { saveSettingsAction } from "@/app/dashboard/configure/[model]/actions";
-import { toast } from "sonner";
+import { AISettingsSaveSchema } from "@/app/dashboard/configure/[model]/schema";
+import { HelpTooltip } from "@/components/help-tooltip";
 import {
-    AlertDialog, AlertDialogAction, AlertDialogCancel,
-    AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { AIModel, AISetting } from "@/db/types";
+import { useCustomAction } from "@/hooks/use-custom-action";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
 export const ManageForm = ({data, defaultConfig, model}: {
     data: AISetting,
@@ -39,7 +43,6 @@ export const ManageForm = ({data, defaultConfig, model}: {
             topP: data?.topP || 1,
             frequencyPenalty: data?.frequencyPenalty || 0,
             presencePenalty: data?.presencePenalty || 0,
-            prompt: data?.prompt || "",
         }
     })
 

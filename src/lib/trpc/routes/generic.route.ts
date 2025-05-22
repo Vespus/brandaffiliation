@@ -1,28 +1,20 @@
-import {createTRPCRouter, publicProcedure} from "@/lib/trpc/trpc";
-import {db} from "@/db";
-import {eq} from "drizzle-orm";
-import {
-    aiModels,
-    brands as brandTable,
-    brandWithScales,
-    translations,
-    userPrompts
-} from "@/db/schema";
-import {z} from "zod";
-import {formatPrompt} from "@/app/dashboard/content-generation/utils";
-import {createClient} from "@/db/supabase";
 import { ContentGenerateSchema } from "@/app/dashboard/content-generation/schema";
+import { formatPrompt } from "@/app/dashboard/content-generation/utils";
+import { db } from "@/db";
+import { aiModels, brands as brandTable, brandWithScales, translations, userPrompts } from "@/db/schema";
+import { createClient } from "@/db/supabase";
+import { createTRPCRouter, publicProcedure } from "@/lib/trpc/trpc";
+import { eq } from "drizzle-orm";
+import { z } from "zod";
 
 export const genericRoute = createTRPCRouter({
     getBrandsWithCharacteristics: publicProcedure
         .query(async () => {
-            const brands = await db.query.brands.findMany({
+            return db.query.brands.findMany({
                 with: {
-                    characteristic: true
+                    characteristics: true
                 }
-            })
-
-            return brands
+            });
         }),
     getCategories: publicProcedure
         .query(async () => {
@@ -30,19 +22,19 @@ export const genericRoute = createTRPCRouter({
         }),
     getAIModels: publicProcedure
         .query(async () => {
-            return await db.query.aiModels.findMany({
+            return db.query.aiModels.findMany({
                 where: (
                     eq(aiModels.isActive, true)
                 ),
                 with: {
-                    provider: {
+                    aiProvider: {
                         columns: {
                             name: true,
                             code: true
                         }
                     }
                 }
-            })
+            });
         }),
     getPrompt: publicProcedure
         .input(z.object({

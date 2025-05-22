@@ -1,13 +1,13 @@
-import type { TextStreamPart, ToolSet } from 'ai';
-import type { NextRequest } from 'next/server';
+import { db } from "@/db";
 
 import { createOpenAI } from '@ai-sdk/openai';
 import { InvalidArgumentError } from '@ai-sdk/provider';
 import { delay as originalDelay } from '@ai-sdk/provider-utils';
+import type { TextStreamPart, ToolSet } from 'ai';
 import { convertToCoreMessages, streamText } from 'ai';
-import { NextResponse } from 'next/server';
-import { db } from "@/db";
 import { eq } from 'drizzle-orm';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 /**
  * Detects the first chunk in a buffer.
@@ -30,7 +30,7 @@ type delayer = (buffer: string) => number;
  * @returns A transform stream that smooths text streaming output.
  */
 function smoothStream<TOOLS extends ToolSet>({
-                                                 _internal: { delay = originalDelay } = {},
+                                                 _internal: {delay = originalDelay} = {},
                                                  chunking = 'word',
                                                  delayInMs = 10,
                                              }: {
@@ -96,7 +96,7 @@ function smoothStream<TOOLS extends ToolSet>({
                     console.log(buffer, 'finished');
 
                     if (buffer.length > 0) {
-                        controller.enqueue({ textDelta: buffer, type: 'text-delta' });
+                        controller.enqueue({textDelta: buffer, type: 'text-delta'});
                         buffer = '';
                     }
 
@@ -109,7 +109,7 @@ function smoothStream<TOOLS extends ToolSet>({
                 let match;
 
                 while ((match = detectChunk(buffer)) != null) {
-                    controller.enqueue({ textDelta: match, type: 'text-delta' });
+                    controller.enqueue({textDelta: match, type: 'text-delta'});
                     buffer = buffer.slice(match.length);
 
                     const _delayInMs =
@@ -131,22 +131,22 @@ const CHUNKING_REGEXPS = {
 };
 
 export async function POST(req: NextRequest) {
-    const { messages, system } = await req.json();
+    const {messages, system} = await req.json();
     const aiModel = await db.query.aiModels.findFirst({
         where: (aiModels) => eq(aiModels.modelName, "gpt-4o"),
         with: {
-            provider: true
+            aiProvider: true
         }
     });
 
-    if(!aiModel) {
+    if (!aiModel) {
         return NextResponse.json(
-            { error: 'Missing OpenAI API key.' },
-            { status: 401 }
+            {error: 'Missing OpenAI API key.'},
+            {status: 401}
         );
     }
 
-    const openai = createOpenAI({ apiKey: aiModel.provider.key });
+    const openai = createOpenAI({apiKey: aiModel.aiProvider!.key});
 
     let isInCodeBlock = false;
     let isInTable = false;
@@ -213,8 +213,8 @@ export async function POST(req: NextRequest) {
         return result.toDataStreamResponse();
     } catch {
         return NextResponse.json(
-            { error: 'Failed to process AI request' },
-            { status: 500 }
+            {error: 'Failed to process AI request'},
+            {status: 500}
         );
     }
 }

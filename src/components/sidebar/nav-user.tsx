@@ -1,10 +1,6 @@
 "use client"
 
-import {
-    LogOutIcon,
-    MoreVerticalIcon,
-    SunIcon
-} from "lucide-react"
+import { handleLogoutAction } from "@/components/sidebar/actions";
 
 import {
     DropdownMenu,
@@ -16,11 +12,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar"
 import { useCustomAction } from "@/hooks/use-custom-action";
-import type * as React from "react";
-import { handleLogoutAction } from "@/components/sidebar/actions";
-import { toast } from "sonner";
+import { User } from "better-auth";
+import { LogOutIcon, MoreVerticalIcon, SunIcon } from "lucide-react"
 import { useTheme } from "next-themes";
-import { User } from "next-auth";
+import type * as React from "react";
+import { toast } from "sonner";
 
 export function NavUser({
                             user,

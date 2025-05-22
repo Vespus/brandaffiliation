@@ -1,6 +1,5 @@
 "use client";
 
-import { Translation } from "@/db/schema";
 import type { Table } from "@tanstack/react-table";
 import { Download } from "lucide-react";
 import * as React from "react";
@@ -13,6 +12,7 @@ import {
 
 import { Separator } from "@/components/ui/separator";
 import { exportTableToCSV } from "@/lib/datatable/export";
+import { Translation } from "@/db/types";
 
 interface TranslationTableActionBarProps {
     table: Table<Translation>;

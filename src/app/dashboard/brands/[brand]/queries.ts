@@ -1,7 +1,8 @@
 import { db } from "@/db";
 import { desc, eq, getTableColumns, ne, sql } from 'drizzle-orm';
-import { brandWithScales, brands, BrandWithCharacteristicAndScales } from '@/db/schema';
+import { brandWithScales, brands } from '@/db/schema';
 import { searchParamsCache } from "@/app/dashboard/brands/[brand]/search-params";
+import { BrandWithCharacteristicAndScales } from "@/db/types";
 
 /**
  * Finds most similar brands to a target brand by its name using weighted scales.

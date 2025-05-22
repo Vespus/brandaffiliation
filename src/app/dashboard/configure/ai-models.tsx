@@ -1,10 +1,11 @@
-import {Table, TableBody, TableHead, TableHeader, TableRow} from "@/components/ui/table"
-import {db} from "@/db";
-import {AIModelItem} from "@/app/dashboard/configure/ai-model-item";
-import {AISetting, getAISettings} from "@/db/presets";
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
-import {aiModels} from "@/db/schema";
-import {eq} from "drizzle-orm";
+import { AIModelItem } from "@/app/dashboard/configure/ai-model-item";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { db } from "@/db";
+import { getAISettings } from "@/db/presets";
+import { aiModels } from "@/db/schema";
+import { AISetting } from "@/db/types";
+import { eq } from "drizzle-orm";
 
 export const AIModels = async () => {
     const [AIModels, AISettings] = await Promise.all([
@@ -13,7 +14,7 @@ export const AIModels = async () => {
                 eq(aiModels.isActive, true)
             ),
             with: {
-                provider: {
+                aiProvider: {
                     columns: {
                         name: true,
                         code: true

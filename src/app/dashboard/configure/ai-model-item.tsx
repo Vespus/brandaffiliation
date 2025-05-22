@@ -1,17 +1,16 @@
 "use client"
 
 import {TableCell, TableRow} from "@/components/ui/table";
+import { AIModel, AIProvider, AISetting } from "@/db/types";
 import { cn } from "@/lib/utils";
-import type {AIModel, Provider} from "@/db/schema";
 import {useRouter} from "next/navigation";
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
 import {Settings} from "lucide-react";
-import {AISetting} from "@/db/schema";
 
 type AIModelItemType = {
     model: AIModel & {
-       provider: Pick<Provider, "name" | "code">
+       aiProvider: Pick<AIProvider, "name" | "code">
     },
     settings: AISetting
 }
@@ -35,7 +34,7 @@ export const AIModelItem = ({model, settings}: AIModelItemType) => {
             </TableCell>
             <TableCell>
                 <Badge variant="outline" className="text-xs">
-                    {model.provider.name}
+                    {model.aiProvider.name}
                 </Badge>
             </TableCell>
             <TableCell>{settings?.temperature}</TableCell>

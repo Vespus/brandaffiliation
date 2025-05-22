@@ -1,13 +1,14 @@
-import {db} from "@/db";
-import {eq} from "drizzle-orm";
-import { aiModels, AISetting } from "@/db/schema";
-import {redirect} from "next/navigation";
-import {buttonVariants} from "@/components/ui/button";
-import {ArrowLeft} from "lucide-react";
+import { db } from "@/db";
+import { eq } from "drizzle-orm";
+import { aiModels } from "@/db/schema";
+import { redirect } from "next/navigation";
+import { buttonVariants } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { ManageForm } from "@/app/dashboard/configure/[model]/manage-form";
+import { getAISettings, getDefaultSettings } from "@/db/presets";
+import { AISetting } from "@/db/types";
 import Link from "next/link";
-import {cn} from "@/lib/utils";
-import {ManageForm} from "@/app/dashboard/configure/[model]/manage-form";
-import {getAISettings, getDefaultSettings} from "@/db/presets";
 
 type PageProps = {
     params: Promise<{ model: string }>

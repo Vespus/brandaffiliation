@@ -1,6 +1,6 @@
 import { getLocale, getTranslations } from "next-intl/server";
-import { BrandWithCharacteristicAndScales } from "@/db/schema";
 import { roundBothWays } from "@/utils/round-both-ways";
+import { BrandWithCharacteristicAndScales } from "@/db/types";
 
 interface ScaleStrengthsProps {
     scale: string;

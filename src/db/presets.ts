@@ -1,40 +1,48 @@
-import {createClient} from "@/db/supabase";
-import {db} from "@/db/index";
-import {and, eq, getTableColumns, inArray, sql} from "drizzle-orm";
+import { createClient } from "@/db/supabase";
+import { db } from "@/db/index";
+import { auth } from "@/lib/auth";
+import { and, eq, getTableColumns, inArray, sql } from "drizzle-orm";
 import {
     aiModels,
-    AIModelWithProviderAndSettings,
-    AISetting,
+    aiProviders,
     aiSettingsDefault,
-    aiSettingsUser, Provider,
-    provider
+    aiSettingsUser,
 } from "@/db/schema";
+import { AIModelWithProviderAndSettings, AIProvider, AISetting } from "./types";
+import { headers } from "next/headers";
 
 export const getAISettings = async (model?: string) => {
-    const user = await (await createClient()).auth.getUser();
+    //todo get user.
+    const session = await auth.api.getSession({
+        headers: await headers()
+    })
 
     const query = db.select({
         id: aiSettingsUser.id,
         model: aiSettingsDefault.model,
-        temperature: sql`coalesce(${aiSettingsUser.temperature}, ${aiSettingsDefault.temperature})`.as('temperature'),
-        topP: sql`coalesce(${aiSettingsUser.topP}, ${aiSettingsDefault.topP})`.as('top_p'),
-        maxTokens: sql`coalesce(${aiSettingsUser.maxTokens}, ${aiSettingsDefault.maxTokens})`.as('max_tokens'),
-        frequencyPenalty: sql`coalesce(${aiSettingsUser.frequencyPenalty}, ${aiSettingsDefault.frequencyPenalty})`.as('frequency_penalty'),
-        presencePenalty: sql`coalesce(${aiSettingsUser.presencePenalty}, ${aiSettingsDefault.presencePenalty})`.as('presence_penalty'),
-        prompt: sql`coalesce(${aiSettingsUser.prompt}, ${aiSettingsDefault.prompt})`.as('prompt'),
+        temperature: sql`coalesce
+            (${aiSettingsUser.temperature}, ${aiSettingsDefault.temperature})`.as('temperature'),
+        topP: sql`coalesce
+            (${aiSettingsUser.topP}, ${aiSettingsDefault.topP})`.as('top_p'),
+        maxTokens: sql`coalesce
+            (${aiSettingsUser.maxTokens}, ${aiSettingsDefault.maxTokens})`.as('max_tokens'),
+        frequencyPenalty: sql`coalesce
+            (${aiSettingsUser.frequencyPenalty}, ${aiSettingsDefault.frequencyPenalty})`.as('frequency_penalty'),
+        presencePenalty: sql`coalesce
+            (${aiSettingsUser.presencePenalty}, ${aiSettingsDefault.presencePenalty})`.as('presence_penalty'),
     })
-    .from(aiSettingsDefault)
-    .leftJoin(aiSettingsUser, and(
-        eq(aiSettingsUser.model, aiSettingsDefault.model),
-        !user.error ? eq(aiSettingsUser.userId, user.data.user.id) : undefined
-    ))
+        .from(aiSettingsDefault)
+        .leftJoin(aiSettingsUser, and(
+            eq(aiSettingsUser.model, aiSettingsDefault.model),
+            session?.user ? eq(aiSettingsUser.userId, session.user.id) : undefined
+        ))
 
-    if(model){
+    if (model) {
         query.where(eq(aiSettingsDefault.model, model))
     }
 
     const result = await query
-    if(model){
+    if (model) {
         return result[0] as AISetting || null
     }
 
@@ -50,29 +58,31 @@ export const getDefaultSettings = async (model?: string) => {
         maxTokens: aiSettingsDefault.maxTokens,
         frequencyPenalty: aiSettingsDefault.frequencyPenalty,
         presencePenalty: aiSettingsDefault.presencePenalty,
-        prompt: aiSettingsDefault.prompt,
     }).from(aiSettingsDefault)
 
-    if(model){
+    if (model) {
         query.where(eq(aiSettingsDefault.model, model))
     }
 
     const result = await query
-    if(model){
+    if (model) {
         return result[0] as AISetting || null
     }
 
     return result as AISetting[] || null
 }
 
-export const getAIModelsWithProviderAndSettings = async (models: number[]) : Promise<AIModelWithProviderAndSettings[]> => {
+export const getAIModelsWithProviderAndSettings = async (models: number[]): Promise<AIModelWithProviderAndSettings[]> => {
     const user = await (await createClient()).auth.getUser();
 
     const query = db
         .select({
             ...getTableColumns(aiModels),
-            provider: sql<Provider>`jsonb_build_object('id', ${provider.id},'name', ${provider.name},'code', ${provider.code},'key', ${provider.key},'createdAt', ${provider.createdAt})`,
-            settings: sql<AISetting>`jsonb_build_object('model', ${aiSettingsDefault.model},'temperature', COALESCE(${aiSettingsUser.temperature}, ${aiSettingsDefault.temperature}),'topP', COALESCE(${aiSettingsUser.topP}, ${aiSettingsDefault.topP}),'maxTokens', COALESCE(${aiSettingsUser.maxTokens}, ${aiSettingsDefault.maxTokens}),'frequencyPenalty', COALESCE(${aiSettingsUser.frequencyPenalty}, ${aiSettingsDefault.frequencyPenalty}),'presencePenalty', COALESCE(${aiSettingsUser.presencePenalty}, ${aiSettingsDefault.presencePenalty}),'prompt', COALESCE(${aiSettingsUser.prompt}, ${aiSettingsDefault.prompt}))`})
+            provider: sql<AIProvider>`jsonb_build_object
+            ('id', ${aiProviders.id},'name', ${aiProviders.name},'code', ${aiProviders.code},'key', ${aiProviders.key},'createdAt', ${aiProviders.createdAt})`,
+            settings: sql<AISetting>`jsonb_build_object
+            ('model', ${aiSettingsDefault.model},'temperature', COALESCE (${aiSettingsUser.temperature}, ${aiSettingsDefault.temperature}),'topP', COALESCE (${aiSettingsUser.topP}, ${aiSettingsDefault.topP}),'maxTokens', COALESCE (${aiSettingsUser.maxTokens}, ${aiSettingsDefault.maxTokens}),'frequencyPenalty', COALESCE (${aiSettingsUser.frequencyPenalty}, ${aiSettingsDefault.frequencyPenalty}),'presencePenalty', COALESCE (${aiSettingsUser.presencePenalty}, ${aiSettingsDefault.presencePenalty}))`
+        })
         .from(aiModels)
         .innerJoin(aiSettingsDefault, eq(aiModels.modelName, aiSettingsDefault.model))
         .leftJoin(
@@ -82,7 +92,7 @@ export const getAIModelsWithProviderAndSettings = async (models: number[]) : Pro
                 !user.error ? eq(aiSettingsUser.userId, user.data.user.id) : undefined
             )
         )
-        .innerJoin(provider, eq(aiModels.providerId, provider.id))
+        .innerJoin(aiProviders, eq(aiModels.providerId, aiProviders.id))
         .where(inArray(aiModels.id, models));
 
     return await query;

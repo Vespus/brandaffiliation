@@ -4,6 +4,598 @@
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.translations": {
+      "name": "translations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "entity_type": {
+          "name": "entity_type",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entity_id": {
+          "name": "entity_id",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lang_code": {
+          "name": "lang_code",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "text_value": {
+          "name": "text_value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "translations_entity_type_entity_id_lang_code_key": {
+          "columns": [
+            "entity_type",
+            "entity_id",
+            "lang_code"
+          ],
+          "nullsNotDistinct": false,
+          "name": "translations_entity_type_entity_id_lang_code_key"
+        }
+      },
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.scales": {
+      "name": "scales",
+      "schema": "",
+      "columns": {
+        "label": {
+          "name": "label",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "scales_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "scale_group_id": {
+          "name": "scale_group_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.brand_scales": {
+      "name": "brand_scales",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "brand_scales_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "brand_id": {
+          "name": "brand_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "scale_id": {
+          "name": "scale_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "value": {
+          "name": "value",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "brand_scales_brand_id_fkey": {
+          "name": "brand_scales_brand_id_fkey",
+          "tableFrom": "brand_scales",
+          "tableTo": "brands",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "brand_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "brand_scales_scale_id_fkey": {
+          "name": "brand_scales_scale_id_fkey",
+          "tableFrom": "brand_scales",
+          "tableTo": "scales",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "scale_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": true
+    },
+    "public.scale_groups": {
+      "name": "scale_groups",
+      "schema": "",
+      "columns": {
+        "label": {
+          "name": "label",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_additional": {
+          "name": "is_additional",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "scale_groups_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.ai_settings_default": {
+      "name": "ai_settings_default",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "model": {
+          "name": "model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "temperature": {
+          "name": "temperature",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "top_p": {
+          "name": "top_p",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "max_tokens": {
+          "name": "max_tokens",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 4000
+        },
+        "frequency_penalty": {
+          "name": "frequency_penalty",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "presence_penalty": {
+          "name": "presence_penalty",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "prompt": {
+          "name": "prompt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ai_settings_default_model_fkey": {
+          "name": "ai_settings_default_model_fkey",
+          "tableFrom": "ai_settings_default",
+          "tableTo": "ai_models",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "model"
+          ],
+          "columnsTo": [
+            "model_name"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ai_settings_default_model_key": {
+          "columns": [
+            "model"
+          ],
+          "nullsNotDistinct": false,
+          "name": "ai_settings_default_model_key"
+        }
+      },
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.ai_settings_user": {
+      "name": "ai_settings_user",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "model": {
+          "name": "model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "temperature": {
+          "name": "temperature",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "top_p": {
+          "name": "top_p",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "max_tokens": {
+          "name": "max_tokens",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "frequency_penalty": {
+          "name": "frequency_penalty",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "presence_penalty": {
+          "name": "presence_penalty",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "prompt": {
+          "name": "prompt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ai_settings_user_model_fkey": {
+          "name": "ai_settings_user_model_fkey",
+          "tableFrom": "ai_settings_user",
+          "tableTo": "ai_models",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "model"
+          ],
+          "columnsTo": [
+            "model_name"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "ai_settings_user_user_id_fkey": {
+          "name": "ai_settings_user_user_id_fkey",
+          "tableFrom": "ai_settings_user",
+          "tableTo": "users",
+          "schemaTo": "auth",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ai_settings_user_user_id_model_key": {
+          "columns": [
+            "user_id",
+            "model"
+          ],
+          "nullsNotDistinct": false,
+          "name": "ai_settings_user_user_id_model_key"
+        }
+      },
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.ai_providers": {
+      "name": "ai_providers",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "ai_providers_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'255'"
+        },
+        "code": {
+          "name": "code",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'255'"
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ai_providers_code_key": {
+          "columns": [
+            "code"
+          ],
+          "nullsNotDistinct": false,
+          "name": "ai_providers_code_key"
+        }
+      },
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": true
+    },
+    "public.ai_models": {
+      "name": "ai_models",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "provider_id": {
+          "name": "provider_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "model_name": {
+          "name": "model_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ai_models_provider_id_fkey": {
+          "name": "ai_models_provider_id_fkey",
+          "tableFrom": "ai_models",
+          "tableTo": "ai_providers",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "provider_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ai_models_model_name_key": {
+          "columns": [
+            "model_name"
+          ],
+          "nullsNotDistinct": false,
+          "name": "ai_models_model_name_key"
+        }
+      },
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
     "public.characteristics": {
       "name": "characteristics",
       "schema": "",
@@ -11,7 +603,7 @@
         "id": {
           "name": "id",
           "type": "serial",
-          "primaryKey": false,
+          "primaryKey": true,
           "notNull": true
         },
         "brand_id": {
@@ -27,7 +619,40 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "similarity_gin": {
+          "name": "similarity_gin",
+          "columns": [
+            {
+              "expression": "value",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "gin_trgm_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        },
+        "similarity_gist": {
+          "name": "similarity_gist",
+          "columns": [
+            {
+              "expression": "value",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "gist_trgm_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gist",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "fk_brand": {
           "name": "fk_brand",
@@ -57,7 +682,7 @@
         "id": {
           "name": "id",
           "type": "serial",
-          "primaryKey": false,
+          "primaryKey": true,
           "notNull": true
         },
         "name": {
@@ -66,34 +691,9 @@
           "primaryKey": false,
           "notNull": true
         },
-        "attribute_price": {
-          "name": "attribute_price",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 0
-        },
-        "attribute_design": {
-          "name": "attribute_design",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "attribute_fame": {
-          "name": "attribute_fame",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "attribute_product_range": {
-          "name": "attribute_product_range",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "attribute_positioning": {
-          "name": "attribute_positioning",
-          "type": "integer",
+        "slug": {
+          "name": "slug",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": false
         }
@@ -105,14 +705,301 @@
       "checkConstraints": {},
       "policies": {},
       "isRLSEnabled": false
+    },
+    "public.user_prompts": {
+      "name": "user_prompts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "user_prompts_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "auth.uid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "prompt": {
+          "name": "prompt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_favorite": {
+          "name": "is_favorite",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "user_prompts_user_id_fkey": {
+          "name": "user_prompts_user_id_fkey",
+          "tableFrom": "user_prompts",
+          "tableTo": "users",
+          "schemaTo": "auth",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": true
+    },
+    "public.user_roles": {
+      "name": "user_roles",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "user_roles_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "app_role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "user_roles_user_id_fkey": {
+          "name": "user_roles_user_id_fkey",
+          "tableFrom": "user_roles",
+          "tableTo": "users",
+          "schemaTo": "auth",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "user_roles_user_id_role_key": {
+          "columns": [
+            "user_id",
+            "role"
+          ],
+          "nullsNotDistinct": false,
+          "name": "user_roles_user_id_role_key"
+        }
+      },
+      "checkConstraints": {},
+      "policies": {
+        "Allow auth admin to read user roles": {
+          "name": "Allow auth admin to read user roles",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "supabase_auth_admin"
+          ],
+          "using": "true"
+        }
+      },
+      "isRLSEnabled": false
     }
   },
-  "enums": {},
+  "enums": {
+    "public.app_role": {
+      "name": "app_role",
+      "values": [
+        "admin",
+        "moderator",
+        "user"
+      ],
+      "schema": "public"
+    }
+  },
   "schemas": {},
   "sequences": {},
   "roles": {},
   "policies": {},
-  "views": {},
+  "views": {
+    "public.brand_features": {
+      "name": "brand_features",
+      "schema": "public",
+      "columns": {
+        "brand_id": {
+          "name": "brand_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "all_features": {
+          "name": "all_features",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "isExisting": false,
+      "definition": "SELECT b.id AS brand_id, b.name, string_agg(lower(unaccent(c.value)), ' '::text) AS all_features FROM brands b JOIN characteristics c ON b.id = c.brand_id GROUP BY b.id, b.name",
+      "materialized": true
+    },
+    "public.brand_with_scales": {
+      "name": "brand_with_scales",
+      "schema": "public",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "price": {
+          "name": "price",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quality": {
+          "name": "quality",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "focus": {
+          "name": "focus",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "design": {
+          "name": "design",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "positioning": {
+          "name": "positioning",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "origin": {
+          "name": "origin",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "heritage": {
+          "name": "heritage",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "recognition": {
+          "name": "recognition",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "revenue": {
+          "name": "revenue",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "characteristic": {
+          "name": "characteristic",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "slug": {
+          "name": "slug",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "isExisting": false,
+      "definition": "SELECT brands.id, brands.name, max( CASE WHEN scales.label::text = 'price'::text THEN brand_scales.value ELSE NULL::real END) AS price, max( CASE WHEN scales.label::text = 'quality'::text THEN brand_scales.value ELSE NULL::real END) AS quality, max( CASE WHEN scales.label::text = 'focus'::text THEN brand_scales.value ELSE NULL::real END) AS focus, max( CASE WHEN scales.label::text = 'design'::text THEN brand_scales.value ELSE NULL::real END) AS design, max( CASE WHEN scales.label::text = 'positioning'::text THEN brand_scales.value ELSE NULL::real END) AS positioning, max( CASE WHEN scales.label::text = 'origin'::text THEN brand_scales.value ELSE NULL::real END) AS origin, max( CASE WHEN scales.label::text = 'heritage'::text THEN brand_scales.value ELSE NULL::real END) AS heritage, max( CASE WHEN scales.label::text = 'recognition'::text THEN brand_scales.value ELSE NULL::real END) AS recognition, max( CASE WHEN scales.label::text = 'revenue'::text THEN brand_scales.value ELSE NULL::real END) AS revenue, COALESCE(( SELECT jsonb_agg(jsonb_build_object('id', c.id, 'value', c.value)) AS jsonb_agg FROM characteristics c WHERE c.brand_id = brands.id), '[]'::jsonb) AS characteristic, brands.slug FROM brands LEFT JOIN brand_scales ON brands.id = brand_scales.brand_id LEFT JOIN scales ON brand_scales.scale_id = scales.id GROUP BY brands.id, brands.name",
+      "materialized": false
+    }
+  },
   "_meta": {
     "schemas": {},
     "tables": {},

@@ -1,17 +1,10 @@
-import {
-    createSearchParamsCache,
-    parseAsInteger,
-    parseAsString,
-    parseAsArrayOf
-} from "nuqs/server";
-import {getSortingStateParser} from "@/lib/datatable/parsers";
-import {
-    BrandWithCharacteristicAndScales,
-    brandWithScales,
-} from "@/db/schema";
-import {and, asc, count, desc, gte, ilike, lte} from "drizzle-orm";
-import {db} from "@/db";
-import {z} from "zod";
+import { db } from "@/db";
+import { brandWithScales, } from "@/db/schema";
+import { BrandWithCharacteristicAndScales } from "@/db/types";
+import { getSortingStateParser } from "@/lib/datatable/parsers";
+import { and, asc, count, desc, gte, ilike, lte } from "drizzle-orm";
+import { createSearchParamsCache, parseAsArrayOf, parseAsInteger, parseAsString } from "nuqs/server";
+import { z } from "zod";
 
 export const searchParamsCache = createSearchParamsCache({
     page: parseAsInteger.withDefault(1),
@@ -97,11 +90,11 @@ export const getBrands = async (input: Awaited<ReturnType<typeof searchParamsCac
         const scaleList = await tx.query.scales.findMany()
 
         const data = await tx.select()
-                .from(brandWithScales)
-                .where(where)
-                .orderBy(...orderBy)
-                .offset(offset)
-                .limit(input.perPage)
+            .from(brandWithScales)
+            .where(where)
+            .orderBy(...orderBy)
+            .offset(offset)
+            .limit(input.perPage)
 
         const total = await tx
             .select({

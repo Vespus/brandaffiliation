@@ -1,36 +1,32 @@
-import {relations} from "drizzle-orm/relations";
-import {aiModels, brands, brandScales, characteristic, provider, scales} from "./schema";
+import { relations } from "drizzle-orm/relations";
+import { aiModels, aiProviders, aiSettingsUser, brands, characteristics } from "./schema";
 
-export const characteristicRelations = relations(characteristic, ({one}) => ({
-    brand: one(brands, {
-        fields: [characteristic.brandId],
-        references: [brands.id]
+export const aiSettingsUserRelations = relations(aiSettingsUser, ({one}) => ({
+    aiModel: one(aiModels, {
+        fields: [aiSettingsUser.model],
+        references: [aiModels.modelName]
     }),
 }));
 
-export const brandRelations = relations(brands, ({many}) => ({
-    characteristic: many(characteristic),
-    brandScales: many(brandScales)
-}));
-
-export const brandScalesRelations = relations(brandScales, ({one}) => ({
-    brand: one(brands, {
-        fields: [brandScales.brandId],
-        references: [brands.id]
-    }),
-    scale: one(scales, {
-        fields: [brandScales.scaleId],
-        references: [scales.id]
-    }),
-}))
-
-export const providerRelations = relations(provider, ({many}) => ({
-    aiModels: many(aiModels),
-}))
-
-export const aiModelsRelations = relations(aiModels, ({one}) => ({
-    provider: one(provider, {
+export const aiModelsRelations = relations(aiModels, ({one, many}) => ({
+    aiSettingsUsers: many(aiSettingsUser),
+    aiProvider: one(aiProviders, {
         fields: [aiModels.providerId],
-        references: [provider.id]
-    })
-}))
+        references: [aiProviders.id]
+    }),
+}));
+
+export const aiProvidersRelations = relations(aiProviders, ({many}) => ({
+    aiModels: many(aiModels),
+}));
+
+export const characteristicsRelations = relations(characteristics, ({one}) => ({
+    brand: one(brands, {
+        fields: [characteristics.brandId],
+        references: [brands.id]
+    }),
+}));
+
+export const brandsRelations = relations(brands, ({many}) => ({
+    characteristics: many(characteristics),
+}));

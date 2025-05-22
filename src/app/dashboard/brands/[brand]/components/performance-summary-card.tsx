@@ -1,9 +1,9 @@
-import { BrandWithCharacteristicAndScales, Scale } from "@/db/schema";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { ChartBarBig } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { ScaleStrengths } from "./scale-strengths";
+import { BrandWithCharacteristicAndScales, Scale } from "@/db/types";
+import { ChartBarBig } from "lucide-react";
 import { Suspense } from "react";
+import { ScaleStrengths } from "./scale-strengths";
 import { ScaleStrengthsSkeleton } from "./skeletons/scale-strengths-skeleton";
 
 interface PerformanceSummaryCardProps {
@@ -37,7 +37,7 @@ export const PerformanceSummaryCard = ({brand, scales}: PerformanceSummaryCardPr
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                     {scales.map((scale) => (
-                        <Suspense key={scale.label} fallback={<ScaleStrengthsSkeleton />}>
+                        <Suspense key={scale.label} fallback={<ScaleStrengthsSkeleton/>}>
                             <ScaleStrengths scale={scale.label} brand={brand}/>
                         </Suspense>
                     ))}

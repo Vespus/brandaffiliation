@@ -1,7 +1,7 @@
 import { create } from 'zustand'
-import { AIModelWithProviderAndSettings } from "@/db/schema";
 import { CustomNodeType } from "@/app/dashboard/content-generation/flow-nodes/types";
 import { applyNodeChanges, OnEdgesChange, OnConnect, OnNodesChange, applyEdgeChanges, addEdge, Edge } from "@xyflow/react";
+import { AIModelWithProviderAndSettings } from '@/db/types';
 
 interface ContentGenerationStoreType {
     nodes: CustomNodeType[]

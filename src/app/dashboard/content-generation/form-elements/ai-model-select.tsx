@@ -68,7 +68,7 @@ export const AIModelSelect = ({value, onValueChange}: AIModelSelectType) => {
                        </span>
                         <div className="flex flex-col space-y-0.5 px-2">
                             <div className="flex items-center space-x-2">
-                                <ProviderIcon providerCode={model.provider.code}/>
+                                <ProviderIcon providerCode={model.aiProvider!.code!}/>
                                 <span>{model.name}</span>
                             </div>
                             {

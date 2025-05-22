@@ -1,11 +1,13 @@
 import {Sidebar} from "@/components/sidebar/sidebar";
 import {SidebarInset, SidebarProvider, SidebarTrigger} from "@/components/ui/sidebar";
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 export default async function DashboardLayout({children}: Readonly<{ children: React.ReactNode; }>) {
-    const session = await auth();
-
+    const session = await auth.api.getSession({
+        headers: await headers() // you need to pass the headers object.
+    })
     if(!session?.user) {
         redirect("/auth/sign-in")
     }
