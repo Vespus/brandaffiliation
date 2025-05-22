@@ -24,7 +24,8 @@ export const SignupForm = () => {
         resolver: zodResolver(loginSchema),
         defaultValues: {
             email: "",
-            password: ''
+            password: '',
+            name: ""
         },
     })
 
