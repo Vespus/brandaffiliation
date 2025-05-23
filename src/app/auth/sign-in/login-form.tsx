@@ -67,7 +67,15 @@ export const LoginForm = () => {
                     name="password"
                     render={({field}) => (
                         <FormItem>
-                            <FormLabel>Password</FormLabel>
+                            <div className="flex items-center">
+                                <FormLabel htmlFor="password">Password</FormLabel>
+                                <a
+                                    href="#"
+                                    className="ml-auto text-sm underline-offset-4 hover:underline"
+                                >
+                                    Forgot your password?
+                                </a>
+                            </div>
                             <FormControl>
                                 <Input placeholder="*********" type="password" {...field} />
                             </FormControl>
@@ -75,13 +83,13 @@ export const LoginForm = () => {
                         </FormItem>
                     )}
                 />
-                <Link
-                    href="/auth/forgot-password"
-                    className="text-sm text-muted-foreground self-end"
-                >
-                    Forgot Password?
-                </Link>
                 <Button type="submit" loading={loading} className="w-full">Continue</Button>
+                <div className="text-center text-sm">
+                    Don&apos;t have an account?{" "}
+                    <Link href="/auth/sign-up" className="underline underline-offset-4">
+                        Sign up
+                    </Link>
+                </div>
             </form>
 
         </Form>

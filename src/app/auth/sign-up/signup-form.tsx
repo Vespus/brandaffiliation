@@ -61,7 +61,7 @@ export const SignupForm = () => {
                         <FormItem>
                             <FormLabel>Name</FormLabel>
                             <FormControl>
-                                <Input placeholder="Enter your name" {...field} />
+                                <Input placeholder="Enter your name" autoComplete="name" {...field} />
                             </FormControl>
                             <FormMessage/>
                         </FormItem>
