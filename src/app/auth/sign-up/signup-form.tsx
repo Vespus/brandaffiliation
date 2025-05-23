@@ -3,11 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { env } from "@/env";
 import { authClient } from "@/lib/auth-client";
-import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -21,7 +18,6 @@ const loginSchema = z.object({
 
 export const SignupForm = () => {
     const [loading, setLoading] = useState(false);
-    const [token, setToken] = useState("");
 
     const captchaRef = useRef(null);
 
@@ -41,34 +37,21 @@ export const SignupForm = () => {
             email, // user email address
             password, // user password -> min 8 characters by default
             name, // user display name
-            fetchOptions: {
-                headers: {
-                    "x-captcha-response": token
-                }
-            },
             callbackURL: "/dashboard",
         }, {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
+
             onResponse: () => {
                 setLoading(false);
             },
             onSuccess: () => {
                 toast.success('Account created successfully. Check your email for verification.');
             },
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
+
             onError: (ctx) => {
                 toast.error(ctx.error.message)
             },
         });
     }
-
-    const onLoad = () => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
-        captchaRef.current!.execute();
-    };
 
     return (
         <Form {...form} >
@@ -111,13 +94,6 @@ export const SignupForm = () => {
                             <FormMessage/>
                         </FormItem>
                     )}
-                />
-                <HCaptcha
-                    sitekey={env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
-                    onLoad={onLoad}
-                    languageOverride="auto"
-                    onVerify={(token) => setToken(token)}
-                    ref={captchaRef}
                 />
                 <Button type="submit" loading={loading || !captchaRef} className="w-full">Sign Up</Button>
             </form>
