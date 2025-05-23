@@ -21,7 +21,8 @@ export const auth = betterAuth({
     trustedOrigins: [
         'http://localhost:3000',
         'https://brandaffiliation.vercel.app',
-        "https://*adepauli-depaulicoms-projects.vercel.app"
+        "https://*adepauli-depaulicoms-projects.vercel.app",
+        env.HOSTNAME!
     ],
     secret: env.BETTER_AUTH_SECRET,
     emailAndPassword: {
