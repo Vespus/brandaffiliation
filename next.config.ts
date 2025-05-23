@@ -14,9 +14,8 @@ const nextConfig: NextConfig = {
         remotePatterns: [
             {
                 protocol: 'https',
-                hostname: 'res.cloudinary.com',
-                port: '',
-                pathname: '/**',
+                hostname: "0vnr1azfmv.ufs.sh",
+                pathname: "/f/*",
             },
         ]
     }
