@@ -2,7 +2,7 @@ import { ContentGenerateSchema } from "@/app/dashboard/content-generation/schema
 import { formatPrompt } from "@/app/dashboard/content-generation/utils";
 import { db } from "@/db";
 import { aiModels, brands as brandTable, brandWithScales, translations, userPrompts } from "@/db/schema";
-import { createClient } from "@/db/supabase";
+import { getUser } from "@/lib/get-user";
 import { createTRPCRouter, publicProcedure } from "@/lib/trpc/trpc";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
@@ -61,10 +61,10 @@ export const genericRoute = createTRPCRouter({
         }),
     getUserPrompts: publicProcedure
         .query(async () => {
-            const {error, data: {user}} = await (await createClient()).auth.getUser();
+            const {user} = await getUser()
 
-            if(error) {
-                throw error
+            if (!user) {
+                throw Error("User not found")
             }
 
             return await db.query.userPrompts.findMany({where: eq(userPrompts.userId, user!.id)})

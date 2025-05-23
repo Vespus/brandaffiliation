@@ -5,6 +5,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { Resend } from 'resend';
 import { VerificationEmail } from "@/lib/emails/verification-email";
+import { captcha } from "better-auth/plugins";
 
 const resend = new Resend("re_SFCA4zkL_DoScwtVxwMBajhkn1P6r4BEw");
 
@@ -35,6 +36,10 @@ export const auth = betterAuth({
         expiresIn: 3600
     },
     plugins: [
-        nextCookies()
+        nextCookies(),
+        captcha({
+            provider: "hcaptcha", // or google-recaptcha, hcaptcha
+            secretKey: process.env.HCATPCHA_TOKEN!,
+        }),
     ]
 })

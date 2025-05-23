@@ -3,10 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { env } from "@/env";
 import { authClient } from "@/lib/auth-client";
+import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -19,7 +21,10 @@ const loginSchema = z.object({
 
 export const SignupForm = () => {
     const [loading, setLoading] = useState(false);
-    const router = useRouter()
+    const [token, setToken] = useState("");
+
+    const captchaRef = useRef(null);
+
     const form = useForm({
         resolver: zodResolver(loginSchema),
         defaultValues: {
@@ -30,26 +35,40 @@ export const SignupForm = () => {
     })
 
     const onSubmit = async ({name, email, password}: z.infer<typeof loginSchema>) => {
+        setLoading(true);
+
         await authClient.signUp.email({
             email, // user email address
             password, // user password -> min 8 characters by default
             name, // user display name
-            callbackURL: "/dashboard" // A URL to redirect to after the user verifies their email (optional)
-        }, {
-            onRequest: () => {
-                setLoading(true);
+            fetchOptions: {
+                headers: {
+                    "x-captcha-response": token
+                }
             },
+            callbackURL: "/dashboard",
+        }, {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
             onResponse: () => {
                 setLoading(false);
             },
             onSuccess: () => {
-                toast.success('Account created successfully');
+                toast.success('Account created successfully. Check your email for verification.');
             },
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
             onError: (ctx) => {
                 toast.error(ctx.error.message)
             },
         });
     }
+
+    const onLoad = () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        captchaRef.current!.execute();
+    };
 
     return (
         <Form {...form} >
@@ -93,7 +112,14 @@ export const SignupForm = () => {
                         </FormItem>
                     )}
                 />
-                <Button type="submit" loading={loading} className="w-full">Sign Up</Button>
+                <HCaptcha
+                    sitekey={env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
+                    onLoad={onLoad}
+                    languageOverride="auto"
+                    onVerify={(token) => setToken(token)}
+                    ref={captchaRef}
+                />
+                <Button type="submit" loading={loading || !captchaRef} className="w-full">Sign Up</Button>
             </form>
         </Form>
     )

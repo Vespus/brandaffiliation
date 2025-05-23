@@ -1,6 +1,6 @@
-import { createClient } from "@/db/supabase";
 import { db } from "@/db/index";
 import { auth } from "@/lib/auth";
+import { getUser } from "@/lib/get-user";
 import { and, eq, getTableColumns, inArray, sql } from "drizzle-orm";
 import {
     aiModels,
@@ -73,7 +73,7 @@ export const getDefaultSettings = async (model?: string) => {
 }
 
 export const getAIModelsWithProviderAndSettings = async (models: number[]): Promise<AIModelWithProviderAndSettings[]> => {
-    const user = await (await createClient()).auth.getUser();
+    const {user} = await getUser();
 
     const query = db
         .select({
@@ -89,7 +89,7 @@ export const getAIModelsWithProviderAndSettings = async (models: number[]): Prom
             aiSettingsUser,
             and(
                 eq(aiSettingsDefault.model, aiSettingsUser.model),
-                !user.error ? eq(aiSettingsUser.userId, user.data.user.id) : undefined
+                user ? eq(aiSettingsUser.userId, user.id) : undefined
             )
         )
         .innerJoin(aiProviders, eq(aiModels.providerId, aiProviders.id))
