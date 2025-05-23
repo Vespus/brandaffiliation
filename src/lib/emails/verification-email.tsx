@@ -14,41 +14,28 @@ import {
 } from '@react-email/components';
 
 interface BrandAffiliationVerificationEmailProps {
-    token?: string;
+    url?: string;
 }
 
-const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : '';
-
 export const VerificationEmail = ({
-                                      token,
+                                      url
                                   }: BrandAffiliationVerificationEmailProps) => (
     <Html>
         <Head/>
         <Body style={main}>
-            <Preview>Your login code for BrandAffiliation</Preview>
+            <Preview>Verify your BrandAffiliation account</Preview>
             <Container style={container}>
-                <Img
-                    src={`${baseUrl}/static/linear-logo.png`}
-                    width="42"
-                    height="42"
-                    alt="BrandAffiliation"
-                    style={logo}
-                />
-                <Heading style={heading}>Your login code for BrandAffiliation</Heading>
+                <Heading style={heading}>Verify your BrandAffiliation account</Heading>
                 <Section style={buttonContainer}>
-                    <Button style={button} href="https://linear.app">
-                        Login to BrandAffiliation
+                    <Button style={button} href={url}>
+                        Verify Account
                     </Button>
                 </Section>
                 <Text style={paragraph}>
-                    This link and code will only be valid for the next 5 minutes. If the
-                    link does not work, you can use the login verification code directly:
+                    This verification link will only be valid for the next 5 minutes.
                 </Text>
-                <code style={code}>{validationCode}</code>
                 <Hr style={hr}/>
-                <Link href="https://linear.app" style={reportLink}>
+                <Link href="https://brandaffiliation.vercel.app/" style={reportLink}>
                     BrandAffiliation
                 </Link>
             </Container>

@@ -1,4 +1,4 @@
-import { AIModelItem } from "@/app/dashboard/configure/ai-model-item";
+import { AiModelItem } from "@/app/dashboard/configure/ai-model-item";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { db } from "@/db";
@@ -47,7 +47,7 @@ export const AIModels = async () => {
                     <TableBody>
                         {
                             AIModels.map((model) => (
-                                <AIModelItem
+                                <AiModelItem
                                     key={model.id}
                                     model={model}
                                     settings={settingsMap.get(model.modelName)!}

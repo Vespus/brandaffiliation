@@ -63,7 +63,6 @@ export const ManageForm = ({data, defaultConfig, model}: {
                     <TabsList className="grid grid-cols-3 mb-4 w-full">
                         <TabsTrigger value="general">General</TabsTrigger>
                         <TabsTrigger value="advanced">Advanced</TabsTrigger>
-                        <TabsTrigger value="system">System Prompt</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="general">
@@ -242,35 +241,6 @@ export const ManageForm = ({data, defaultConfig, model}: {
                                                 text so
                                                 far. Higher values encourage the model to talk about new topics.
                                             </FormDescription>
-                                            <FormMessage/>
-                                        </FormItem>
-                                    )}
-                                />
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-                    <TabsContent value="system">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>System Prompt</CardTitle>
-                                <CardDescription>Set a system prompt to guide the model&#39;s
-                                    behavior.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <FormField
-                                    control={form.control}
-                                    name="prompt"
-                                    render={({field}) => (
-                                        <FormItem>
-                                            <FormLabel>System Prompt</FormLabel>
-                                            <FormControl>
-                                                <Textarea
-                                                    className="resize-none"
-                                                    rows={24}
-                                                    placeholder="You are a helpful assistant..."
-                                                    {...field}
-                                                />
-                                            </FormControl>
                                             <FormMessage/>
                                         </FormItem>
                                     )}

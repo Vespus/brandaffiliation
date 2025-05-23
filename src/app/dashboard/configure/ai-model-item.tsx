@@ -1,21 +1,21 @@
 "use client"
 
-import {TableCell, TableRow} from "@/components/ui/table";
+import { TableCell, TableRow } from "@/components/ui/table";
 import { AIModel, AIProvider, AISetting } from "@/db/types";
 import { cn } from "@/lib/utils";
-import {useRouter} from "next/navigation";
-import {Badge} from "@/components/ui/badge";
-import {Button} from "@/components/ui/button";
-import {Settings} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Settings } from "lucide-react";
 
 type AIModelItemType = {
     model: AIModel & {
-       aiProvider: Pick<AIProvider, "name" | "code">
+        aiProvider: Pick<AIProvider, "name" | "code">
     },
     settings: AISetting
 }
 
-export const AIModelItem = ({model, settings}: AIModelItemType) => {
+export const AiModelItem = ({model, settings}: AIModelItemType) => {
     const router = useRouter()
 
     const handleModelSelect = () => {
@@ -46,7 +46,7 @@ export const AIModelItem = ({model, settings}: AIModelItemType) => {
                     onClick={handleModelSelect}
                     className="h-8 w-8"
                 >
-                    <Settings className="h-4 w-4" />
+                    <Settings className="h-4 w-4"/>
                     <span className="sr-only">Configure {model.name}</span>
                 </Button>
             </TableCell>

@@ -12,7 +12,6 @@ export default async function DashboardLayout({children}: Readonly<{ children: R
         redirect("/auth/sign-in")
     }
 
-    console.log(session.user)
     return (
         <SidebarProvider className="h-0">
             <Sidebar user={session.user}/>
