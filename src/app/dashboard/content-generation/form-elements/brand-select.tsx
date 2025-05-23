@@ -64,9 +64,9 @@ export const BrandSelect = ({value, onValueChange}: BrandSelect) => {
                                     <div className="flex flex-col space-y-1">
                                         <span>{brand.name}</span>
                                         {
-                                            brand.characteristic[0] &&
+                                            brand.characteristics[0] &&
                                             <span
-                                                className="text-muted-foreground text-xs">{brand.characteristic[0].value}</span>
+                                                className="text-muted-foreground text-xs">{brand.characteristics[0].value}</span>
                                         }
                                     </div>
                                 </CommandItem>

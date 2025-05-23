@@ -1,9 +1,9 @@
-import {AIModelWithProvider, BrandWithCharacteristicAndScales} from "@/db/schema";
-import {getTranslations, getFormatter, getLocale} from 'next-intl/server';
-import {createOpenAI, openai} from "@ai-sdk/openai";
-import {createAnthropic} from "@ai-sdk/anthropic";
-import {db} from "@/db";
-import {roundBothWays} from "@/utils/round-both-ways";
+import { getTranslations, getLocale } from 'next-intl/server';
+import { createOpenAI, openai } from "@ai-sdk/openai";
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { get } from 'es-toolkit/compat';
+import { roundBothWays } from "@/utils/round-both-ways";
+import { AIModelWithProvider, BrandWithCharacteristicAndScales } from "@/db/types";
 
 export const getDriver = (modelWithProvider: AIModelWithProvider) => {
     switch (modelWithProvider.provider.code) {
@@ -29,33 +29,35 @@ export const formatPrompt = async ({category, season, brand, prompt}: {
     prompt: string
 }) => {
     const locale = await getLocale();
-
     const t = await getTranslations({locale});
-    const format = await getFormatter({locale})
-    const scales = await db.query.scales.findMany()
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const {characteristic, id, slug, name, ...scales} = brand || {}
 
-    const featuresMap = new Map()
+    const dataSource = {
+        form: {
+            season,
+            category
+        },
+        brand: {
+            name,
+            scales: Object.entries(scales).map(([key, value], index) => {
+                const andLabel = t("generic.and")
+                const scaleLabel = t(`scale.${key}`)
+                const scaleValues = roundBothWays(value as number || 0)
+                const scaleLabels = scaleValues.map((v) => t(`scale_value.${key}_${v}`)).join(` ${andLabel} `)
 
-    if(brand.characteristic){
-        featuresMap.set("Markenattribute", format.list(brand.characteristic?.map(x => x.value)))
+                return `${index === 0 ? '\t' : ''}- ${scaleLabel}: ${scaleLabels}`
+            }).join("\n\t"),
+            characteristics: characteristic?.map((char, index) => `${index === 0 ? '\t' : ''}- ${char.value}`).join("\n\t"),
+        }
     }
 
-    scales.forEach((scale) => {
-        const brandScale = brand[scale.label as keyof BrandWithCharacteristicAndScales] as number
-        if(brandScale){
-            const values = format.list(
-                roundBothWays(brandScale).map(x => t(`scale_value.${scale.label}_${x}`))
-            )
-            featuresMap.set(t(`scale.${scale.label}`), values)
+    return prompt.replace(/\{([a-zA-Z0-9_.]+)\}/g,
+        (_, match: string) => {
+            const value = get(dataSource, match)
+            if (value) return value
+
+            return _
         }
-    })
-
-
-    const brandFeatures = [...featuresMap].map(([key, value]) => `- ${key}: ${value}`).join("\n\t")
-
-    return prompt
-        .replace("{category}", category)
-        .replace("{season}", season)
-        .replace("{brand}", brand.name)
-        .replace("{brandFeatures}", brandFeatures)
+    )
 }

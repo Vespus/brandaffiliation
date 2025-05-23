@@ -1,33 +1,20 @@
-/*
-import {clerkMiddleware, createRouteMatcher} from '@clerk/nextjs/server'
+import type { auth } from "@/lib/auth";
+import { type NextRequest, NextResponse } from "next/server";
 
-const isProtectedRoute = createRouteMatcher(["/dashboard(.*)"]);
+type Session = typeof auth.$Infer.Session;
 
-export default clerkMiddleware(async (auth, req) => {
-    if (isProtectedRoute(req)) await auth.protect();
-});
-
-export const config = {
-    matcher: [
-        // Skip Next.js internals and all static files, unless found in search params
-        '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-        // Always run for API routes
-        '/(api|trpc)(.*)',
-    ],
-}*/
-
-import { type NextRequest } from "next/server";
-import { updateSession } from "@/utils/supabase/middleware";
-
-export async function middleware(request: NextRequest) {
-    return await updateSession(request);
+export default async function middleware(request: NextRequest) {
+    const response = await fetch(`${request.nextUrl.origin}/api/auth/get-session`, {
+        headers: {
+            cookie: request.headers.get('cookie') || ""
+        }
+    })
+    const session = await response.json() as Session
+    return NextResponse.next();
 }
 
 export const config = {
     matcher: [
-
-        '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-        // Always run for API routes
-        '/(api|trpc)(.*)',
+        "/((?!api|_next/static|_next/image|public/|favicon.ico|robots.txt|sitemap.xml|manifest.json|.well-known).*)",
     ],
 };

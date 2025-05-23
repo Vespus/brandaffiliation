@@ -1,18 +1,13 @@
 "use client";
 
-import { BrandWithCharacteristicAndScales } from "@/db/schema";
-import { ColumnDef, RowData } from "@tanstack/react-table";
-import {
-    ArrowBigRightDash, ArrowRight,
-    StarIcon,
-    Text,
-} from "lucide-react";
-import * as React from "react";
-
 import { DataTableColumnHeader } from "@/components/datatable/data-table-column-header";
-import { SimpleRating } from "@/components/ui/simple-rating";
-import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { SimpleRating } from "@/components/ui/simple-rating";
+import { BrandWithCharacteristicAndScales } from "@/db/types";
+import { ColumnDef, RowData } from "@tanstack/react-table";
+import { ArrowBigRightDash, ArrowRight, StarIcon, Text, } from "lucide-react";
+import Link from "next/link";
+import * as React from "react";
 
 declare module '@tanstack/react-table' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -28,8 +23,9 @@ export function getBranchTableColumns(): ColumnDef<BrandWithCharacteristicAndSca
             header: () => "",
             cell: ({row}) => {
                 return (
-                    <Link href={`/dashboard/brands/${row.original.slug}`} className={buttonVariants({variant: "ghost", size: "icon"})}>
-                        <ArrowRight />
+                    <Link href={`/dashboard/brands/${row.original.slug}`}
+                          className={buttonVariants({variant: "ghost", size: "icon"})}>
+                        <ArrowRight/>
                     </Link>
                 )
             },

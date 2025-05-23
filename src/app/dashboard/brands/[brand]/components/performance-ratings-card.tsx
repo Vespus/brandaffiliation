@@ -1,7 +1,7 @@
-import { BrandWithCharacteristicAndScales, Scale } from "@/db/schema";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { ChartAreaIcon } from "lucide-react";
 import { SimpleRating } from "@/components/ui/simple-rating";
+import { BrandWithCharacteristicAndScales, Scale } from "@/db/types";
+import { ChartAreaIcon } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 
 interface PerformanceRatingsCardProps {

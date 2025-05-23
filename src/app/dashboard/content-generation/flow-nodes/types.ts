@@ -1,5 +1,5 @@
 import type { BuiltInNode, Node } from '@xyflow/react';
-import { AIModelWithProviderAndSettings } from "@/db/schema";
+import { AIModelWithProviderAndSettings } from "@/db/types";
 
 export type AIStreamNodeType = Node<{
     model: AIModelWithProviderAndSettings

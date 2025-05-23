@@ -1,6 +1,6 @@
-import { BrandWithCharacteristicAndScales } from "@/db/schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { BrandWithCharacteristicAndScales } from "@/db/types";
 import { ArrowBigRightDash } from "lucide-react";
 
 interface BrandInfoCardProps {

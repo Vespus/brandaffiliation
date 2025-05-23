@@ -8,5 +8,4 @@ export const AISettingsSaveSchema = z.object({
     topP: z.number().min(0).max(1),
     frequencyPenalty: z.number().min(-2).max(2),
     presencePenalty: z.number().min(-2).max(2),
-    prompt: z.string(),
 })

@@ -1,11 +1,11 @@
 import {Suspense} from "react";
-import {AIModels} from "@/app/dashboard/configure/ai-models";
+import {Models} from "@/app/dashboard/configure/models";
 
 export default async function BrandsPage() {
     return (
         <div className="max-w-4xl">
             <Suspense>
-                <AIModels />
+                <Models />
             </Suspense>
         </div>
     );

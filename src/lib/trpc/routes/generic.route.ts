@@ -1,28 +1,20 @@
-import {createTRPCRouter, publicProcedure} from "@/lib/trpc/trpc";
-import {db} from "@/db";
-import {eq} from "drizzle-orm";
-import {
-    aiModels,
-    brands as brandTable,
-    BrandWithCharacteristic,
-    BrandWithCharacteristicAndScales, brandWithScales,
-    translations, userPrompts
-} from "@/db/schema";
-import {z} from "zod";
-import {AISetting, getAISettings} from "@/db/presets";
-import {formatPrompt} from "@/app/dashboard/content-generation/utils";
-import {createClient} from "@/db/supabase";
+import { ContentGenerateSchema } from "@/app/dashboard/content-generation/schema";
+import { formatPrompt } from "@/app/dashboard/content-generation/utils";
+import { db } from "@/db";
+import { aiModels, brands as brandTable, brandWithScales, translations, userPrompts } from "@/db/schema";
+import { getUser } from "@/lib/get-user";
+import { createTRPCRouter, publicProcedure } from "@/lib/trpc/trpc";
+import { eq } from "drizzle-orm";
+import { z } from "zod";
 
 export const genericRoute = createTRPCRouter({
     getBrandsWithCharacteristics: publicProcedure
         .query(async () => {
-            const brands = await db.query.brands.findMany({
+            return db.query.brands.findMany({
                 with: {
-                    characteristic: true
+                    characteristics: true
                 }
-            })
-
-            return brands
+            });
         }),
     getCategories: publicProcedure
         .query(async () => {
@@ -30,19 +22,19 @@ export const genericRoute = createTRPCRouter({
         }),
     getAIModels: publicProcedure
         .query(async () => {
-            return await db.query.aiModels.findMany({
+            return db.query.aiModels.findMany({
                 where: (
                     eq(aiModels.isActive, true)
                 ),
                 with: {
-                    provider: {
+                    aiProvider: {
                         columns: {
                             name: true,
                             code: true
                         }
                     }
                 }
-            })
+            });
         }),
     getPrompt: publicProcedure
         .input(z.object({
@@ -69,10 +61,10 @@ export const genericRoute = createTRPCRouter({
         }),
     getUserPrompts: publicProcedure
         .query(async () => {
-            const {error, data: {user}} = await (await createClient()).auth.getUser();
+            const {user} = await getUser()
 
-            if(error) {
-                throw error
+            if (!user) {
+                throw Error("User not found")
             }
 
             return await db.query.userPrompts.findMany({where: eq(userPrompts.userId, user!.id)})
@@ -82,4 +74,26 @@ export const genericRoute = createTRPCRouter({
         .query(async ({input}) => {
             return await db.query.translations.findFirst({where: eq(translations.id, input.id)})
         }),
+    getBrand: publicProcedure
+        .input(z.number())
+        .query(async ({input}) => {
+            const [brand] = await db.select().from(brandWithScales).where(eq(brandWithScales.id, input))
+
+            if (!brand) {
+                throw new Error("Brand not found")
+            }
+
+            return brand
+        }),
+    promptPreview: publicProcedure
+        .input(ContentGenerateSchema)
+        .query(async ({input}) => {
+            const [brand] = await db.select().from(brandWithScales).where(eq(brandWithScales.id, input.brand))
+            return formatPrompt({
+                category: input.category,
+                season: input.season,
+                brand: brand,
+                prompt: input.customPrompt
+            })
+        })
 })

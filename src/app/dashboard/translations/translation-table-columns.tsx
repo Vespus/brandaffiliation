@@ -1,12 +1,11 @@
 "use client";
 
-import { Translation } from "@/db/schema";
-import type { ColumnDef } from "@tanstack/react-table";
-import {Text, Hash, FileText, Pencil, Trash2} from "lucide-react";
-import * as React from "react";
-
 import { DataTableColumnHeader } from "@/components/datatable/data-table-column-header";
 import { Button } from "@/components/ui/button";
+import { Translation } from "@/db/types";
+import type { ColumnDef } from "@tanstack/react-table";
+import { FileText, Hash, Pencil, Text, Trash2 } from "lucide-react";
+import * as React from "react";
 
 export function getTranslationTableColumns(
     onEdit: (translation: Translation) => void,
@@ -17,10 +16,10 @@ export function getTranslationTableColumns(
         {
             id: "entityType",
             accessorKey: "entityType",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Entity Type" />
+            header: ({column}) => (
+                <DataTableColumnHeader column={column} title="Entity Type"/>
             ),
-            cell: ({ row }) => <div className="min-w-20">{row.getValue("entityType")}</div>,
+            cell: ({row}) => <div className="min-w-20">{row.getValue("entityType")}</div>,
             enableSorting: true,
             enableHiding: false,
             meta: {
@@ -34,10 +33,10 @@ export function getTranslationTableColumns(
         {
             id: "entityId",
             accessorKey: "entityId",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Entity ID" />
+            header: ({column}) => (
+                <DataTableColumnHeader column={column} title="Entity ID"/>
             ),
-            cell: ({ row }) => <div className="min-w-20">{row.getValue("entityId")}</div>,
+            cell: ({row}) => <div className="min-w-20">{row.getValue("entityId")}</div>,
             enableSorting: true,
             enableHiding: false,
             meta: {
@@ -51,10 +50,10 @@ export function getTranslationTableColumns(
         {
             id: "langCode",
             accessorKey: "langCode",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Language" />
+            header: ({column}) => (
+                <DataTableColumnHeader column={column} title="Language"/>
             ),
-            cell: ({ row }) => <div className="min-w-20">{row.getValue("langCode")}</div>,
+            cell: ({row}) => <div className="min-w-20">{row.getValue("langCode")}</div>,
             enableSorting: true,
             enableHiding: false,
             meta: {
@@ -75,10 +74,10 @@ export function getTranslationTableColumns(
         {
             id: "textValue",
             accessorKey: "textValue",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Text" />
+            header: ({column}) => (
+                <DataTableColumnHeader column={column} title="Text"/>
             ),
-            cell: ({ row }) => (
+            cell: ({row}) => (
                 <div className="max-w-[200px] truncate">{row.getValue("textValue")}</div>
             ),
             enableSorting: true,
@@ -94,7 +93,7 @@ export function getTranslationTableColumns(
         {
             id: "actions",
             header: () => <div className="text-right">Actions</div>,
-            cell: ({ row }) => {
+            cell: ({row}) => {
                 const translation = row.original;
 
                 return (

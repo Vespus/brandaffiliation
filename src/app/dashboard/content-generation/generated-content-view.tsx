@@ -5,7 +5,7 @@ import {
     ReactFlow,
     Background,
     Controls,
-    Edge, useReactFlow
+    useReactFlow
 } from '@xyflow/react';
 import { useCallback, useEffect, } from "react";
 import { AIStreamNode } from "@/app/dashboard/content-generation/flow-nodes/ai-stream-node";
@@ -13,7 +13,6 @@ import { AIStreamNode } from "@/app/dashboard/content-generation/flow-nodes/ai-s
 import '@xyflow/react/dist/style.css';
 import { CustomNodeType } from "@/app/dashboard/content-generation/flow-nodes/types";
 import ELK, { ElkNode, LayoutOptions } from 'elkjs/lib/elk.bundled.js';
-import { Button } from "@/components/ui/button";
 
 const nodeTypes = {"ai-stream": AIStreamNode};
 
@@ -99,4 +98,3 @@ const ActualFlow = () => {
         </>
     )
 }
-

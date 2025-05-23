@@ -1,10 +1,5 @@
 "use client";
 
-import {BrandWithCharacteristicAndScales} from "@/db/schema";
-import type { Table } from "@tanstack/react-table";
-import { Download } from "lucide-react";
-import * as React from "react";
-
 import {
     DataTableActionBar,
     DataTableActionBarAction,
@@ -12,13 +7,17 @@ import {
 } from "@/components/datatable/data-table-action-bar";
 
 import { Separator } from "@/components/ui/separator";
+import { BrandWithCharacteristicAndScales } from "@/db/types";
 import { exportTableToCSV } from "@/lib/datatable/export";
+import type { Table } from "@tanstack/react-table";
+import { Download } from "lucide-react";
+import * as React from "react";
 
 interface BrandTableActionBarProps {
     table: Table<BrandWithCharacteristicAndScales>;
 }
 
-export function BrandTableActionBar({ table }: BrandTableActionBarProps) {
+export function BrandTableActionBar({table}: BrandTableActionBarProps) {
     const rows = table.getFilteredSelectedRowModel().rows;
     const [isPending, startTransition] = React.useTransition();
     const [currentAction, setCurrentAction] = React.useState<string | null>(null);
@@ -41,7 +40,7 @@ export function BrandTableActionBar({ table }: BrandTableActionBarProps) {
 
     return (
         <DataTableActionBar table={table} visible={rows.length > 0}>
-            <DataTableActionBarSelection table={table} />
+            <DataTableActionBarSelection table={table}/>
             <Separator
                 orientation="vertical"
                 className="hidden data-[orientation=vertical]:h-5 sm:block"
@@ -53,7 +52,7 @@ export function BrandTableActionBar({ table }: BrandTableActionBarProps) {
                     isPending={getIsActionPending("export")}
                     onClick={onTaskExport}
                 >
-                    <Download />
+                    <Download/>
                 </DataTableActionBarAction>
             </div>
         </DataTableActionBar>

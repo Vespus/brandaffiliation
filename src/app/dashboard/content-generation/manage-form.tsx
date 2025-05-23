@@ -5,31 +5,28 @@ import {ContentGenerateSchema, ContentGenerationStep1Schema} from "@/app/dashboa
 import {z} from "zod";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {useState} from "react";
-import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
 import {Stepper, StepperIndicator, StepperItem, StepperSeparator, StepperTrigger} from "@/components/ui/stepper";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
 import {AnimatePresence, motion} from "motion/react";
 import {BrandSelect} from "@/app/dashboard/content-generation/form-elements/brand-select";
-import {Textarea} from "@/components/ui/textarea";
 import {Button} from "@/components/ui/button";
 import {ArrowLeft, ArrowRight, CloudRainIcon, Sparkles, SunIcon} from "lucide-react";
 import {CategorySelect} from "@/app/dashboard/content-generation/form-elements/category-select";
 import {AIModelSelect} from "@/app/dashboard/content-generation/form-elements/ai-model-select";
 import {PromptArea} from "@/app/dashboard/content-generation/form-elements/prompt-area";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
-import {useCustomAction} from "@/hooks/use-custom-action";
 import {CompletionStream} from "@/app/dashboard/content-generation/actions";
 import {readStreamableValue} from "ai/rsc";
 import {useContentGenerationStore} from "@/app/dashboard/content-generation/store";
-import { GeneratedContentView } from "@/app/dashboard/content-generation/generated-content-view";
 
 
 const steps = [1, 2]
-const defaultSystemPrompt = `Erstelle einen SEO-optimierten Produktkategorietext für {category} von {brand} für die {season}-Saison mit ca. 200–250 Wörtern.
+const defaultSystemPrompt = `Erstelle einen SEO-optimierten Produktkategorietext für {form.category} von {brand.name} für die {form.season}-Saison mit ca. 200–250 Wörtern.
 
 1. Verwende deine eigenen Kenntnisse über die Marke als Basis.
 2. Als Ergänzung dienen dir diese Informationen:
-{brandFeatures}
+{brand.characteristics}
+{brand.scales}
 
 Textstruktur:
 1. Einleitung (1–2 Sätze): 
@@ -90,203 +87,182 @@ export const ManageForm = () => {
     }
 
     return (
-        <>
-            <Card className="h-full w-full max-w-lg flex-none gap-0 overflow-hidden border-0 border-b py-0 shadow-none">
-                <CardHeader className="py-6">
-                    <div className="mb-2 flex items-center justify-between">
-                        <CardTitle>Generate SEO Content</CardTitle>
-                        <div className="flex w-24 items-center gap-2">
-                            <Stepper value={currentStep} onValueChange={setCurrentStep}>
-                                {steps.map((step) => (
-                                    <StepperItem key={step} step={step} className="not-last:flex-1">
-                                        <StepperTrigger asChild className="size-8">
-                                            <StepperIndicator/>
-                                        </StepperTrigger>
-                                        {step < steps.length && <StepperSeparator/>}
-                                    </StepperItem>
-                                ))}
-                            </Stepper>
-                        </div>
+        <div className="flex w-full flex-1 flex-col gap-0 shadow-none lg:max-w-lg xl:max-w-xl min-h-0">
+            <div className="flex-none py-6">
+                <div className="flex items-center justify-between">
+                    <h1 className="text-lg font-semibold">Generate SEO Content</h1>
+                    <div className="flex w-24 items-center gap-2">
+                        <Stepper value={currentStep} onValueChange={setCurrentStep}>
+                            {steps.map((step) => (
+                                <StepperItem key={step} step={step} className="not-last:flex-1">
+                                    <StepperTrigger asChild className="size-8">
+                                        <StepperIndicator/>
+                                    </StepperTrigger>
+                                    {step < steps.length && <StepperSeparator/>}
+                                </StepperItem>
+                            ))}
+                        </Stepper>
                     </div>
-                    <CardDescription>
-                        {currentStep === 1
-                            ? "Select product details for your content"
-                            : "Choose AI model and customize your prompt"}
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6">
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                            <AnimatePresence mode="wait">
-                                {
-                                    currentStep === 1 && (
-                                        <motion.div
-                                            key="step1"
-                                            initial={{opacity: 0, x: -20}}
-                                            animate={{opacity: 1, x: 0}}
-                                            exit={{opacity: 0, x: -20}}
-                                            transition={{duration: 0.3}}
-                                            className="space-y-6"
-                                        >
-                                            <FormField
-                                                control={form.control}
-                                                name="brand"
-                                                render={({field}) => (
-                                                    <FormItem>
-                                                        <FormLabel>Brand</FormLabel>
-                                                        <BrandSelect onValueChange={field.onChange} value={field.value}/>
-                                                        <FormMessage/>
-                                                    </FormItem>
-                                                )}
-                                            />
-
-                                            <FormField
-                                                control={form.control}
-                                                name="category"
-                                                render={({field}) => (
-                                                    <FormItem>
-                                                        <FormLabel>Category</FormLabel>
-                                                        <CategorySelect value={field.value} onValueChange={field.onChange}/>
-                                                        <FormMessage/>
-                                                    </FormItem>
-                                                )}
-                                            />
-
-                                            <FormField
-                                                control={form.control}
-                                                name="season"
-                                                render={({field}) => (
-                                                    <FormItem>
-                                                        <FormLabel>Season</FormLabel>
-                                                        <FormControl>
-                                                            <RadioGroup
-                                                                onValueChange={field.onChange}
-                                                                className="grid-cols-2"
-                                                                defaultValue="Spring/Summer"
-                                                            >
-                                                                <div
-                                                                    className="border-input has-data-[state=checked]:border-primary/50 has-focus-visible:border-ring has-focus-visible:ring-ring/50 relative flex cursor-pointer flex-col items-center gap-3 rounded-md border px-2 py-3 text-center shadow-xs transition-[color,box-shadow] outline-none has-focus-visible:ring-[3px]">
-                                                                    <RadioGroupItem id="summer" value="Spring/Summer" className="sr-only"/>
-                                                                    <SunIcon className="opacity-60" size={20} aria-hidden="true"/>
-                                                                    <label htmlFor="summer" className="after:absolute after:inset-0 cursor-pointer text-xs font-medium leading-none text-foreground">
-                                                                        Spring/Summer
-                                                                    </label>
-                                                                </div>
-                                                                <div
-                                                                    className="border-input has-data-[state=checked]:border-primary/50 has-focus-visible:border-ring has-focus-visible:ring-ring/50 relative flex cursor-pointer flex-col items-center gap-3 rounded-md border px-2 py-3 text-center shadow-xs transition-[color,box-shadow] outline-none has-focus-visible:ring-[3px]">
-                                                                    <RadioGroupItem id="winter" value="Fall/Winter" className="sr-only"/>
-                                                                    <CloudRainIcon className="opacity-60" size={20} aria-hidden="true" />
-                                                                    <label htmlFor="winter" className="after:absolute after:inset-0 cursor-pointer text-xs font-medium leading-none text-foreground">
-                                                                        Fall/Winter
-                                                                    </label>
-                                                                </div>
-                                                            </RadioGroup>
-                                                        </FormControl>
-                                                        <FormMessage/>
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </motion.div>
-                                    )
-                                }
-                                {
-                                    currentStep === 2 && (
-                                        <motion.div
-                                            key="step2"
-                                            initial={{opacity: 0, x: 20}}
-                                            animate={{opacity: 1, x: 0}}
-                                            exit={{opacity: 0, x: 20}}
-                                            transition={{duration: 0.3}}
-                                            className="space-y-6"
-                                        >
-                                            <FormField
-                                                control={form.control}
-                                                name="aiModel"
-                                                render={({field}) => (
-                                                    <FormItem>
-                                                        <FormLabel>AI Model</FormLabel>
-                                                        <AIModelSelect onValueChange={field.onChange} value={field.value}/>
-                                                        <FormMessage/>
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={form.control}
-                                                name="customPrompt"
-                                                render={({field}) => (
-                                                    <FormItem>
-                                                        <FormLabel>Custom Prompt (Optional)</FormLabel>
-                                                        <FormControl>
-                                                            <PromptArea
-                                                                placeholder="Add specific instructions for the AI model..."
-                                                                className="resize-none min-h-[120px]"
-                                                                {...field}
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage/>
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </motion.div>
-                                    )
-                                }
-                            </AnimatePresence>
-                        </form>
-                    </Form>
-                </CardContent>
-                <CardFooter
-                    className="flex justify-between border-t p-6">
-                    {currentStep === 1 ? (
-                        <Button
-                            key="step-button-1"
-                            type="button"
-                            onClick={nextStep}
-                            className="ml-auto"
-                        >
-                            Next Step
-                            <ArrowRight className="ml-2 h-4 w-4"/>
-                        </Button>
-                    ) : (
-                        <>
-                            <Button
-                                key="step-button-2"
-                                type="button"
-                                onClick={prevStep}
-                                variant="outline"
-                            >
-                                <ArrowLeft className="mr-2 h-4 w-4"/>
-                                Previous
-                            </Button>
-                            <Button
-                                type="button"
-                                onClick={form.handleSubmit(onSubmit)}
-                                className="bg-green-600 transition hover:bg-green-700"
-                            >
-                                <Sparkles className="mr-2 h-4 w-4"/>
-                                Generate Content
-                            </Button>
-                        </>
-                    )}
-                </CardFooter>
-            </Card>
-            <div className="flex flex-1 items-center justify-center rounded-lg bg-muted">
-                {/*{
-                    !result
-                        ? (
-                            <div className="flex w-full max-w-lg flex-col items-center justify-center gap-4 text-center">
-                                <div
-                                    className="flex items-center justify-center rounded-full bg-green-100 p-2 text-green-700 size-16">
-                                    <Sparkles size={32}/>
-                                </div>
-                                <div className="text-xl font-semibold">Ready to Generate Content</div>
-                                <span>Complete the form and click <strong>Generate Content</strong> to create SEO text for your fashion category page.</span>
-                            </div>
-                        ) : (
-
-                        )
-                }*/}
-                <GeneratedContentView/>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                    {currentStep === 1
+                        ? "Select product details for your content"
+                        : "Choose AI model and customize your prompt"}
+                </p>
             </div>
-        </>
+            <div className="h-0 flex-1 p-6 overflow-auto scrollbar-hide">
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <AnimatePresence mode="wait">
+                            {
+                                currentStep === 1 && (
+                                    <motion.div
+                                        key="step1"
+                                        initial={{opacity: 0, x: -20}}
+                                        animate={{opacity: 1, x: 0}}
+                                        exit={{opacity: 0, x: -20}}
+                                        transition={{duration: 0.3}}
+                                        className="space-y-6"
+                                    >
+                                        <FormField
+                                            control={form.control}
+                                            name="brand"
+                                            render={({field}) => (
+                                                <FormItem>
+                                                    <FormLabel>Brand</FormLabel>
+                                                    <BrandSelect onValueChange={field.onChange} value={field.value}/>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        <FormField
+                                            control={form.control}
+                                            name="category"
+                                            render={({field}) => (
+                                                <FormItem>
+                                                    <FormLabel>Category</FormLabel>
+                                                    <CategorySelect value={field.value} onValueChange={field.onChange}/>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        <FormField
+                                            control={form.control}
+                                            name="season"
+                                            render={({field}) => (
+                                                <FormItem>
+                                                    <FormLabel>Season</FormLabel>
+                                                    <FormControl>
+                                                        <RadioGroup
+                                                            onValueChange={field.onChange}
+                                                            className="grid-cols-2"
+                                                            defaultValue="Spring/Summer"
+                                                        >
+                                                            <div
+                                                                className="border-input has-data-[state=checked]:border-primary/50 has-focus-visible:border-ring has-focus-visible:ring-ring/50 relative flex cursor-pointer flex-col items-center gap-3 rounded-md border px-2 py-3 text-center shadow-xs transition-[color,box-shadow] outline-none has-focus-visible:ring-[3px]">
+                                                                <RadioGroupItem id="summer" value="Spring/Summer" className="sr-only"/>
+                                                                <SunIcon className="opacity-60" size={20} aria-hidden="true"/>
+                                                                <label htmlFor="summer" className="after:absolute after:inset-0 cursor-pointer text-xs font-medium leading-none text-foreground">
+                                                                    Spring/Summer
+                                                                </label>
+                                                            </div>
+                                                            <div
+                                                                className="border-input has-data-[state=checked]:border-primary/50 has-focus-visible:border-ring has-focus-visible:ring-ring/50 relative flex cursor-pointer flex-col items-center gap-3 rounded-md border px-2 py-3 text-center shadow-xs transition-[color,box-shadow] outline-none has-focus-visible:ring-[3px]">
+                                                                <RadioGroupItem id="winter" value="Fall/Winter" className="sr-only"/>
+                                                                <CloudRainIcon className="opacity-60" size={20} aria-hidden="true" />
+                                                                <label htmlFor="winter" className="after:absolute after:inset-0 cursor-pointer text-xs font-medium leading-none text-foreground">
+                                                                    Fall/Winter
+                                                                </label>
+                                                            </div>
+                                                        </RadioGroup>
+                                                    </FormControl>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </motion.div>
+                                )
+                            }
+                            {
+                                currentStep === 2 && (
+                                    <motion.div
+                                        key="step2"
+                                        initial={{opacity: 0, x: 20}}
+                                        animate={{opacity: 1, x: 0}}
+                                        exit={{opacity: 0, x: 20}}
+                                        transition={{duration: 0.3}}
+                                        className="space-y-6"
+                                    >
+                                        <FormField
+                                            control={form.control}
+                                            name="aiModel"
+                                            render={({field}) => (
+                                                <FormItem>
+                                                    <FormLabel>AI Model</FormLabel>
+                                                    <AIModelSelect onValueChange={field.onChange} value={field.value}/>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="customPrompt"
+                                            render={({field}) => (
+                                                <FormItem>
+                                                    <FormLabel>Custom Prompt (Optional)</FormLabel>
+                                                    <FormControl>
+                                                        <PromptArea
+                                                            placeholder="Add specific instructions for the AI model..."
+                                                            className="resize-none min-h-[120px]"
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage/>
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </motion.div>
+                                )
+                            }
+                        </AnimatePresence>
+                    </form>
+                </Form>
+            </div>
+            <div className="flex flex-none justify-between p-6">
+                {currentStep === 1 ? (
+                    <Button
+                        key="step-button-1"
+                        type="button"
+                        onClick={nextStep}
+                        className="ml-auto"
+                    >
+                        Next Step
+                        <ArrowRight className="ml-2 h-4 w-4"/>
+                    </Button>
+                ) : (
+                    <>
+                        <Button
+                            key="step-button-2"
+                            type="button"
+                            onClick={prevStep}
+                            variant="outline"
+                        >
+                            <ArrowLeft className="mr-2 h-4 w-4"/>
+                            Previous
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={form.handleSubmit(onSubmit)}
+                            className="bg-green-600 transition hover:bg-green-700"
+                        >
+                            <Sparkles className="mr-2 h-4 w-4"/>
+                            Generate Content
+                        </Button>
+                    </>
+                )}
+            </div>
+        </div>
     )
 }

@@ -1,14 +1,10 @@
-import {
-    createSearchParamsCache,
-    parseAsArrayOf,
-    parseAsInteger,
-    parseAsString,
-} from "nuqs/server";
-import {getSortingStateParser} from "@/lib/datatable/parsers";
-import {Translation, translations} from "@/db/schema";
-import {and, AnyColumn, asc, count, desc, ilike, inArray} from "drizzle-orm";
-import {db} from "@/db";
-import {z} from "zod";
+import { db } from "@/db";
+import { translations } from "@/db/schema";
+import { Translation } from "@/db/types";
+import { getSortingStateParser } from "@/lib/datatable/parsers";
+import { and, AnyColumn, asc, count, desc, ilike, inArray } from "drizzle-orm";
+import { createSearchParamsCache, parseAsArrayOf, parseAsInteger, parseAsString, } from "nuqs/server";
+import { z } from "zod";
 
 export const searchParamsCache = createSearchParamsCache({
     page: parseAsInteger.withDefault(1),
