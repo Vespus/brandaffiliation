@@ -1,5 +1,6 @@
 import { db } from "@/db";
 import * as schema from "@/db/schema";
+import { env } from "@/env";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
@@ -17,6 +18,7 @@ export const auth = betterAuth({
             user: schema.users,
         }
     }),
+    secret: env.BETTER_AUTH_SECRET,
     emailAndPassword: {
         enabled: true,
         autoSignIn: false,
