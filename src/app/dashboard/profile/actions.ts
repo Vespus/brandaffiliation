@@ -18,11 +18,8 @@ export const updateProfileAction = actionClient
       .set({
         name: parsedInput.name,
         image: parsedInput.image,
-        // Theme is handled client-side with localStorage
       })
       .where(eq(users.id, user.id));
 
     revalidatePath('/dashboard/profile', 'layout');
-
-    return { success: true, theme: parsedInput.theme };
   });

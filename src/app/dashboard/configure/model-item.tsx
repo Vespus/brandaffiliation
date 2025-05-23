@@ -15,7 +15,7 @@ type AIModelItemType = {
     settings: AISetting
 }
 
-export const AiModelItem = ({model, settings}: AIModelItemType) => {
+export function ModelItem({model, settings}: AIModelItemType) {
     const router = useRouter()
 
     const handleModelSelect = () => {

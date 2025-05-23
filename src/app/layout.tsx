@@ -37,22 +37,24 @@ export default async function RootLayout({
             className={`${geistSans.variable} ${geistMono.variable}`}
         >
             <body className="bg-background text-foreground">
-                <NextIntlClientProvider>
-                    <TRPCReactProvider>
-                        <NuqsAdapter>
-                            <ThemeProvider
-                                attribute="class"
-                                defaultTheme="system"
-                                enableSystem
-                            >
+                <ThemeProvider
+                    attribute="class"
+                    defaultTheme="system"
+                    enableSystem
+                >
+                    <NextIntlClientProvider>
+                        <TRPCReactProvider>
+                            <NuqsAdapter>
+
                                 <>
                                     {children}
                                 </>
                                 <Toaster richColors/>
-                            </ThemeProvider>
-                        </NuqsAdapter>
-                    </TRPCReactProvider>
-                </NextIntlClientProvider>
+
+                            </NuqsAdapter>
+                        </TRPCReactProvider>
+                    </NextIntlClientProvider>
+                </ThemeProvider>
             </body>
         </html>
     );
