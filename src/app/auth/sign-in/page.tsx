@@ -14,7 +14,7 @@ export default async function Login() {
                 </CardHeader>
                 <CardContent>
                     <LoginForm/>
-                    test-{process.env.BETTER_AUTH_KEY || "-test"}
+                    test-{process.env.BETTER_AUTH_SECRET || "-test"}
                 </CardContent>
             </Card>
             <div
