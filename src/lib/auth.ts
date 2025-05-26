@@ -2,9 +2,11 @@ import { db } from "@/db";
 import * as schema from "@/db/schema";
 import { env } from "@/env";
 import { VerificationEmail } from "@/lib/emails/verification-email";
+import { ac, admin, user } from "@/lib/permissions";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
+import { admin as adminPlugin } from "better-auth/plugins"
 import React from "react";
 import { Resend } from 'resend';
 
@@ -43,6 +45,13 @@ export const auth = betterAuth({
         expiresIn: 3600
     },
     plugins: [
-        nextCookies()
+        nextCookies(),
+        adminPlugin({
+            ac,
+            roles: {
+                admin,
+                user,
+            }
+        })
     ]
 })
