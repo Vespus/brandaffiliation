@@ -5,11 +5,11 @@ import { getUser } from "@/lib/get-user";
 import { unauthorized } from "next/navigation";
 import { SearchParams } from "nuqs/server";
 
-type BrandsPageProps = {
+type UsersPageProps = {
     searchParams: Promise<SearchParams>
 }
 
-export default async function BrandsPage(props: BrandsPageProps) {
+export default async function UsersPage(props: UsersPageProps) {
     const searchParams = await props.searchParams;
     const search = searchParamsCache.parse(searchParams);
 
