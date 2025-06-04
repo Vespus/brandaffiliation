@@ -3,20 +3,11 @@
 import { DataTableColumnHeader } from "@/components/datatable/data-table-column-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { buttonVariants } from "@/components/ui/button";
-import { ColumnDef, RowData } from "@tanstack/react-table";
+import { ColumnDef } from "@tanstack/react-table";
 import { User } from "better-auth";
 import { ArrowRight, Text, } from "lucide-react";
-import { createFormatter } from "next-intl";
 import Link from "next/link";
 import * as React from "react";
-
-declare module '@tanstack/react-table' {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    interface TableMeta<TData extends RowData> {
-        t: (id: string) => string;
-        formatter: ReturnType<typeof createFormatter>
-    }
-}
 
 export function getUsersTableColumns(): ColumnDef<User>[] {
     return [
@@ -103,7 +94,7 @@ export function getUsersTableColumns(): ColumnDef<User>[] {
             cell: ({row, table: {options: {meta}}}) => {
 
                 return (
-                   <div>{meta?.formatter.dateTime(new Date(row.getValue("createdAt")))}</div>
+                    <div>{meta?.formatter?.dateTime(new Date(row.getValue("createdAt")))}</div>
                 )
             },
             enableSorting: true,

@@ -1,16 +1,16 @@
-import { getUsers, searchParamsCache } from "@/app/dashboard/users/queries";
-import { UsersTable } from "@/app/dashboard/users/users-table";
+import { getPrompts, searchParamsCache } from "@/app/dashboard/prompts/queries";
+import { PromptsTable } from "@/app/dashboard/prompts/prompt-table";
 import { auth } from "@/lib/auth";
 import { getUser } from "@/lib/get-user";
 import { unauthorized } from "next/navigation";
 import { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
 
-type UsersPageProps = {
+type PromptsPageProps = {
     searchParams: Promise<SearchParams>
 }
 
-export default async function UsersPage(props: UsersPageProps) {
+export default async function PromptsPage(props: PromptsPageProps) {
     const searchParams = await props.searchParams;
     const search = searchParamsCache.parse(searchParams);
 
@@ -20,7 +20,7 @@ export default async function UsersPage(props: UsersPageProps) {
             userId: user.id,
             role: "admin",
             permission: {
-                users: ["list"],
+                prompt: ["list"],
             }
         }
     })
@@ -29,11 +29,16 @@ export default async function UsersPage(props: UsersPageProps) {
         unauthorized()
     }
 
-    const users =  getUsers(search)
+    const prompts = getPrompts(search)
 
     return (
-        <Suspense>
-            <UsersTable promise={users} />
-        </Suspense>
+        <div className="flex flex-col gap-6">
+            <div className="flex items-center justify-between">
+                <h1 className="font-semibold text-2xl">System Prompts</h1>
+            </div>
+            <Suspense>
+                <PromptsTable promise={prompts} />
+            </Suspense>
+        </div>
     );
 }

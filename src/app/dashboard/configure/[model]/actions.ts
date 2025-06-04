@@ -8,7 +8,7 @@ import { revalidatePath } from "next/cache";
 import { getUser } from "@/lib/get-user";
 
 export const saveSettingsAction = actionClient
-    .schema(AISettingsSaveSchema)
+    .inputSchema(AISettingsSaveSchema)
     .action(async ({parsedInput: {id, ...data}}) => {
         const {user} = await getUser()
 

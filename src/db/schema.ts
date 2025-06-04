@@ -1,7 +1,6 @@
 import {
     bigint,
     boolean,
-    date,
     foreignKey,
     index,
     integer,
@@ -242,3 +241,38 @@ export const brandWithScales = pgTable("brand_with_scales", {
     characteristic: jsonb('characteristic').$type<{ id: number, value: string }[]>(),
     slug: varchar()
 })
+
+export const datasources = pgTable("datasources", {
+    id: serial().primaryKey().notNull(),
+    name: varchar("name", {length: 100}).notNull(),
+    description: text("description"),
+    valueColumn: varchar("value_column", {length: 100}).notNull(),
+    displayColumn: varchar("display_column", {length: 100}).notNull(),
+    columns: jsonb("columns").$type<string[]>().notNull(),
+    isMultiple: boolean("is_multiple").default(false).notNull(),
+    createdAt: timestamp("created_at", {withTimezone: true, mode: 'string'}).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", {withTimezone: true, mode: 'string'}).defaultNow().notNull(),
+    createdBy: text("created_by").references(() => users.id, {onDelete: "set null"}),
+})
+
+export const datasourceValues = pgTable("datasource_values", {
+    id: serial().primaryKey().notNull(),
+    datasourceId: integer("datasource_id").notNull().references(() => datasources.id, {onDelete: "cascade"}),
+    data: jsonb("data").notNull(),
+    createdAt: timestamp("created_at", {withTimezone: true, mode: 'string'}).defaultNow().notNull(),
+})
+
+
+export const systemPrompts = pgTable('system_prompts', {
+    id: serial().primaryKey().notNull(),
+    name: text().notNull(),
+    description: text(),
+    prompt: text().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+      .defaultNow(),
+  }, (tbl) => [
+    unique('system_prompts_name_key').on(tbl.name),
+  ]);

@@ -1,5 +1,5 @@
-import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 
@@ -7,10 +7,10 @@ type Session = typeof auth.$Infer.Session;
 
 export const getUser = cache(async (): Promise<Session> => {
     const session = await auth.api.getSession({
-        headers: await headers(),
+        headers: await headers()
     });
 
-    if(!session){
+    if (!session) {
         redirect("/auth/sign-in")
     }
 

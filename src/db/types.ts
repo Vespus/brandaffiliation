@@ -6,6 +6,8 @@ import {
     brandScales,
     brandWithScales,
     characteristics,
+    datasources,
+    datasourceValues,
     scales,
     translations
 } from "@/db/schema";
@@ -25,3 +27,9 @@ export type AIModelWithProvider = AIModel & { provider: AIProvider }
 export type AIModelWithProviderAndSettings = AIModelWithProvider & { settings: AISetting }
 
 export type Translation = typeof translations.$inferSelect
+
+export type Datasource = typeof datasources.$inferSelect
+export type DatasourceValue = typeof datasourceValues.$inferSelect
+export type DatasourceWithValues = Datasource & { values: DatasourceValue[] }
+
+export type SystemPrompt = typeof systemPrompts.$inferSelect;

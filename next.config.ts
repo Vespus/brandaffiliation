@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
     experimental: {
         authInterrupts: true
     },
+    logging: {
+        fetches: {
+            fullUrl: true,
+        },
+    },
     typescript: {
         ignoreBuildErrors: true
     },

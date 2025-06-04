@@ -1,7 +1,8 @@
 import { ContentGenerateSchema } from "@/app/dashboard/content-generation/schema";
 import { formatPrompt } from "@/app/dashboard/content-generation/utils";
+import { getDatasourceById } from "@/app/dashboard/datasources/queries";
 import { db } from "@/db";
-import { aiModels, brands as brandTable, brandWithScales, translations, userPrompts } from "@/db/schema";
+import { aiModels, brands as brandTable, brandWithScales, datasourceValues, datasources, translations, userPrompts } from "@/db/schema";
 import { getUser } from "@/lib/get-user";
 import { createTRPCRouter, publicProcedure } from "@/lib/trpc/trpc";
 import { eq } from "drizzle-orm";
@@ -95,5 +96,34 @@ export const genericRoute = createTRPCRouter({
                 brand: brand,
                 prompt: input.customPrompt
             })
+        }),
+    getDatasourceById: publicProcedure
+        .input(z.object({id: z.number()}))
+        .query(async ({input}) => {
+            return await getDatasourceById(input.id)
+        }),
+    getDatasources: publicProcedure
+        .input(z.object({
+            isMultiple: z.boolean().optional()
+        }))
+        .query(async ({input}) => {
+            if (input.isMultiple !== undefined) {
+                return await db.query.datasources.findMany({
+                    where: eq(datasources.isMultiple, input.isMultiple),
+                    orderBy: (datasources, { asc }) => [asc(datasources.name)]
+                });
+            }
+            return await db.query.datasources.findMany({
+                orderBy: (datasources, { asc }) => [asc(datasources.name)]
+            });
+        }),
+    getDatasourceValues: publicProcedure
+        .input(z.object({
+            datasourceId: z.number()
+        }))
+        .query(async ({input}) => {
+            return await db.query.datasourceValues.findMany({
+                where: eq(datasourceValues.datasourceId, input.datasourceId)
+            });
         })
 })

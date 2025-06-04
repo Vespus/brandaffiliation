@@ -18,8 +18,13 @@ export const auth = betterAuth({
         schema: {
             ...schema,
             user: schema.users,
-        }
+        },
     }),
+    session: {
+        cookieCache: {
+            enabled: true
+        }
+    },
     trustedOrigins: [
         'http://localhost:3000',
         'https://brandaffiliation.vercel.app',
