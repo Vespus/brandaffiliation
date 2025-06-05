@@ -13,17 +13,17 @@ export default async function DashboardLayout({children}: Readonly<{ children: R
     }
 
     return (
-        <SidebarProvider className="h-0">
-            <Sidebar user={session.user}/>
+        <SidebarProvider>
+            <Sidebar user={session.user} variant="inset"/>
             <SidebarInset className="max-w-full">
-                <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+                <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear">
                     <div className="flex items-center gap-2 px-4">
                         <SidebarTrigger className="-ml-1" />
                     </div>
                 </header>
-                <main className="flex flex-col flex-1 px-4 mb-8 min-h-0">
+                <div className="flex flex-col flex-1 px-4 mb-8 min-h-0">
                     {children}
-                </main>
+                </div>
             </SidebarInset>
         </SidebarProvider>
     )

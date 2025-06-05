@@ -3,18 +3,11 @@
 import emojiMartData from '@emoji-mart/data';
 import { CodeBlockPlugin } from '@udecode/plate-code-block/react';
 import { EmojiPlugin } from '@udecode/plate-emoji/react';
-import {
-    FontBackgroundColorPlugin,
-    FontColorPlugin,
-    FontSizePlugin,
-} from '@udecode/plate-font/react';
+import { FontBackgroundColorPlugin, FontColorPlugin, FontSizePlugin, } from '@udecode/plate-font/react';
 import { HorizontalRulePlugin } from '@udecode/plate-horizontal-rule/react';
 import { ColumnPlugin } from '@udecode/plate-layout/react';
 import { SlashPlugin } from '@udecode/plate-slash-command/react';
 import { TrailingBlockPlugin } from '@udecode/plate-trailing-block';
-
-import { FixedToolbarPlugin } from '@/components/editor/plugins/fixed-toolbar-plugin';
-import { FloatingToolbarPlugin } from '@/components/editor/plugins/floating-toolbar-plugin';
 
 import { aiPlugins } from './ai-plugins';
 import { alignPlugin } from './align-plugin';
@@ -66,7 +59,7 @@ export const editorPlugins = [
         options: {
             triggerQuery(editor) {
                 return !editor.api.some({
-                    match: { type: editor.getType(CodeBlockPlugin) },
+                    match: {type: editor.getType(CodeBlockPlugin)},
                 });
             },
         },
@@ -75,7 +68,7 @@ export const editorPlugins = [
     cursorOverlayPlugin,
     ...blockMenuPlugins,
     ...dndPlugins,
-    EmojiPlugin.configure({ options: { data: emojiMartData as any } }),
+    EmojiPlugin.configure({options: {data: emojiMartData as any}}),
     exitBreakPlugin,
     resetBlockTypePlugin,
     softBreakPlugin,
@@ -85,6 +78,6 @@ export const editorPlugins = [
     markdownPlugin,
 
     // UI
-    FixedToolbarPlugin,
-    FloatingToolbarPlugin,
+    //FixedToolbarPlugin,
+    //FloatingToolbarPlugin,
 ];

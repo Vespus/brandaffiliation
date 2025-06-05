@@ -39,7 +39,7 @@ export default async function PromptDetailPage(props: PromptDetailPageProps) {
     }
 
     return (
-        <div className="max-w-4xl w-full flex flex-col gap-6">
+        <div className="max-w-7xl w-full flex flex-col gap-6">
             <div className="flex space-x-2 items-center">
                 <Link href="/dashboard/prompts"><ArrowLeft/></Link>
                 <h1 className="font-semibold text-2xl">

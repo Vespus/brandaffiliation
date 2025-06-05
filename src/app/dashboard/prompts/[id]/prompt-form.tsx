@@ -1,11 +1,11 @@
 "use client";
 
-import { createPrompt, updatePrompt, type PromptFormData } from "@/app/dashboard/prompts/actions";
+import { createPrompt, type PromptFormData, updatePrompt } from "@/app/dashboard/prompts/actions";
+import { PromptEditor } from "@/app/dashboard/prompts/prompt-editor";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { systemPrompts } from "@/db/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,9 +13,9 @@ import { Eye, FileText, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import Markdown from "react-markdown";
 import { toast } from "sonner";
 import { z } from "zod";
-
 
 const promptSchema = z.object({
     name: z.string().min(1, "Name is required").max(255, "Name too long"),
@@ -29,7 +29,7 @@ interface PromptFormProps {
     prompt?: Prompt;
 }
 
-export function PromptForm({ prompt }: PromptFormProps) {
+export function PromptForm({prompt}: PromptFormProps) {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [activeTab, setActiveTab] = useState("edit");
@@ -68,7 +68,6 @@ export function PromptForm({ prompt }: PromptFormProps) {
     }
 
 
-
     return (
         <Card className="rounded-md shadow-none">
             <CardHeader>
@@ -84,13 +83,13 @@ export function PromptForm({ prompt }: PromptFormProps) {
                             <FormField
                                 control={form.control}
                                 name="name"
-                                render={({ field }) => (
+                                render={({field}) => (
                                     <FormItem>
                                         <FormLabel>Name</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Enter prompt name..." {...field} />
                                         </FormControl>
-                                        <FormMessage />
+                                        <FormMessage/>
                                     </FormItem>
                                 )}
                             />
@@ -98,13 +97,13 @@ export function PromptForm({ prompt }: PromptFormProps) {
                             <FormField
                                 control={form.control}
                                 name="description"
-                                render={({ field }) => (
+                                render={({field}) => (
                                     <FormItem>
                                         <FormLabel>Description (Optional)</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Brief description..." {...field} />
                                         </FormControl>
-                                        <FormMessage />
+                                        <FormMessage/>
                                     </FormItem>
                                 )}
                             />
@@ -113,63 +112,60 @@ export function PromptForm({ prompt }: PromptFormProps) {
                         <FormField
                             control={form.control}
                             name="prompt"
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <FormItem>
                                     <FormLabel>Prompt Content</FormLabel>
                                     <FormControl>
                                         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                                             <TabsList className="grid w-full grid-cols-2">
                                                 <TabsTrigger value="edit" className="flex items-center gap-2">
-                                                    <FileText className="h-4 w-4" />
+                                                    <FileText className="h-4 w-4"/>
                                                     Editor
                                                 </TabsTrigger>
                                                 <TabsTrigger value="preview" className="flex items-center gap-2">
-                                                    <Eye className="h-4 w-4" />
+                                                    <Eye className="h-4 w-4"/>
                                                     Preview
                                                 </TabsTrigger>
                                             </TabsList>
-                                            
+
                                             <TabsContent value="edit" className="mt-4">
-                                                <Textarea 
-                                                    {...field}
-                                                    placeholder="Enter your system prompt..."
-                                                    className="min-h-[400px] resize-none"
-                                                />
+                                                <PromptEditor defaultValue={field.value} onChange={field.onChange}/>
                                             </TabsContent>
-                                            
+
                                             <TabsContent value="preview" className="mt-4">
                                                 <div className="border rounded-md min-h-[400px] p-4 bg-muted/30">
                                                     {watchedPrompt ? (
-                                                        <div className="prose max-w-none whitespace-pre-wrap">
-                                                            {watchedPrompt}
+                                                        <div className="prose dark:prose-invert">
+                                                            <Markdown>{watchedPrompt}</Markdown>
                                                         </div>
                                                     ) : (
                                                         <p className="text-muted-foreground italic">
-                                                            No content to preview. Switch to the Editor tab to start writing.
+                                                            No content to preview. Switch to the Editor tab to start
+                                                            writing.
                                                         </p>
                                                     )}
                                                 </div>
                                             </TabsContent>
                                         </Tabs>
                                     </FormControl>
-                                    <FormMessage />
+                                    <FormMessage/>
                                 </FormItem>
                             )}
                         />
 
                         <div className="flex items-center gap-4 pt-4">
                             <Button type="submit" disabled={isSubmitting}>
-                                <Save className="mr-2 h-4 w-4" />
-                                {isSubmitting 
-                                    ? "Saving..." 
-                                    : prompt 
-                                        ? "Update Prompt" 
+                                <Save className="mr-2 h-4 w-4"/>
+                                {isSubmitting
+                                    ? "Saving..."
+                                    : prompt
+                                        ? "Update Prompt"
                                         : "Create Prompt"
                                 }
                             </Button>
-                            <Button 
-                                type="button" 
-                                variant="outline" 
+                            <Button
+                                type="button"
+                                variant="outline"
                                 onClick={() => router.back()}
                             >
                                 Cancel

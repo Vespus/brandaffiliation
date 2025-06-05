@@ -122,6 +122,7 @@ export function Draggable(props: PlateElementProps) {
                             <Button
                                 ref={handleRef}
                                 variant="ghost"
+                                type="button"
                                 className="h-6 w-4.5 p-0"
                                 data-plate-prevent-deselect
                             >

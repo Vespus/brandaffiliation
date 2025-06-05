@@ -1,5 +1,6 @@
-import { getPrompts, searchParamsCache } from "@/app/dashboard/prompts/queries";
+import { PromptPageHeader } from "@/app/dashboard/prompts/prompt-page-header";
 import { PromptsTable } from "@/app/dashboard/prompts/prompt-table";
+import { getPrompts, searchParamsCache } from "@/app/dashboard/prompts/queries";
 import { auth } from "@/lib/auth";
 import { getUser } from "@/lib/get-user";
 import { unauthorized } from "next/navigation";
@@ -32,12 +33,10 @@ export default async function PromptsPage(props: PromptsPageProps) {
     const prompts = getPrompts(search)
 
     return (
-        <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between">
-                <h1 className="font-semibold text-2xl">System Prompts</h1>
-            </div>
+        <div className="flex flex-col gap-6 max-w-7xl">
+            <PromptPageHeader/>
             <Suspense>
-                <PromptsTable promise={prompts} />
+                <PromptsTable promise={prompts}/>
             </Suspense>
         </div>
     );

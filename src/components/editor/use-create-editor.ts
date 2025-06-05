@@ -136,7 +136,7 @@ export const useCreateEditor = (
             plugins: [
                 ...editorPlugins,
                 FixedToolbarPlugin,
-                FloatingToolbarPlugin,
+                //FloatingToolbarPlugin,
             ],
             ...options,
         },

@@ -38,12 +38,10 @@ export const PromptsTable = ({promise}: PromptsTableProps) => {
                 table={table}
                 actionBar={
                     <div className="flex items-center gap-2">
-                        <Button asChild>
-                            <Link href="/dashboard/prompts/new">
-                                <Plus className="mr-2 h-4 w-4" />
-                                Create Prompt
-                            </Link>
-                        </Button>
+                        <Link href="/dashboard/prompts/new">
+                            <Plus className="mr-2 h-4 w-4" />
+                            Create Prompt
+                        </Link>
                     </div>
                 }
             >
