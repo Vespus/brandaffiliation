@@ -105,9 +105,9 @@ export const genericRoute = createTRPCRouter({
     getDatasources: publicProcedure
         .input(z.object({
             isMultiple: z.boolean().optional()
-        }))
+        }).optional())
         .query(async ({input}) => {
-            if (input.isMultiple !== undefined) {
+            if (input?.isMultiple !== undefined) {
                 return await db.query.datasources.findMany({
                     where: eq(datasources.isMultiple, input.isMultiple),
                     orderBy: (datasources, { asc }) => [asc(datasources.name)]
@@ -125,5 +125,9 @@ export const genericRoute = createTRPCRouter({
             return await db.query.datasourceValues.findMany({
                 where: eq(datasourceValues.datasourceId, input.datasourceId)
             });
+        }),
+    getSystemPrompts: publicProcedure
+        .query(async () => {
+            return await db.query.systemPrompts.findMany()
         })
 })

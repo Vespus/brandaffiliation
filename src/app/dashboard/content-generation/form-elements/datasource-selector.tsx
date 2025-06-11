@@ -1,26 +1,19 @@
-import {SelectProps} from "@radix-ui/react-select";
-import {api} from "@/lib/trpc/react";
-import {Check, ChevronsUpDown} from "lucide-react";
-import {useState} from "react";
-import {Button} from "@/components/ui/button";
-import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList
-} from "@/components/ui/command";
-import {cn} from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { api } from "@/lib/trpc/react";
+import { cn } from "@/lib/utils";
+import { SelectProps } from "@radix-ui/react-select";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { useState } from "react";
 
-type BrandSelect = Omit<SelectProps, "value" | "onValueChange"> & {
-    value?: string;
-    onValueChange?: (value?: string) => void;
+type DataSourceSelectorProps = Omit<SelectProps, "value" | "onValueChange"> & {
+    value?: number;
+    onValueChange?: (value?: number) => void;
 }
 
-export const BrandSelect = ({value, onValueChange}: BrandSelect) => {
-    const {data} = api.genericRoute.getBrandsWithCharacteristics.useQuery()
+export const DataSourceSelector = ({value, onValueChange}: DataSourceSelectorProps) => {
+    const {data: dataSources} = api.genericRoute.getDatasources.useQuery()
     const [open, setOpen] = useState(false)
 
     return (
@@ -33,24 +26,24 @@ export const BrandSelect = ({value, onValueChange}: BrandSelect) => {
                     className="w-full justify-between"
                 >
                     {value
-                        ? data?.find((brand) => brand.name === value)?.name
-                        : "Select Brand..."}
+                        ? dataSources?.find((ds) => ds.id === value)?.name
+                        : "Select Datasource..."}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-(--radix-popper-anchor-width) p-0">
                 <Command>
-                    <CommandInput placeholder="Search brands..."/>
+                    <CommandInput placeholder="Search Datasources..."/>
                     <CommandList>
-                        <CommandEmpty>No Brand found.</CommandEmpty>
+                        <CommandEmpty>No Datasource found.</CommandEmpty>
                         <CommandGroup>
-                            {data?.map((brand) => (
+                            {dataSources?.map((ds) => (
                                 <CommandItem
-                                    key={brand.id}
-                                    value={brand.name}
-                                    keywords={[brand.name]}
+                                    key={ds.id}
+                                    value={ds.id.toString()}
+                                    keywords={[ds.name, ds.description || ""]}
                                     onSelect={(currentValue) => {
-                                        onValueChange?.(currentValue === value ? undefined : currentValue)
+                                        onValueChange?.(Number(currentValue))
                                         setOpen(false)
                                     }}
                                     className="flex items-start"
@@ -58,15 +51,15 @@ export const BrandSelect = ({value, onValueChange}: BrandSelect) => {
                                     <Check
                                         className={cn(
                                             "mr-2 mt-0.5 h-4 w-4",
-                                            value === brand.name ? "opacity-100" : "opacity-0"
+                                            value === ds.id ? "opacity-100" : "opacity-0"
                                         )}
                                     />
                                     <div className="flex flex-col space-y-1">
-                                        <span>{brand.name}</span>
+                                        <span>{ds.name}</span>
                                         {
-                                            brand.characteristics[0] &&
+                                            ds.description &&
                                             <span
-                                                className="text-muted-foreground text-xs">{brand.characteristics[0].value}</span>
+                                                className="text-muted-foreground text-xs">{ds.description}</span>
                                         }
                                     </div>
                                 </CommandItem>

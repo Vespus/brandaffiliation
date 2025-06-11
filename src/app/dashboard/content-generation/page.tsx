@@ -15,10 +15,8 @@ export default async function Page() {
         }
     })
 
-    console.log(error)
-
     return (
-        <div className="flex gap-8 flex-1 mb-6 min-h-0 min-w-0">
+        <div className="flex gap-8 flex-1 min-h-0 max-h-[calc(100svh_-_calc(var(--spacing)_*_16)_-_calc(var(--spacing)_*_4)))]">
             <ManageForm/>
             <GeneratedContentView/>
         </div>

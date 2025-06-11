@@ -1,9 +1,9 @@
-import { getTranslations, getLocale } from 'next-intl/server';
-import { createOpenAI, openai } from "@ai-sdk/openai";
-import { createAnthropic } from "@ai-sdk/anthropic";
-import { get } from 'es-toolkit/compat';
-import { roundBothWays } from "@/utils/round-both-ways";
 import { AIModelWithProvider, BrandWithCharacteristicAndScales } from "@/db/types";
+import { roundBothWays } from "@/utils/round-both-ways";
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { createOpenAI, openai } from "@ai-sdk/openai";
+import { get } from 'es-toolkit/compat';
+import { getLocale, getTranslations } from 'next-intl/server';
 
 export const getDriver = (modelWithProvider: AIModelWithProvider) => {
     switch (modelWithProvider.provider.code) {
@@ -60,4 +60,14 @@ export const formatPrompt = async ({category, season, brand, prompt}: {
             return _
         }
     )
+}
+
+export const formatPrompt2 = async ({prompt, datasources}: { prompt: string, datasources: any }) => {
+    return prompt
+}
+
+export const appendMarkdown = (original: string, toAppend: string): string => {
+    const trimmedOriginal = original.replace(/\n*$/, '\n');
+    const ensuredToAppend = toAppend.endsWith('\n') ? toAppend : toAppend + '\n';
+    return trimmedOriginal + ensuredToAppend;
 }

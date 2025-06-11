@@ -1,13 +1,13 @@
-import {z} from "zod";
-
-export const ContentGenerationStep1Schema = z.object({
-    brand: z.number({message: "Please select a brand"}),
-    season: z.string().min(1, {message: "Please select a season"}),
-    category: z.string().min(1, {message: "Please select a category"}),
-})
+import { z } from "zod";
 
 export const ContentGenerateSchema = z.object({
-    ...ContentGenerationStep1Schema.shape,
-    aiModel: z.array(z.number().min(1, {message: "Please select an AI model"}), ),
-    customPrompt: z.string(),
+    prompt: z.number(),
+    aiModel: z.array(z.number().min(1, {message: "Please select an AI model"}),),
+    dataSources: z.array(
+        z.object({
+            datasourceId: z.number().optional(),
+            datasourceValueId: z.number().optional(),
+            datasourcePrompt: z.string().optional(),
+        })
+    ).optional()
 })

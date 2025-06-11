@@ -1,77 +1,87 @@
 "use server"
 
-import {ContentGenerateSchema} from "@/app/dashboard/content-generation/schema";
-import {getAIModelsWithProviderAndSettings} from "@/db/presets";
-import {db} from "@/db";
-import {brandWithScales} from "@/db/schema";
-import {eq} from "drizzle-orm";
-import {createStreamableValue, StreamableValue} from "ai/rsc";
-import {formatPrompt, getDriver} from "@/app/dashboard/content-generation/utils";
-import {streamText} from "ai";
-import {z} from "zod";
+import { ContentGenerateSchema } from "@/app/dashboard/content-generation/schema";
+import { appendMarkdown, getDriver } from "@/app/dashboard/content-generation/utils";
+import { db } from "@/db";
+import { getAIModelsWithProviderAndSettings } from "@/db/presets";
+import { datasources, datasourceValues, systemPrompts } from "@/db/schema";
+import { streamObject } from "ai";
+import { createStreamableValue, StreamableValue } from "ai/rsc";
+import { and, eq, inArray, sql } from "drizzle-orm";
+import { z } from "zod";
 
 export const CompletionStream = async (parsedInput: z.infer<typeof ContentGenerateSchema>) => {
-    const [models, [brand]] = await Promise.all([
+    const [models, prompt] = await Promise.all([
         getAIModelsWithProviderAndSettings(parsedInput.aiModel),
-        db.select()
-            .from(brandWithScales)
-            .where(eq(brandWithScales.id, parsedInput.brand))
-            .limit(1)
+        db.query.systemPrompts.findFirst({
+            where: eq(systemPrompts.id, parsedInput.prompt)
+        }),
     ])
 
-    if (!models.length) {
+    if (!models.length || !prompt) {
         throw new Error("Model not found")
     }
 
-    const streamableValues: Map<number, ReturnType<typeof createStreamableValue<string, string>>> = new Map();
-    // Initialize streamable values for each model
-    models.forEach(model => {
-        streamableValues.set(model.id, createStreamableValue<string, string>(''));
-    })
+    let dataSourcePrompt = ""
+
+    const queryableDataSources = parsedInput.dataSources?.filter(ds => ds.datasourceId)
+    if (queryableDataSources) {
+        for await (const source of queryableDataSources) {
+            const [ds] = await db.select({
+                name: datasources.name,
+                description: datasources.description,
+                data: sql<string[]>`array_agg
+                    ((${datasourceValues.data} ->> ${datasources.valueColumn}):: text)`,
+            })
+                .from(datasources)
+                .leftJoin(datasourceValues,
+                    and(
+                        eq(datasourceValues.datasourceId, datasources.id),
+                        inArray(datasourceValues.id, [source.datasourceValueId!])
+                    )
+                )
+                .where(eq(datasources.id, source.datasourceId as number))
+                .groupBy(datasources.id)
+
+            dataSourcePrompt = appendMarkdown(dataSourcePrompt, `${source.datasourcePrompt}: ${ds.data.join(", ")}`)
+        }
+    }
+
+    const streamList = new Map(models.map((model) => ([model.id, createStreamableValue()])));
 
     Promise.all(models.map(async (model) => {
-        try {
-            const driver = getDriver(model)
-            const stream = streamText({
-                model: driver,
-                maxTokens: model.settings.maxTokens,
-                temperature: model.settings.temperature,
-                topP: model.settings.topP,
-                frequencyPenalty: model.settings.frequencyPenalty,
-                presencePenalty: model.settings.presencePenalty,
-                messages: [
-                    {
-                        role: 'user',
-                        content: await formatPrompt({
-                            category: parsedInput.category,
-                            season: parsedInput.season,
-                            prompt: parsedInput.customPrompt,
-                            brand
-                        })
-                    }
-                ],
-            });
+        const driver = getDriver(model)
 
-            for await (const chunk of stream.fullStream) {
-                // Update this model's value in the combined object
-                if(chunk.type === "finish"){
-                    streamableValues.set(model.id, streamableValues.get(model.id)!.done());
-                }
-                if(chunk.type === "text-delta"){
-                    streamableValues.set(model.id, streamableValues.get(model.id)!.update(chunk.textDelta));
-                }
-            }
-        } catch (error) {
-            // Handle errors for this model
-            streamableValues.set(model.id, streamableValues.get(model.id)!.append(`\n[Error: ${(error as Error).message}]`));
+        const {partialObjectStream} = streamObject({
+            model: driver,
+            maxTokens: model.settings.maxTokens,
+            temperature: model.settings.temperature,
+            topP: model.settings.topP,
+            frequencyPenalty: model.settings.frequencyPenalty,
+            presencePenalty: model.settings.presencePenalty,
+            system: prompt.prompt,
+            schema: z.object({
+                hero_header: z.string().describe("Hero header of the SEO Text Content"),
+                hero_description: z.string().describe("Hero description of the SEO Text Content with at least 2 long paragraphs"),
+                meta_title: z.string().describe("Meta title of the generated SEO Text Content"),
+                meta_description: z.string().describe("Meta description of the generated SEO Text Content"),
+                meta_keywords: z.string().describe("Meta keywords of the generated SEO Text Content"),
+            }),
+            prompt: dataSourcePrompt
+        })
+
+        for await (const partialObject of partialObjectStream) {
+            streamList.set(model.id, streamList.get(model.id)!.update(partialObject));
         }
+
+        streamList.set(model.id, streamList.get(model.id)!.done())
     }))
 
     return {
         aiModelList: models,
-        streams: [...streamableValues].reduce<Record<number, StreamableValue<string>>>((acc, [modelId, streamableValue]) => {
-            acc[modelId] = streamableValue.value;
-            return acc
-        }, {})
+        streams: [...streamList].reduce<Record<string, StreamableValue<string>>>((acc, [id, stream]) => {
+            acc[id] = stream.value;
+            return acc;
+        }, {}),
     }
 }

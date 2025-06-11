@@ -21,7 +21,7 @@ export default async function DashboardLayout({children}: Readonly<{ children: R
                         <SidebarTrigger className="-ml-1" />
                     </div>
                 </header>
-                <div className="flex flex-col flex-1 px-4 mb-8 min-h-0">
+                <div className="flex flex-col flex-1 px-4 min-h-0">
                     {children}
                 </div>
             </SidebarInset>
