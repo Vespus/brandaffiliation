@@ -1,9 +1,7 @@
 import { Accordion, AccordionContent, AccordionItem } from "@/components/ui/accordion";
 import { CommandIcon, GitCompareIcon, MessageSquareIcon, PlusIcon } from "lucide-react";
 import { Accordion as AccordionPrimitive} from "radix-ui";
-import { useContentGenerationStore } from "@/app/dashboard/content-generation/store";
 import { useCallback } from "react";
-import { v4 as uuidv4 } from 'uuid';
 
 const items = [
     {
@@ -16,45 +14,21 @@ const items = [
                 icon: GitCompareIcon,
                 title: "Compare Content",
                 type: "compare-agent",
-                createNode: (x: number, y: number) => ({
-                    id: uuidv4(),
-                    type: "compare-agent",
-                    position: { x, y },
-                    data: {
-                        label: "Compare Content",
-                        inputs: [],
-                        output: ""
-                    }
-                })
             },
             {
                 id: "tone",
                 icon: MessageSquareIcon,
                 title: "Adjust Tone",
                 type: "tone-agent",
-                createNode: (x: number, y: number) => ({
-                    id: uuidv4(),
-                    type: "tone-agent",
-                    position: { x, y },
-                    data: {
-                        label: "Adjust Tone",
-                        input: "",
-                        output: "",
-                        tone: "professional"
-                    }
-                })
             }
         ]
     }
 ]
 
 export const FlowSidebar = () => {
-    const { addNode } = useContentGenerationStore();
-
-    const onDragStart = useCallback((event: React.DragEvent, nodeType: string, createNode: (x: number, y: number) => any) => {
-        event.dataTransfer.setData('application/reactflow', nodeType);
+    const onDragStart = useCallback((event: React.DragEvent, nodeType: string) => {
+        event.dataTransfer.setData('text/plain', nodeType);
         event.dataTransfer.effectAllowed = 'move';
-        event.dataTransfer.setData('createNode', JSON.stringify(createNode));
     }, []);
 
     return (
@@ -87,7 +61,7 @@ export const FlowSidebar = () => {
                                         key={agent.id}
                                         className="flex items-center gap-2 p-2 rounded-md hover:bg-muted cursor-move"
                                         draggable
-                                        onDragStart={(e) => onDragStart(e, agent.type, agent.createNode)}
+                                        onDragStart={(e) => onDragStart(e, agent.type)}
                                     >
                                         <agent.icon size={16} className="shrink-0 opacity-60" />
                                         <span>{agent.title}</span>

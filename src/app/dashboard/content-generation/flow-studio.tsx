@@ -20,6 +20,7 @@ import { PlayIcon } from "lucide-react";
 import '@xyflow/react/dist/style.css';
 import { CustomNodeType, CompareAgentNodeType, ToneAgentNodeType } from "@/app/dashboard/content-generation/flow-nodes/types";
 import ELK, { ElkNode, LayoutOptions } from 'elkjs/lib/elk.bundled.js';
+import { v4 as uuidv4 } from 'uuid';
 
 const nodeTypes = {
     "ai-stream": AIStreamNode,
@@ -74,6 +75,7 @@ const useLayoutedElements = () => {
 
 export const FlowStudio = () => {
     const state = useContentGenerationStore();
+    const {screenToFlowPosition} = useReactFlow()
 
     const onDragOver = useCallback((event: React.DragEvent) => {
         event.preventDefault();
@@ -83,22 +85,23 @@ export const FlowStudio = () => {
     const onDrop = useCallback(
         (event: React.DragEvent) => {
             event.preventDefault();
+            const type = event.dataTransfer.getData('text/plain');
 
-            const reactFlowBounds = event.currentTarget.getBoundingClientRect();
-            const type = event.dataTransfer.getData('application/reactflow');
-            const createNodeStr = event.dataTransfer.getData('createNode');
-
-            if (typeof type === 'undefined' || !type || !createNodeStr) {
+            if (typeof type === 'undefined' || !type) {
                 return;
             }
 
-            const createNode = JSON.parse(createNodeStr);
-            const position = {
-                x: event.clientX - reactFlowBounds.left,
-                y: event.clientY - reactFlowBounds.top,
-            };
+            const position = screenToFlowPosition({
+                x: event.clientX,
+                y: event.clientY,
+            });
 
-            const newNode = createNode(position.x, position.y);
+            const newNode = {
+                id: uuidv4(),
+                type,
+                position,
+                data: { label: type },
+            };
             state.addNode(newNode);
         },
         [state]
@@ -139,6 +142,7 @@ const ActualFlow = () => {
                 'elk.direction': 'RIGHT',
             })
         }
+        console.log(state.progressState)
     }, [state.progressState]);
 
     const onRun = useCallback(() => {
@@ -190,7 +194,6 @@ const ActualFlow = () => {
         // Update nodes with results
         state.setNodes(nodes);
     }, [getNodes, getEdges, state]);
-
 
     return (
         <>
