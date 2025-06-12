@@ -32,21 +32,16 @@ export const ManageForm = () => {
     const contentStore = useContentGenerationStore()
 
     async function onSubmit(values: z.infer<typeof ContentGenerateSchema>) {
-        console.log(values)
         contentStore.setProgressState("started")
         const response = await CompletionStream(values);
-        contentStore.updateModels(response.aiModelList)
         contentStore.setProgressState("loading")
         Promise.all(
-            values.aiModel.map(async (model) => {
-                const relevantAIModel = response.aiModelList.find((aiModel) => aiModel.id === model)!
-                for await (const value of readStreamableValue(response.streams[model])) {
-                    console.log(value)
-                    //contentStore.updateStreams(relevantAIModel, value || "")
+            response.map(async ({model, streamValue}) => {
+                for await (const value of readStreamableValue(streamValue)) {
+                    contentStore.updateStreams(model, value || {})
                 }
             })
         ).then(() => {
-            console.log('camplit')
             contentStore.setProgressState("complete")
         })
     }
@@ -57,7 +52,7 @@ export const ManageForm = () => {
     });
 
     return (
-        <div className="flex w-full flex-1 flex-col gap-0 lg:max-w-lg xl:max-w-xl min-h-0 py-4">
+        <div className="flex w-full flex-1 flex-col gap-0 lg:max-w-lg xl:max-w-md min-h-0 py-4">
             <div className="flex-none ">
                 <h1 className="text-lg font-semibold">Generate SEO Content</h1>
                 <p className="text-sm text-muted-foreground">

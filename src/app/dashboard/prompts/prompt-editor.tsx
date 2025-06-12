@@ -1,8 +1,8 @@
+import { EditorKit } from "@/components/editor/editor-kit";
 import { Editor, EditorContainer } from "@/components/editor/ui/editor";
-import { useCreateEditor } from "@/components/editor/use-create-editor";
 import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
-import { MarkdownPlugin } from "@udecode/plate-markdown";
-import { Plate } from "@udecode/plate/react";
+import { MarkdownPlugin } from "@platejs/markdown";
+import { Plate, usePlateEditor } from "platejs/react";
 import { LoaderCircle } from "lucide-react";
 import * as React from "react";
 import { useEffect, useRef, useState } from "react";
@@ -15,7 +15,8 @@ interface PromptEditorProps {
 }
 
 export const PromptEditor = ({defaultValue, onChange}: PromptEditorProps) => {
-    const editor = useCreateEditor({
+    const editor = usePlateEditor({
+        plugins: EditorKit,
         skipInitialization: true
     });
 

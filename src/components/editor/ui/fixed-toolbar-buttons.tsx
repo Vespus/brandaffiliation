@@ -1,128 +1,145 @@
 'use client';
 
-import * as React from 'react';
-
 import {
-    BoldPlugin,
-    CodePlugin,
-    ItalicPlugin,
-    StrikethroughPlugin,
-    UnderlinePlugin,
-} from '@udecode/plate-basic-marks/react';
-
-import { useEditorReadOnly } from '@udecode/plate/react';
-import {
+    BaselineIcon,
     BoldIcon,
     Code2Icon,
+    HighlighterIcon,
     ItalicIcon,
+    PaintBucketIcon,
     StrikethroughIcon,
     UnderlineIcon,
     WandSparklesIcon,
 } from 'lucide-react';
-
-import { MoreDropdownMenu } from '@/components/editor/ui/more-dropdown-menu';
+import { KEYS } from 'platejs';
+import { useEditorReadOnly } from 'platejs/react';
+import * as React from 'react';
 
 import { AIToolbarButton } from './ai-toolbar-button';
-import { AlignDropdownMenu } from './align-dropdown-menu';
-import { EmojiDropdownMenu } from './emoji-dropdown-menu';
+import { AlignToolbarButton } from './align-toolbar-button';
+import { EmojiToolbarButton } from './emoji-toolbar-button';
+import { FontColorToolbarButton } from './font-color-toolbar-button';
 import { FontSizeToolbarButton } from './font-size-toolbar-button';
 import { RedoToolbarButton, UndoToolbarButton } from './history-toolbar-button';
-import {
-    BulletedIndentListToolbarButton,
-    NumberedIndentListToolbarButton,
-} from './indent-list-toolbar-button';
-import { IndentTodoToolbarButton } from './indent-todo-toolbar-button';
-import { IndentToolbarButton } from './indent-toolbar-button';
-import { InsertDropdownMenu } from './insert-dropdown-menu';
-import { LineHeightDropdownMenu } from './line-height-dropdown-menu';
+import { ImportToolbarButton } from './import-toolbar-button';
+import { IndentToolbarButton, OutdentToolbarButton, } from './indent-toolbar-button';
+import { InsertToolbarButton } from './insert-toolbar-button';
+import { LineHeightToolbarButton } from './line-height-toolbar-button';
 import { LinkToolbarButton } from './link-toolbar-button';
+import { BulletedListToolbarButton, NumberedListToolbarButton, TodoListToolbarButton, } from './list-toolbar-button';
 import { MarkToolbarButton } from './mark-toolbar-button';
-import { OutdentToolbarButton } from './outdent-toolbar-button';
-import { TableDropdownMenu } from './table-dropdown-menu';
+import { ModeToolbarButton } from './mode-toolbar-button';
+import { MoreToolbarButton } from './more-toolbar-button';
+import { TableToolbarButton } from './table-toolbar-button';
+import { ToggleToolbarButton } from './toggle-toolbar-button';
 import { ToolbarGroup } from './toolbar';
-import { TurnIntoDropdownMenu } from './turn-into-dropdown-menu';
+import { TurnIntoToolbarButton } from './turn-into-toolbar-button';
 
 export function FixedToolbarButtons() {
     const readOnly = useEditorReadOnly();
 
     return (
-        <div className="flex flex-wrap w-full">
+        <div className="flex w-full">
             {!readOnly && (
                 <>
                     <ToolbarGroup>
-                        <UndoToolbarButton />
-                        <RedoToolbarButton />
+                        <UndoToolbarButton/>
+                        <RedoToolbarButton/>
                     </ToolbarGroup>
 
                     <ToolbarGroup>
                         <AIToolbarButton tooltip="AI commands">
-                            <WandSparklesIcon />
+                            <WandSparklesIcon/>
                         </AIToolbarButton>
                     </ToolbarGroup>
 
                     <ToolbarGroup>
-                        <InsertDropdownMenu />
-                        <TurnIntoDropdownMenu />
-                        <FontSizeToolbarButton />
+                        <ImportToolbarButton/>
                     </ToolbarGroup>
 
                     <ToolbarGroup>
-                        <MarkToolbarButton nodeType={BoldPlugin.key} tooltip="Bold (⌘+B)">
-                            <BoldIcon />
+                        <InsertToolbarButton/>
+                        <TurnIntoToolbarButton/>
+                        <FontSizeToolbarButton/>
+                    </ToolbarGroup>
+
+                    <ToolbarGroup>
+                        <MarkToolbarButton nodeType={KEYS.bold} tooltip="Bold (⌘+B)">
+                            <BoldIcon/>
+                        </MarkToolbarButton>
+
+                        <MarkToolbarButton nodeType={KEYS.italic} tooltip="Italic (⌘+I)">
+                            <ItalicIcon/>
                         </MarkToolbarButton>
 
                         <MarkToolbarButton
-                            nodeType={ItalicPlugin.key}
-                            tooltip="Italic (⌘+I)"
-                        >
-                            <ItalicIcon />
-                        </MarkToolbarButton>
-
-                        <MarkToolbarButton
-                            nodeType={UnderlinePlugin.key}
+                            nodeType={KEYS.underline}
                             tooltip="Underline (⌘+U)"
                         >
-                            <UnderlineIcon />
+                            <UnderlineIcon/>
                         </MarkToolbarButton>
 
                         <MarkToolbarButton
-                            nodeType={StrikethroughPlugin.key}
+                            nodeType={KEYS.strikethrough}
                             tooltip="Strikethrough (⌘+⇧+M)"
                         >
-                            <StrikethroughIcon />
+                            <StrikethroughIcon/>
                         </MarkToolbarButton>
 
-                        <MarkToolbarButton nodeType={CodePlugin.key} tooltip="Code (⌘+E)">
-                            <Code2Icon />
+                        <MarkToolbarButton nodeType={KEYS.code} tooltip="Code (⌘+E)">
+                            <Code2Icon/>
                         </MarkToolbarButton>
 
+                        <FontColorToolbarButton nodeType={KEYS.color} tooltip="Text color">
+                            <BaselineIcon/>
+                        </FontColorToolbarButton>
+
+                        <FontColorToolbarButton
+                            nodeType={KEYS.backgroundColor}
+                            tooltip="Background color"
+                        >
+                            <PaintBucketIcon/>
+                        </FontColorToolbarButton>
                     </ToolbarGroup>
 
                     <ToolbarGroup>
-                        <AlignDropdownMenu />
+                        <AlignToolbarButton/>
 
-                        <NumberedIndentListToolbarButton />
-                        <BulletedIndentListToolbarButton />
-                        <IndentTodoToolbarButton />
+                        <NumberedListToolbarButton/>
+                        <BulletedListToolbarButton/>
+                        <TodoListToolbarButton/>
+                        <ToggleToolbarButton/>
                     </ToolbarGroup>
 
                     <ToolbarGroup>
-                        <LinkToolbarButton />
-                        <TableDropdownMenu />
-                        <EmojiDropdownMenu />
+                        <LinkToolbarButton/>
+                        <TableToolbarButton/>
+                        <EmojiToolbarButton/>
                     </ToolbarGroup>
 
                     <ToolbarGroup>
-                        <LineHeightDropdownMenu />
-                        <OutdentToolbarButton />
-                        <IndentToolbarButton />
+                        <LineHeightToolbarButton/>
+                        <OutdentToolbarButton/>
+                        <IndentToolbarButton/>
                     </ToolbarGroup>
 
                     <ToolbarGroup>
-                        <MoreDropdownMenu />
+                        <MoreToolbarButton/>
                     </ToolbarGroup>
                 </>
             )}
+
+            <div className="grow"/>
+
+            <ToolbarGroup>
+                <MarkToolbarButton nodeType={KEYS.highlight} tooltip="Highlight">
+                    <HighlighterIcon/>
+                </MarkToolbarButton>
+            </ToolbarGroup>
+
+            <ToolbarGroup>
+                <ModeToolbarButton/>
+            </ToolbarGroup>
         </div>
     );
 }

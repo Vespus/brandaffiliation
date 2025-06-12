@@ -1,23 +1,17 @@
 'use client';
 
-import * as React from 'react';
-
 import { useChat as useBaseChat } from '@ai-sdk/react';
+import { usePluginOption } from 'platejs/react';
+
+import { aiChatPlugin } from '@/components/editor/plugins/ai-kit';
 
 export const useChat = () => {
-    // remove when you implement the route /api/ai/command
-    const abortControllerRef = React.useRef<AbortController | null>(null);
-    const _abortFakeStream = () => {
-        if (abortControllerRef.current) {
-            abortControllerRef.current.abort();
-            abortControllerRef.current = null;
-        }
-    };
+    const options = usePluginOption(aiChatPlugin, 'chatOptions');
 
     const chat = useBaseChat({
         id: 'editor',
-        api: '/api/editor',
+        ...options,
     });
 
-    return { ...chat, _abortFakeStream };
+    return { ...chat };
 };

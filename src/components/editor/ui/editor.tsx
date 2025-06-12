@@ -2,11 +2,11 @@
 
 import * as React from 'react';
 
-import type { PlateContentProps } from '@udecode/plate/react';
 import type { VariantProps } from 'class-variance-authority';
+import type { PlateContentProps } from 'platejs/react';
 
-import { PlateContainer, PlateContent } from '@udecode/plate/react';
 import { cva } from 'class-variance-authority';
+import { PlateContainer, PlateContent } from 'platejs/react';
 
 import { cn } from '@/lib/utils';
 
@@ -24,7 +24,7 @@ const editorContainerVariants = cva(
                     'has-[[data-slate-editor]:focus]:border-brand/50 has-[[data-slate-editor]:focus]:ring-2 has-[[data-slate-editor]:focus]:ring-brand/30',
                     'has-aria-disabled:border-input has-aria-disabled:bg-muted'
                 ),
-                default: 'h-full ring ring-black/5 shadow',
+                default: 'h-full',
                 demo: 'h-[650px]',
                 select: cn(
                     'group rounded-md border border-input ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
@@ -35,12 +35,11 @@ const editorContainerVariants = cva(
     }
 );
 
-export const EditorContainer = ({
+export function EditorContainer({
                                     className,
                                     variant,
                                     ...props
-                                }: React.ComponentProps<'div'> &
-    VariantProps<typeof editorContainerVariants>) => {
+                                }: React.ComponentProps<'div'> & VariantProps<typeof editorContainerVariants>) {
     return (
         <PlateContainer
             className={cn(
@@ -51,9 +50,7 @@ export const EditorContainer = ({
             {...props}
         />
     );
-};
-
-EditorContainer.displayName = 'EditorContainer';
+}
 
 const editorVariants = cva(
     cn(
@@ -80,7 +77,7 @@ const editorVariants = cva(
                     'max-h-[min(70vh,320px)] w-full max-w-[700px] overflow-y-auto px-3 py-2 text-base md:text-sm',
                 comment: cn('rounded-none border-none bg-transparent text-sm'),
                 default:
-                    'size-full px-16 pt-4 pb-32 text-base sm:px-4.5',
+                    'size-full px-16 pt-4 pb-72 text-base sm:px-[max(64px,calc(50%-350px))]',
                 demo: 'size-full px-16 pt-4 pb-72 text-base sm:px-[max(64px,calc(50%-350px))]',
                 fullWidth: 'size-full px-16 pt-4 pb-72 text-base sm:px-24',
                 none: '',

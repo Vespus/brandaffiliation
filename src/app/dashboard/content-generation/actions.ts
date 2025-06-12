@@ -5,6 +5,7 @@ import { appendMarkdown, getDriver } from "@/app/dashboard/content-generation/ut
 import { db } from "@/db";
 import { getAIModelsWithProviderAndSettings } from "@/db/presets";
 import { datasources, datasourceValues, systemPrompts } from "@/db/schema";
+import { AIModelWithProviderAndSettings } from "@/db/types";
 import { streamObject } from "ai";
 import { createStreamableValue, StreamableValue } from "ai/rsc";
 import { and, eq, inArray, sql } from "drizzle-orm";
@@ -31,7 +32,7 @@ export const CompletionStream = async (parsedInput: z.infer<typeof ContentGenera
                 name: datasources.name,
                 description: datasources.description,
                 data: sql<string[]>`array_agg
-                    ((${datasourceValues.data} ->> ${datasources.valueColumn}):: text)`,
+                    ((${datasourceValues.data} ->> ${datasources.valueColumn})::text)`,
             })
                 .from(datasources)
                 .leftJoin(datasourceValues,
@@ -77,11 +78,8 @@ export const CompletionStream = async (parsedInput: z.infer<typeof ContentGenera
         streamList.set(model.id, streamList.get(model.id)!.done())
     }))
 
-    return {
-        aiModelList: models,
-        streams: [...streamList].reduce<Record<string, StreamableValue<string>>>((acc, [id, stream]) => {
-            acc[id] = stream.value;
-            return acc;
-        }, {}),
-    }
+    return [...streamList].map(([id, stream]) => ({
+        model: models.find((model) => model.id === id) as AIModelWithProviderAndSettings,
+        streamValue: stream.value
+    }))
 }

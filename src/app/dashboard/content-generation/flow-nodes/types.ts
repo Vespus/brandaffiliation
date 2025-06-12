@@ -7,4 +7,17 @@ export type AIStreamNodeType = Node<{
     label: string
 }, 'ai-stream'>
 
-export type CustomNodeType = BuiltInNode | AIStreamNodeType;
+export type CompareAgentNodeType = Node<{
+    label: string
+    inputs: string[]
+    output: string
+}, 'compare-agent'>
+
+export type ToneAgentNodeType = Node<{
+    label: string
+    input: string
+    output: string
+    tone: 'professional' | 'casual' | 'humorous' | 'formal'
+}, 'tone-agent'>
+
+export type CustomNodeType = BuiltInNode | AIStreamNodeType | CompareAgentNodeType | ToneAgentNodeType;

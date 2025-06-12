@@ -15,7 +15,8 @@ interface ContentGenerationStoreType {
     updateModels: (models: AIModelWithProviderAndSettings[]) => void,
     setNodes: (nodes: CustomNodeType[]) => void;
     setEdges: (edges: Edge[]) => void;
-    setProgressState: (state: "loading" | "started" | "idle" | "complete") => void
+    setProgressState: (state: "loading" | "started" | "idle" | "complete") => void;
+    addNode: (node: CustomNodeType) => void;
 }
 
 export const useContentGenerationStore = create<ContentGenerationStoreType>((set, get) => ({
@@ -46,6 +47,11 @@ export const useContentGenerationStore = create<ContentGenerationStoreType>((set
     setEdges: (edges) => {
         set({ edges });
     },
+    addNode: (node) => {
+        set((state) => ({
+            nodes: [...state.nodes, node]
+        }));
+    },
     updateStreams: (model: AIModelWithProviderAndSettings, stream: string) =>
         set(
             (state) => {
@@ -63,7 +69,7 @@ export const useContentGenerationStore = create<ContentGenerationStoreType>((set
                         ...newNodes[existingNodeIndex],
                         data: {
                             ...newNodes[existingNodeIndex].data,
-                            stream: newNodes[existingNodeIndex].data.stream + stream
+                            stream: stream
                         }
                     }
                 }

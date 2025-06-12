@@ -1,31 +1,23 @@
 'use client';
 
-import type { PlateEditor } from '@udecode/plate/react';
+import type { PlateEditor } from 'platejs/react';
 
+import { insertCodeBlock } from '@platejs/code-block';
+import { insertDate } from '@platejs/date';
+import { insertColumnGroup, toggleColumnGroup } from '@platejs/layout';
+import { triggerFloatingLink } from '@platejs/link/react';
+import { SuggestionPlugin } from '@platejs/suggestion/react';
+import { TablePlugin } from '@platejs/table/react';
+import { insertToc } from '@platejs/toc';
 import {
     type NodeEntry,
     type Path,
     type TElement,
+    KEYS,
     PathApi,
-} from '@udecode/plate';
-import { insertCodeBlock } from '@udecode/plate-code-block';
-import { CodeBlockPlugin } from '@udecode/plate-code-block/react';
-import { insertToc } from '@udecode/plate-heading';
-import { TocPlugin } from '@udecode/plate-heading/react';
-import { INDENT_LIST_KEYS, ListStyleType } from '@udecode/plate-indent-list';
-import { IndentListPlugin } from '@udecode/plate-indent-list/react';
+} from 'platejs';
 
-import {
-    TableCellPlugin,
-    TablePlugin,
-    TableRowPlugin,
-} from '@udecode/plate-table/react';
-
-export const STRUCTURAL_TYPES: string[] = [
-    TablePlugin.key,
-    TableRowPlugin.key,
-    TableCellPlugin.key,
-];
+const ACTION_THREE_COLUMNS = 'action_three_columns';
 
 const insertList = (editor: PlateEditor, type: string) => {
     editor.tf.insertNodes(
@@ -41,21 +33,23 @@ const insertBlockMap: Record<
     string,
     (editor: PlateEditor, type: string) => void
 > = {
-    [INDENT_LIST_KEYS.todo]: insertList,
-    [ListStyleType.Decimal]: insertList,
-    [ListStyleType.Disc]: insertList,
-
-    [CodeBlockPlugin.key]: (editor) => insertCodeBlock(editor, { select: true }),
-    [TablePlugin.key]: (editor) =>
+    [KEYS.listTodo]: insertList,
+    [KEYS.ol]: insertList,
+    [KEYS.ul]: insertList,
+    [ACTION_THREE_COLUMNS]: (editor) =>
+        insertColumnGroup(editor, { columns: 3, select: true }),
+    [KEYS.codeBlock]: (editor) => insertCodeBlock(editor, { select: true }),
+    [KEYS.table]: (editor) =>
         editor.getTransforms(TablePlugin).insert.table({}, { select: true }),
-    [TocPlugin.key]: (editor) => insertToc(editor, { select: true }),
+    [KEYS.toc]: (editor) => insertToc(editor, { select: true }),
 };
 
 const insertInlineMap: Record<
     string,
     (editor: PlateEditor, type: string) => void
 > = {
-
+    [KEYS.date]: (editor) => insertDate(editor, { select: true }),
+    [KEYS.link]: (editor) => triggerFloatingLink(editor, { focused: true }),
 };
 
 export const insertBlock = (editor: PlateEditor, type: string) => {
@@ -72,9 +66,9 @@ export const insertBlock = (editor: PlateEditor, type: string) => {
             });
         }
         if (getBlockType(block[0]) !== type) {
-            //editor.getApi(SuggestionPlugin).suggestion.withoutSuggestions(() => {
-                //editor.tf.removeNodes({ previousEmptyBlock: true });
-            //});
+            editor.getApi(SuggestionPlugin).suggestion.withoutSuggestions(() => {
+                editor.tf.removeNodes({ previousEmptyBlock: true });
+            });
         }
     });
 };
@@ -105,9 +99,10 @@ const setBlockMap: Record<
     string,
     (editor: PlateEditor, type: string, entry: NodeEntry<TElement>) => void
 > = {
-    [INDENT_LIST_KEYS.todo]: setList,
-    [ListStyleType.Decimal]: setList,
-    [ListStyleType.Disc]: setList,
+    [KEYS.listTodo]: setList,
+    [KEYS.ol]: setList,
+    [KEYS.ul]: setList,
+    [ACTION_THREE_COLUMNS]: (editor) => toggleColumnGroup(editor, { columns: 3 }),
 };
 
 export const setBlockType = (
@@ -119,8 +114,8 @@ export const setBlockType = (
         const setEntry = (entry: NodeEntry<TElement>) => {
             const [node, path] = entry;
 
-            if (node[IndentListPlugin.key]) {
-                editor.tf.unsetNodes([IndentListPlugin.key, 'indent'], { at: path });
+            if (node[KEYS.listType]) {
+                editor.tf.unsetNodes([KEYS.listType, 'indent'], { at: path });
             }
             if (type in setBlockMap) {
                 return setBlockMap[type](editor, type, entry);
@@ -147,13 +142,13 @@ export const setBlockType = (
 };
 
 export const getBlockType = (block: TElement) => {
-    if (block[IndentListPlugin.key]) {
-        if (block[IndentListPlugin.key] === ListStyleType.Decimal) {
-            return ListStyleType.Decimal;
-        } else if (block[IndentListPlugin.key] === INDENT_LIST_KEYS.todo) {
-            return INDENT_LIST_KEYS.todo;
+    if (block[KEYS.listType]) {
+        if (block[KEYS.listType] === KEYS.ol) {
+            return KEYS.ol;
+        } else if (block[KEYS.listType] === KEYS.listTodo) {
+            return KEYS.listTodo;
         } else {
-            return ListStyleType.Disc;
+            return KEYS.ul;
         }
     }
 
