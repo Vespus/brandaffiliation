@@ -1,9 +1,11 @@
+import { MetaOutputSchema } from "@/app/dashboard/content-generation/types";
 import type { BuiltInNode, Node } from '@xyflow/react';
 import { AIModelWithProviderAndSettings } from "@/db/types";
+import { z } from "zod";
 
 export type AIStreamNodeType = Node<{
     model: AIModelWithProviderAndSettings
-    stream: string
+    stream: z.infer<typeof MetaOutputSchema>
     label: string
 }, 'ai-stream'>
 

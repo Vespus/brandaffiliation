@@ -1,6 +1,15 @@
-export const Legend = ({children}: { children: React.ReactNode }) => {
+import { cn } from "@/lib/utils";
+import React from "react";
+
+export const Legend = ({children, className, ...props}: React.ComponentProps<"div">) => {
     return (
-        <div className="relative flex items-center">
+        <div
+            {...props}
+            className={cn(
+                "relative flex items-center",
+                className
+            )}
+        >
             <div className="bg-background pr-3 text-xs text-muted-foreground inline-block z-10 relative">
                 {children}
             </div>

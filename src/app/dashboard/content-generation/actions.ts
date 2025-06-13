@@ -1,6 +1,7 @@
 "use server"
 
 import { ContentGenerateSchema } from "@/app/dashboard/content-generation/schema";
+import { MetaOutputSchema } from "@/app/dashboard/content-generation/types";
 import { appendMarkdown, getDriver } from "@/app/dashboard/content-generation/utils";
 import { db } from "@/db";
 import { getAIModelsWithProviderAndSettings } from "@/db/presets";
@@ -61,13 +62,7 @@ export const CompletionStream = async (parsedInput: z.infer<typeof ContentGenera
             frequencyPenalty: model.settings.frequencyPenalty,
             presencePenalty: model.settings.presencePenalty,
             system: prompt.prompt,
-            schema: z.object({
-                hero_header: z.string().describe("Hero header of the SEO Text Content"),
-                hero_description: z.string().describe("Hero description of the SEO Text Content with at least 2 long paragraphs"),
-                meta_title: z.string().describe("Meta title of the generated SEO Text Content"),
-                meta_description: z.string().describe("Meta description of the generated SEO Text Content"),
-                meta_keywords: z.string().describe("Meta keywords of the generated SEO Text Content"),
-            }),
+            schema: MetaOutputSchema,
             prompt: dataSourcePrompt
         })
 

@@ -1,3 +1,4 @@
+import { QSPayService } from "@/components/qspay/qspay-service";
 import {Sidebar} from "@/components/sidebar/sidebar";
 import {SidebarInset, SidebarProvider, SidebarTrigger} from "@/components/ui/sidebar";
 import { auth } from "@/lib/auth";
@@ -19,6 +20,7 @@ export default async function DashboardLayout({children}: Readonly<{ children: R
                 <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear">
                     <div className="flex items-center gap-2 px-4">
                         <SidebarTrigger className="-ml-1" />
+                        <QSPayService />
                     </div>
                 </header>
                 <div className="flex flex-col flex-1 px-4 min-h-0">
