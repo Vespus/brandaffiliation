@@ -1,67 +1,43 @@
-import {SelectProps} from "@radix-ui/react-select";
-import {api} from "@/lib/trpc/react";
-import {Check, ChevronsUpDown} from "lucide-react";
-import {useState} from "react";
-import {Button} from "@/components/ui/button";
-import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList
-} from "@/components/ui/command";
-import {cn} from "@/lib/utils";
+import { ComboboxBase } from "@/components/ui/combobox-base";
+import { api } from "@/lib/trpc/react";
+import { QSPayCategory } from "@/qspay-types";
+import { SelectProps } from "@radix-ui/react-select";
+import { ArrowRightIcon } from "lucide-react";
 
-export const CategorySelect = ({value, onValueChange}: SelectProps) => {
-    const {data} = api.genericRoute.getCategories.useQuery()
-    const [open, setOpen] = useState(false)
+const flat = (arr: QSPayCategory[]): QSPayCategory[] => arr.flatMap(({
+                                                                         children,
+                                                                         ...rest
+                                                                     }) => [rest, ...(children ? flat(children) : [])]);
+
+type CategorySelectProps = Omit<SelectProps, "value" | "onValueChange"> & {
+    value?: string;
+    onValueChange?: (value?: string) => void;
+}
+
+export const CategorySelect = ({value, onValueChange}: CategorySelectProps) => {
+    const {data} = api.qspayRoute.getAllCategories.useQuery()
+    const dataSet = flat(data || []);
 
     return (
-        <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-                <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className="w-full justify-between"
-                >
-                    {value
-                        ? data?.find((category) => category.id === value)?.name
-                        : "Select category..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-(--radix-popper-anchor-width) p-0">
-                <Command>
-                    <CommandInput placeholder="Search categories..."/>
-                    <CommandList>
-                        <CommandEmpty>No framework found.</CommandEmpty>
-                        <CommandGroup>
-                            {data?.map((category) => (
-                                <CommandItem
-                                    key={category.id}
-                                    value={category.id.toString()}
-                                    keywords={[category.name, ...category.seoKeywords]}
-                                    onSelect={(currentValue) => {
-                                        onValueChange?.(currentValue === value ? "" : currentValue)
-                                        setOpen(false)
-                                    }}
-                                >
-                                    <Check
-                                        className={cn(
-                                            "mr-2 mt-0.5 h-4 w-4",
-                                            value === category.id ? "opacity-100" : "opacity-0"
-                                        )}
-                                    />
-                                    {category.name}
-                                </CommandItem>
-                            ))}
-                        </CommandGroup>
-                    </CommandList>
-                </Command>
-            </PopoverContent>
-        </Popover>
+        <ComboboxBase
+            valueDisplayKey="description"
+            valueKey="id"
+            data={dataSet || []}
+            value={value}
+            keywords={item => ([item.description])}
+            onValueChange={(val) => onValueChange?.(val)}
+            placeholder="Select a Category"
+            emptyPlaceholder="No category selected"
+            itemRenderer={item => {
+                const parent = data?.find(cat => cat.id === item.parentId);
+                const isParent = !item.parentId
+                return (
+                    <div className="flex items-center gap-2">
+                        {parent && <span className="text-xs text-muted-foreground inline-flex items-center gap-1">{parent.description} <ArrowRightIcon size={12} className="size-auto" /></span>}
+                        <span>{item.description}</span>
+                    </div>
+                )
+            }}
+        />
     )
 }

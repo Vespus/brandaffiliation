@@ -1,7 +1,16 @@
-import { create } from 'zustand'
 import { CustomNodeType } from "@/app/dashboard/content-generation/flow-nodes/types";
-import { applyNodeChanges, OnEdgesChange, OnConnect, OnNodesChange, applyEdgeChanges, addEdge, Edge } from "@xyflow/react";
+import { MetaOutput, MetaOutputSchema } from "@/app/dashboard/content-generation/types";
 import { AIModelWithProviderAndSettings } from '@/db/types';
+import {
+    addEdge,
+    applyEdgeChanges,
+    applyNodeChanges,
+    Edge,
+    OnConnect,
+    OnEdgesChange,
+    OnNodesChange
+} from "@xyflow/react";
+import { create } from 'zustand'
 
 interface ContentGenerationStoreType {
     nodes: CustomNodeType[]
@@ -11,15 +20,18 @@ interface ContentGenerationStoreType {
     onNodesChange: OnNodesChange<CustomNodeType>
     onEdgesChange: OnEdgesChange;
     onConnect: OnConnect;
-    updateStreams: (model: AIModelWithProviderAndSettings, stream: string) => void
+    updateStreams: (model: AIModelWithProviderAndSettings, stream: MetaOutput) => void
     updateModels: (models: AIModelWithProviderAndSettings[]) => void,
     setNodes: (nodes: CustomNodeType[]) => void;
     setEdges: (edges: Edge[]) => void;
     setProgressState: (state: "loading" | "started" | "idle" | "complete") => void;
     addNode: (node: CustomNodeType) => void;
+    saveStream: (model: AIModelWithProviderAndSettings, stream: MetaOutput) => void
+    streams: Record<string, { model: AIModelWithProviderAndSettings, stream: MetaOutput }>
 }
 
 export const useContentGenerationStore = create<ContentGenerationStoreType>((set, get) => ({
+    streams: {},
     nodes: [],
     models: [],
     edges: [],
@@ -42,17 +54,17 @@ export const useContentGenerationStore = create<ContentGenerationStoreType>((set
         });
     },
     setNodes: (nodes) => {
-        set({ nodes });
+        set({nodes});
     },
     setEdges: (edges) => {
-        set({ edges });
+        set({edges});
     },
     addNode: (node) => {
         set((state) => ({
             nodes: [...state.nodes, node]
         }));
     },
-    updateStreams: (model: AIModelWithProviderAndSettings, stream: string) =>
+    updateStreams: (model: AIModelWithProviderAndSettings, stream: MetaOutput) =>
         set(
             (state) => {
                 const newNodes = [...state.nodes]
@@ -78,4 +90,20 @@ export const useContentGenerationStore = create<ContentGenerationStoreType>((set
             }
         ),
     updateModels: (models: AIModelWithProviderAndSettings[]) => set({models}),
+
+    saveStream: (model: AIModelWithProviderAndSettings, stream: MetaOutput) => {
+        set(
+            (state) => {
+                return {
+                    streams: {
+                        ...state.streams,
+                        [model.id]: {
+                            model,
+                            stream
+                        }
+                    }
+                }
+            }
+        )
+    },
 }))

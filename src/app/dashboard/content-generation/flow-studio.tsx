@@ -142,7 +142,6 @@ const ActualFlow = () => {
                 'elk.direction': 'RIGHT',
             })
         }
-        console.log(state.progressState)
     }, [state.progressState]);
 
     const onRun = useCallback(() => {

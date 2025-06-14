@@ -4,8 +4,8 @@ import { QSPayUser } from "@/qspay-types";
 import { cookies } from "next/headers";
 
 export const QspayStoreSelectorServer = async () => {
-    const {result} = await QSPayClient<QSPayUser>("User/Get");
     const cookieList = await cookies()
+    const {result} = await QSPayClient<QSPayUser>("User/Get");
 
     const currentSelectedStore = cookieList.get("qs-pay-store-id")?.value
     const storeList = result.companies[0].merchants[0].stores

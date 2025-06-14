@@ -53,7 +53,7 @@ export function DatasourceValuesTable({ promise, datasource }: DatasourceValuesT
             enableHiding: true,
         })),
     ];
-console.log(values);
+
     const { table } = useDataTable({
         data: values,
         columns,

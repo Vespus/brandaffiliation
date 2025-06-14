@@ -1,3 +1,4 @@
+import { MetaOutputSchema } from "@/app/dashboard/content-generation/types";
 import { z } from "zod";
 
 export const QSPayAuthResponseSchema = z.object({
@@ -119,3 +120,47 @@ export const QSPayUserSchema = z.object({
 });
 
 export type QSPayUser = z.infer<typeof QSPayUserSchema>;
+
+export const QSPayBrandSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    slug: z.string(),
+    storeId: z.string(),
+    mainType: z.number(),
+    promotionType: z.number(),
+    logoSmall: z.nullable(z.string()),
+    logoMedium: z.nullable(z.string()),
+    logoLarge: z.nullable(z.string()),
+    config: z.nullable(z.string()),
+    description: z.nullable(z.string()),
+});
+
+export type QSPayBrand = z.infer<typeof QSPayBrandSchema>;
+
+export const QSPayCategorySchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    mainType: z.number(),
+    parentId: z.string(),
+    slug: z.string(),
+    children: z.lazy(() => z.array(QSPayCategorySchema))
+});
+
+export type QSPayCategory = z.infer<typeof QSPayCategorySchema>;
+
+
+export const QSPayCombinSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    mainType: z.number(),
+    parentId: z.string(),
+    slug: z.string(),
+    catalog: z.string(),//todo
+    category: QSPayCategorySchema,
+    brand: QSPayBrandSchema,
+    config: MetaOutputSchema
+});
+
+export type QSPayCombin = z.infer<typeof QSPayCombinSchema>;

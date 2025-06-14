@@ -57,7 +57,7 @@ export const DataSourceValueSelector = ({value, onValueChange, index}: DataSourc
                                 <CommandItem
                                     key={dsv.id}
                                     value={dsv.id.toString()}
-                                    keywords={[dsv.data[dataSource.displayColumn]]}
+                                    keywords={[(dsv.data as any)[dataSource.displayColumn]]}
                                     onSelect={(currentValue) => {
                                         onValueChange?.(Number(currentValue) === value ? undefined : Number(currentValue))
                                         setOpen(false)
@@ -71,7 +71,7 @@ export const DataSourceValueSelector = ({value, onValueChange, index}: DataSourc
                                         )}
                                     />
                                     <div className="flex flex-col space-y-1">
-                                        <span>{dsv.data[dataSource.displayColumn]}</span>
+                                        <span>{(dsv.data as any)[dataSource.displayColumn]}</span>
                                     </div>
                                 </CommandItem>
                             ))}

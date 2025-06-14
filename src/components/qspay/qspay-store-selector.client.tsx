@@ -4,7 +4,8 @@ import { changeStore } from "@/components/qspay/qspay-store-selector-action";
 import { ComboboxBase } from "@/components/ui/combobox-base";
 import { useCustomAction } from "@/hooks/use-custom-action";
 import { QSPayStore } from "@/qspay-types";
-import { useEffect, useState } from "react";
+import { parseAsString, useQueryState } from "nuqs";
+import { useState } from "react";
 
 export const QspayStoreSelectorClient = ({
                                              storeList,
@@ -16,24 +17,23 @@ export const QspayStoreSelectorClient = ({
                                          }) => {
     const [value, setValue] = useState(selectedStore);
     const changeStoreAction = useCustomAction(changeStore)
-
-    useEffect(() => {
-        if(value !== selectedStore) {
-            changeStoreAction.execute({storeId: value})
-        }
-    }, [value])
+    const [error] = useQueryState("error", parseAsString)
 
     return (
         <ComboboxBase
-            valueDisplayKey="storeUrl"
+            valueDisplayKey="name"
             valueKey="storeId"
             value={value}
-            onValueChange={setValue}
+            onValueChange={(val) => {
+                setValue(val)
+                changeStoreAction.execute({storeId: val})
+            }}
             placeholder="Select a store"
             emptyPlaceholder="No store selected"
             searchPlaceholder="Search..."
             data={storeList}
-
+            keywords={item => ([item.name])}
+            className={error ? "border-red-500 dark:border-red-700" : ""}
         />
     )
 }

@@ -23,3 +23,5 @@ export const MetaOutputSchema = z.object({
         footer: z.string().describe("Bottom of the page Hero Footer description")
     }).describe("Content descriptions")
 })
+
+export type MetaOutput = z.infer<typeof MetaOutputSchema>

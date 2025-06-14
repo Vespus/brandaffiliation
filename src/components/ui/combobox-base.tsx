@@ -3,28 +3,34 @@
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ChevronsUpDown } from "lucide-react";
-import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { JSX, useState } from "react";
 
 export const ComboboxBase = <T, >({
                                       data,
                                       placeholder = "Select a value",
                                       emptyPlaceholder = "No value selected",
                                       searchPlaceholder = "Search...",
+                                      keywords,
                                       valueDisplayKey,
                                       valueKey,
                                       onValueChange,
                                       value,
+                                      itemRenderer,
+                                      className,
                                   }:
-                                  {
+                                      React.ComponentProps<"button"> & {
                                       valueDisplayKey: keyof T,
                                       valueKey: keyof T,
                                       data: T[],
                                       placeholder?: string,
                                       emptyPlaceholder?: string,
                                       searchPlaceholder?: string,
-                                      value?: string;
+                                      keywords?: (item: T) => any[],
+                                      value?: string | number;
                                       onValueChange?: (value?: string) => void;
+                                      itemRenderer?: (item: T) => JSX.Element | null;
                                   }) => {
     const [open, setOpen] = useState(false)
 
@@ -37,7 +43,10 @@ export const ComboboxBase = <T, >({
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="w-full justify-between"
+                    className={cn(
+                        "w-full justify-between",
+                        className
+                    )}
                 >
                     {selectedValue}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
@@ -57,8 +66,19 @@ export const ComboboxBase = <T, >({
                                         onValueChange?.(currentValue === value ? undefined : currentValue)
                                         setOpen(false)
                                     }}
+                                    keywords={keywords?.(item)}
+                                    className="flex items-start"
                                 >
-                                    {item[valueDisplayKey] as string}
+                                    <Check
+                                        className={cn(
+                                            "mr-2 mt-0.5 h-4 w-4",
+                                            value === item[valueKey] ? "opacity-100" : "opacity-0"
+                                        )}
+                                    />
+                                    {
+                                        itemRenderer ? itemRenderer(item) :
+                                            <span>{item[valueDisplayKey] as string}</span>
+                                    }
                                 </CommandItem>
                             ))}
                         </CommandGroup>

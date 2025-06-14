@@ -86,7 +86,6 @@ export const POST = async (req: NextRequest) => {
 
     for await (const partialObject of partialObjectStream) {
         console.clear();
-        console.log(partialObject);
     }
 
 }

@@ -66,6 +66,7 @@
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.44.2",
     "elkjs": "^0.10.0",
+    "embla-carousel-react": "^8.6.0",
     "es-toolkit": "^1.39.3",
     "jwt-decode": "^4.0.0",
     "lexical": "^0.32.1",
