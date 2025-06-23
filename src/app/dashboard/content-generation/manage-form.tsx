@@ -4,8 +4,7 @@ import { CompletionStream } from "@/app/dashboard/content-generation/actions";
 import { AIModelSelect } from "@/app/dashboard/content-generation/form-elements/ai-model-select";
 import { BrandSelect } from "@/app/dashboard/content-generation/form-elements/brand-select";
 import { CategorySelect } from "@/app/dashboard/content-generation/form-elements/category-select";
-import { DataSourceSelector } from "@/app/dashboard/content-generation/form-elements/datasource-selector";
-import { DataSourceValueSelector } from "@/app/dashboard/content-generation/form-elements/datasource-value-selector";
+import { DataSources } from "@/app/dashboard/content-generation/form-elements/datasources";
 import { PromptSelector } from "@/app/dashboard/content-generation/form-elements/prompt-selector";
 import { ContentGenerateSchema } from "@/app/dashboard/content-generation/schema";
 import { useContentGenerationStore } from "@/app/dashboard/content-generation/store";
@@ -13,16 +12,14 @@ import {
     useContentGenerationQueryParams
 } from "@/app/dashboard/content-generation/use-content-generation-query-params";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Form, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Legend } from "@/components/ui/legend";
 import { Scroller } from "@/components/ui/scroller";
-import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { readStreamableValue } from "ai/rsc";
-import { PlusIcon, Sparkles, XIcon } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { useEffect } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 export const ManageForm = () => {
@@ -54,10 +51,6 @@ export const ManageForm = () => {
         })
     }
 
-    const {fields, append, remove} = useFieldArray({
-        name: "dataSources",
-        control: form.control
-    });
     const {brand, category} = form.watch()
     useEffect(() => {
         setParams({
@@ -131,85 +124,8 @@ export const ManageForm = () => {
                             </div>
                             <div>
                                 <Legend>Data Sources</Legend>
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    className="my-4"
-                                    onClick={() => append({
-                                        datasourceId: undefined,
-                                        datasourceValueId: undefined,
-                                        datasourcePrompt: ""
-                                    })}
-                                >
-                                    <PlusIcon/>
-                                    Add Data Source
-                                </Button>
-                                <div className="space-y-4">
-                                    {
-                                        fields.map((field, index) => (
-                                            <Card key={index}>
-                                                <CardContent className="space-y-4">
-                                                    <div className="grid grid-cols-2 gap-4">
-                                                        <FormField
-                                                            control={form.control}
-                                                            name={`dataSources.${index}.datasourceId`}
-                                                            render={({field}) => (
-                                                                <FormItem>
-                                                                    <FormLabel>Source</FormLabel>
-                                                                    <DataSourceSelector onValueChange={field.onChange}
-                                                                                        value={field.value}/>
-                                                                    <FormMessage/>
-                                                                </FormItem>
-                                                            )}
-                                                        />
-                                                        <FormField
-                                                            control={form.control}
-                                                            name={`dataSources.${index}.datasourceValueId`}
-                                                            render={({field}) => (
-                                                                <FormItem>
-                                                                    <FormLabel>Source Value</FormLabel>
-                                                                    <DataSourceValueSelector
-                                                                        onValueChange={field.onChange}
-                                                                        value={field.value}
-                                                                        index={index}
-                                                                    />
-                                                                    <FormMessage/>
-                                                                </FormItem>
-                                                            )}
-                                                        />
-                                                    </div>
-                                                    <FormField
-                                                        control={form.control}
-                                                        name={`dataSources.${index}.datasourcePrompt`}
-                                                        render={({field}) => (
-                                                            <FormItem>
-                                                                <FormLabel>Source Prompt</FormLabel>
-                                                                <Textarea
-                                                                    {...field}
-                                                                    value={field.value}
-                                                                    onChange={field.onChange}
-                                                                    placeholder="Prompt to append to the system prompt"
-                                                                />
-                                                                <FormMessage/>
-                                                            </FormItem>
-                                                        )}
-                                                    />
-                                                </CardContent>
-                                                <CardFooter className="justify-end">
-                                                    <Button
-                                                        type="button"
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={() => remove(index)}
-                                                    >
-                                                        <XIcon/> Remove
-                                                    </Button>
-                                                </CardFooter>
-                                            </Card>
-                                        ))
-                                    }
-                                </div>
+                                <DataSources/>
+
                             </div>
                         </form>
                     </Form>
