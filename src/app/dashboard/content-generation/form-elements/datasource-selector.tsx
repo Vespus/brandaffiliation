@@ -4,7 +4,7 @@ import { SelectProps } from "@radix-ui/react-select";
 
 type DataSourceSelectorProps = Omit<SelectProps, "value" | "onValueChange"> & {
     value?: number;
-    onValueChange?: (value?: number) => void;
+    onValueChange?: (value?: number | string) => void;
 }
 
 export const DataSourceSelector = ({value, onValueChange}: DataSourceSelectorProps) => {
@@ -12,11 +12,12 @@ export const DataSourceSelector = ({value, onValueChange}: DataSourceSelectorPro
 
     return (
         <ComboboxBase
-            valueDisplayKey="name"
+            labelKey="name"
             valueKey="id"
             data={dataSources || []}
             value={value}
-            onValueChange={(val) => onValueChange?.(Number(val))}
+            onValueChange={onValueChange}
+            valueAs="number"
             placeholder="Select a Datasource"
             emptyPlaceholder="No Datasource selected"
         />

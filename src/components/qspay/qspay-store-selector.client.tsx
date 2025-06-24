@@ -21,7 +21,7 @@ export const QspayStoreSelectorClient = ({
 
     return (
         <ComboboxBase
-            valueDisplayKey="name"
+            labelKey="name"
             valueKey="storeId"
             value={value}
             onValueChange={(val) => {
@@ -32,7 +32,6 @@ export const QspayStoreSelectorClient = ({
             emptyPlaceholder="No store selected"
             searchPlaceholder="Search..."
             data={storeList}
-            keywords={item => ([item.name])}
             className={error ? "border-red-500 dark:border-red-700" : ""}
         />
     )

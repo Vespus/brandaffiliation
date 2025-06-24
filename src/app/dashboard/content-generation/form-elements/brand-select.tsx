@@ -12,11 +12,10 @@ export const BrandSelect = ({value, onValueChange}: BrandSelect) => {
 
     return (
         <ComboboxBase
-            valueDisplayKey="description"
+            labelKey="description"
             valueKey="id"
             data={data || []}
             value={value}
-            keywords={item => ([item.description])}
             onValueChange={(val) => onValueChange?.(val)}
             placeholder="Select a Brand"
             emptyPlaceholder="No brand selected"

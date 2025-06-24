@@ -104,7 +104,7 @@ export const TemporaryStudio = () => {
                         <Label className="flex-none text-xs">Output Model: </Label>
                         <div className="w-xs">
                             <ComboboxBase
-                                valueDisplayKey="label"
+                                labelKey="label"
                                 valueKey="value"
                                 data={outputModelData}
                                 value={selectedOutputModel?.toString() || outputModelData[0]?.value || ""}

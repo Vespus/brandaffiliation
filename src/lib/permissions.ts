@@ -7,7 +7,7 @@ const statement = {
     contentGeneration: ["create", "list", "delete"],
     prompt: ["create", "list", "delete"],
     users: ["create", "list", "delete"],
-    user: ["list", "set-role", "ban"]
+    user: ["list", "set-role", "ban", "create"]
 } as const;
 
 export const ac = createAccessControl(statement);
@@ -19,5 +19,5 @@ export const admin = ac.newRole({
     contentGeneration: ["create", "list", "delete"],
     prompt: ["create", "list", "delete"],
     users: ["create", "list", "delete"],
-    user: ["list", "set-role", "ban"]
+    user: ["list", "set-role", "ban", "create"]
 });

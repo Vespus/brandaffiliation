@@ -11,7 +11,7 @@ const flat = (arr: QSPayCategory[]): QSPayCategory[] => arr.flatMap(({
 
 type CategorySelectProps = Omit<SelectProps, "value" | "onValueChange"> & {
     value?: string;
-    onValueChange?: (value?: string) => void;
+    onValueChange?: (value?: string | number) => void;
 }
 
 export const CategorySelect = ({value, onValueChange}: CategorySelectProps) => {
@@ -20,17 +20,15 @@ export const CategorySelect = ({value, onValueChange}: CategorySelectProps) => {
 
     return (
         <ComboboxBase
-            valueDisplayKey="description"
+            labelKey="description"
             valueKey="id"
             data={dataSet || []}
             value={value}
-            keywords={item => ([item.description])}
-            onValueChange={(val) => onValueChange?.(val)}
+            onValueChange={onValueChange}
             placeholder="Select a Category"
             emptyPlaceholder="No category selected"
             itemRenderer={item => {
                 const parent = data?.find(cat => cat.id === item.parentId);
-                const isParent = !item.parentId
                 return (
                     <div className="flex items-center gap-2">
                         {parent && <span className="text-xs text-muted-foreground inline-flex items-center gap-1">{parent.description} <ArrowRightIcon size={12} className="size-auto" /></span>}

@@ -2,7 +2,9 @@ import { DataSourceSelector } from "@/app/dashboard/content-generation/form-elem
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, } from "@/components/ui/card";
 import { FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Legend } from "@/components/ui/legend";
 import { Textarea } from "@/components/ui/textarea";
+import { api } from "@/lib/trpc/react";
 import { PlusIcon, XIcon } from "lucide-react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { DataSourceValueSelector } from "./datasource-value-selector";
@@ -36,15 +38,41 @@ export const DataSources = () => {
                     fields.map((field, index) => (
                         <Card key={field.id}>
                             <CardContent className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-
+                                <div className="grid grid-cols-3 gap-4">
+                                    <FormField
+                                        control={form.control}
+                                        name={`dataSources.${index}.datasourceId`}
+                                        render={({field}) => (
+                                            <FormItem>
+                                                <FormLabel>Source</FormLabel>
+                                                <DataSourceSelector onValueChange={field.onChange}
+                                                                    value={field.value}/>
+                                                <FormMessage/>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name={`dataSources.${index}.datasourceValueId`}
+                                        render={({field}) => (
+                                            <FormItem className="col-span-2">
+                                                <FormLabel>Source Value</FormLabel>
+                                                <DataSourceValueSelector
+                                                    onValueChange={field.onChange}
+                                                    value={field.value}
+                                                    index={index}
+                                                />
+                                                <FormMessage/>
+                                            </FormItem>
+                                        )}
+                                    />
                                 </div>
                                 <FormField
                                     control={form.control}
                                     name={`dataSources.${index}.datasourcePrompt`}
                                     render={({field}) => (
                                         <FormItem>
-                                            <FormLabel>Source Prompt</FormLabel>
+                                            <FormLabel>User Defined Prompt</FormLabel>
                                             <Textarea
                                                 {...field}
                                                 value={field.value}
@@ -55,6 +83,7 @@ export const DataSources = () => {
                                         </FormItem>
                                     )}
                                 />
+                                <Preview index={index}/>
                             </CardContent>
                             <CardFooter className="justify-end">
                                 <Button
@@ -74,14 +103,31 @@ export const DataSources = () => {
     )
 }
 
-const Preview = ({value, index}: {value: string, index: number}) => {
+const Preview = ({index}: { index: number }) => {
     const form = useFormContext()
     const fieldValues = form.watch("dataSources")
+    const dsId = fieldValues[index].datasourceId
+    const dsValueId = fieldValues[index].datasourceValueId
+
+    const {data: dataSource} = api.genericRoute.getDatasourceById.useQuery({id: dsId}, {
+        enabled: !!dsId
+    })
+
+    const {data: dataSourceValues} = api.genericRoute.getDatasourceValues.useQuery({datasourceId: dataSource!.id}, {
+        enabled: !!dataSource
+    })
+
+    const foundDsValue = dataSourceValues?.find(dsValue => dsValue.id === dsValueId)
+    if (!dataSource) {
+        return null
+    }
 
     return (
         <div>
-            Preview of your input :
-            {fieldValues[index].datasourcePrompt}
+            <Legend>Prompt Preview</Legend>
+            <div className="mt-2 text-sm">
+                {fieldValues[index].datasourcePrompt} : {(foundDsValue?.data as object)[dataSource.displayColumn]}
+            </div>
         </div>
     )
 }

@@ -6,53 +6,62 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { Check, ChevronsUpDown } from "lucide-react";
 import * as React from 'react';
 
-type Option = {
-    value: string;
-    label: string;
-};
-
-interface VirtualizedCommandProps {
-    height: string;
-    options: Option[];
-    placeholder: string;
-    selectedOption: string;
-    onSelectOption?: (option: string) => void;
+type VirtualizedCommandProps<T> = {
+    height?: string;
+    data: T[];
+    valueKey: keyof T;
+    labelKey: keyof T;
+    valueAs?: "string" | "number";
+    itemRenderer?: (item: T) => React.JSX.Element | null;
+    itemRendererContainerHeight?: number
+    value?: string | number;
+    placeholder?: string;
+    emptyPlaceholder?: string;
+    searchPlaceholder?: string
+    onValueChange?: (value?: string | number) => void
+    setOpen: (open: boolean) => void;
 }
 
-const VirtualizedCommand = ({
-                                height,
-                                options,
-                                placeholder,
-                                selectedOption,
-                                onSelectOption,
-                            }: VirtualizedCommandProps) => {
-    const [filteredOptions, setFilteredOptions] = React.useState<Option[]>(options);
+const VirtualizedCommand = <T, >({
+                                     height = "400px",
+                                     data,
+                                     valueKey,
+                                     labelKey,
+                                     itemRenderer,
+                                     itemRendererContainerHeight = 35,
+                                     onValueChange,
+                                     value,
+                                     valueAs,
+                                     emptyPlaceholder = "No Item Selected",
+                                     searchPlaceholder = "Search Item...",
+                                     setOpen,
+                                 }: VirtualizedCommandProps<T>) => {
+    const [filteredOptions, setFilteredOptions] = React.useState<T[]>(data);
     const [focusedIndex, setFocusedIndex] = React.useState(0);
     const [isKeyboardNavActive, setIsKeyboardNavActive] = React.useState(false);
 
     const parentRef = React.useRef(null);
-
     const virtualizer = useVirtualizer({
         count: filteredOptions.length,
         getScrollElement: () => parentRef.current,
-        estimateSize: () => 35,
+        estimateSize: () => itemRendererContainerHeight,
     });
-
     const virtualOptions = virtualizer.getVirtualItems();
-
     const scrollToIndex = (index: number) => {
         virtualizer.scrollToIndex(index, {
             align: 'center',
         });
     };
-
     const handleSearch = (search: string) => {
         setIsKeyboardNavActive(false);
         setFilteredOptions(
-            options.filter((option) => option.value.toLowerCase().includes(search.toLowerCase() ?? [])),
+            data.filter(
+                (option) =>
+                    (option[valueKey] as string).toLowerCase().includes(search.toLowerCase()) ||
+                    (option[labelKey] as string).toLowerCase().includes(search.toLowerCase())
+            ),
         );
     };
-
     const handleKeyDown = (event: React.KeyboardEvent) => {
         switch (event.key) {
             case 'ArrowDown': {
@@ -78,7 +87,8 @@ const VirtualizedCommand = ({
             case 'Enter': {
                 event.preventDefault();
                 if (filteredOptions[focusedIndex]) {
-                    onSelectOption?.(filteredOptions[focusedIndex].value);
+                    const currentValue = filteredOptions[focusedIndex][valueKey] as string
+                    onValueChange?.(currentValue === value ? undefined : currentValue);
                 }
                 break;
             }
@@ -88,8 +98,8 @@ const VirtualizedCommand = ({
     };
 
     React.useEffect(() => {
-        if (selectedOption) {
-            const option = filteredOptions.find((option) => option.value === selectedOption);
+        if (value) {
+            const option = filteredOptions.find((option) => (option[valueKey] as string) === value);
             if (option) {
                 const index = filteredOptions.indexOf(option);
                 setFocusedIndex(index);
@@ -98,11 +108,11 @@ const VirtualizedCommand = ({
                 });
             }
         }
-    }, [selectedOption, filteredOptions, virtualizer]);
+    }, [value, filteredOptions, virtualizer]);
 
     return (
         <Command shouldFilter={false} onKeyDown={handleKeyDown}>
-            <CommandInput onValueChange={handleSearch} placeholder={placeholder}/>
+            <CommandInput onValueChange={handleSearch} placeholder={searchPlaceholder}/>
             <CommandList
                 ref={parentRef}
                 style={{
@@ -113,7 +123,7 @@ const VirtualizedCommand = ({
                 onMouseDown={() => setIsKeyboardNavActive(false)}
                 onMouseMove={() => setIsKeyboardNavActive(false)}
             >
-                <CommandEmpty>No item found.</CommandEmpty>
+                <CommandEmpty>{emptyPlaceholder}</CommandEmpty>
                 <CommandGroup>
                     <div
                         style={{
@@ -124,11 +134,11 @@ const VirtualizedCommand = ({
                     >
                         {virtualOptions.map((virtualOption) => (
                             <CommandItem
-                                key={filteredOptions[virtualOption.index].value}
+                                key={filteredOptions[virtualOption.index][valueKey] as string}
                                 disabled={isKeyboardNavActive}
                                 className={cn(
                                     'absolute left-0 top-0 w-full bg-transparent',
-                                    focusedIndex === virtualOption.index && 'bg-accent text-accent-foreground',
+                                    focusedIndex === virtualOption.index && 'bg-accent',
                                     isKeyboardNavActive &&
                                     focusedIndex !== virtualOption.index &&
                                     'aria-selected:bg-transparent aria-selected:text-primary',
@@ -137,20 +147,30 @@ const VirtualizedCommand = ({
                                     height: `${virtualOption.size}px`,
                                     transform: `translateY(${virtualOption.start}px)`,
                                 }}
-                                value={filteredOptions[virtualOption.index].value}
+                                value={(filteredOptions[virtualOption.index][valueKey] as string).toString()}
                                 onMouseEnter={() => !isKeyboardNavActive && setFocusedIndex(virtualOption.index)}
                                 onMouseLeave={() => !isKeyboardNavActive && setFocusedIndex(-1)}
-                                onSelect={onSelectOption}
+                                onSelect={currentValue => {
+                                    if (valueAs === "number") {
+                                        onValueChange?.(Number(currentValue) === value ? undefined : Number(currentValue))
+                                    } else {
+                                        onValueChange?.(currentValue === value ? undefined : currentValue)
+                                    }
+                                    setOpen(false)
+                                }}
                             >
                                 <Check
                                     className={cn(
                                         'mr-2 h-4 w-4',
-                                        selectedOption === filteredOptions[virtualOption.index].value
+                                        value === filteredOptions[virtualOption.index][valueKey] as string
                                             ? 'opacity-100'
                                             : 'opacity-0',
                                     )}
                                 />
-                                {filteredOptions[virtualOption.index].label}
+                                {
+                                    itemRenderer ? itemRenderer(filteredOptions[virtualOption.index]) :
+                                        <span>{filteredOptions[virtualOption.index][labelKey] as string}</span>
+                                }
                             </CommandItem>
                         ))}
                     </div>
@@ -160,30 +180,19 @@ const VirtualizedCommand = ({
     );
 };
 
-interface VirtualizedComboboxProps<T> {
-    searchPlaceholder?: string;
-    width?: string;
-    height?: string;
-    valueKey: keyof T;
-    labelKey: keyof T;
-    data: T[];
-    selectedOption: string;
-    onSelectOption?: (option: string) => void;
-    itemRenderer?: (item: T) => React.JSX.Element | null;
-}
+export const ComboboxBase = <T, >({
+                                      data,
+                                      value,
+                                      valueKey,
+                                      labelKey,
+                                      valueAs = "string",
+                                      placeholder = "Select Item...",
+                                      maskedValue,
+                                      ...props
+                                  }: Omit<VirtualizedCommandProps<T>, "setOpen"> & { maskedValue?: any }) => {
 
-export function VirtualizedCombobox<T>({
-                                           data,
-                                           valueKey,
-                                           labelKey,
-                                           searchPlaceholder = 'Search items...',
-                                           width = '400px',
-                                           height = '400px',
-                                           onValueChange?: (value?: string) => void;
-
-                                       }: VirtualizedComboboxProps<T>) {
     const [open, setOpen] = React.useState(false);
-    const [selectedOption, setSelectedOption] = React.useState('');
+    const selectedValue = data.find(d => d[valueKey] === value)?.[labelKey] as string || placeholder;
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -192,25 +201,21 @@ export function VirtualizedCombobox<T>({
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="justify-between"
-                    style={{
-                        width: width,
-                    }}
+                    className="w-full justify-between"
                 >
-                    {selectedOption ? data.find((option) => option === selectedOption) : searchPlaceholder}
+                    {maskedValue || selectedValue}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="p-0" style={{width: width}}>
+            <PopoverContent className="w-(--radix-popper-anchor-width) p-0">
                 <VirtualizedCommand
-                    height={height}
-                    options={options.map((option) => ({value: option, label: option}))}
-                    placeholder={searchPlaceholder}
-                    selectedOption={selectedOption}
-                    onSelectOption={(currentValue) => {
-                        setSelectedOption(currentValue === selectedOption ? '' : currentValue);
-                        setOpen(false);
-                    }}
+                    data={data}
+                    valueKey={valueKey}
+                    labelKey={labelKey}
+                    value={value}
+                    valueAs={valueAs}
+                    setOpen={setOpen}
+                    {...props}
                 />
             </PopoverContent>
         </Popover>

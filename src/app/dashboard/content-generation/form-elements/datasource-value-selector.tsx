@@ -1,23 +1,20 @@
-import { Button } from "@/components/ui/button";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ComboboxBase } from "@/components/ui/combobox-base";
+import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/trpc/react";
-import { cn } from "@/lib/utils";
 import { SelectProps } from "@radix-ui/react-select";
-import { Check, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 type DataSourceValueSelectorProps = Omit<SelectProps, "value" | "onValueChange"> & {
     index: number
     value?: number;
-    onValueChange?: (value?: number) => void;
+    onValueChange?: (value?: number | string) => void;
 }
 
 export const DataSourceValueSelector = ({value, onValueChange, index}: DataSourceValueSelectorProps) => {
     const [open, setOpen] = useState(false)
     const formContext = useFormContext()
-    const dataSourceFormValues = formContext.watch("dataSources") as {datasourceId: number}[]
+    const dataSourceFormValues = formContext.watch("dataSources") as { datasourceId: number }[]
 
     const relevantDataSourceId = dataSourceFormValues?.[index]?.datasourceId
 
@@ -34,51 +31,35 @@ export const DataSourceValueSelector = ({value, onValueChange, index}: DataSourc
         ?.find((dsv) => dsv.id === value)
         ?.data[dataSource.displayColumn] as string | undefined
 
+    if (!dataSource) {
+        return <Skeleton className="h-9 w-full"/>
+    }
+
     return (
-        <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-                <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className="w-full justify-between"
-                >
-                    {selectedValue || "Select Datasource..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-(--radix-popper-anchor-width) p-0">
-                <Command>
-                    <CommandInput placeholder="Search Datasources..."/>
-                    <CommandList>
-                        <CommandEmpty>No Datasource found.</CommandEmpty>
-                        <CommandGroup>
-                            {dataSource && dataSourceValues?.map((dsv) => (
-                                <CommandItem
-                                    key={dsv.id}
-                                    value={dsv.id.toString()}
-                                    keywords={[(dsv.data as any)[dataSource.displayColumn] || "-"]}
-                                    onSelect={(currentValue) => {
-                                        onValueChange?.(Number(currentValue) === value ? undefined : Number(currentValue))
-                                        setOpen(false)
-                                    }}
-                                    className="flex items-start"
-                                >
-                                    <Check
-                                        className={cn(
-                                            "mr-2 mt-0.5 h-4 w-4",
-                                            value === dsv.id ? "opacity-100" : "opacity-0"
-                                        )}
-                                    />
-                                    <div className="flex flex-col space-y-1">
-                                        <span>{(dsv.data as any)[dataSource.displayColumn] || "-"}</span>
-                                    </div>
-                                </CommandItem>
-                            ))}
-                        </CommandGroup>
-                    </CommandList>
-                </Command>
-            </PopoverContent>
-        </Popover>
+        <ComboboxBase
+            data={dataSourceValues || []}
+            valueKey="id"
+            labelKey={dataSource.displayColumn as keyof typeof dataSourceValues}
+            valueAs="number"
+            value={value}
+            maskedValue={selectedValue}
+            onValueChange={onValueChange}
+            itemRendererContainerHeight={56}
+            itemRenderer={item => {
+                if (!item.data || !(item.data as object)[dataSource.valueColumn] || !(item.data as object)[dataSource.displayColumn]) {
+                    return <span className="text-muted-foreground flex items-center"
+                                 style={{height: "56px"}}>Undefined</span>
+                }
+                return (
+                    <div className="flex flex-col gap-2">
+                        {(item.data as object)[dataSource.displayColumn] &&
+                            <span>{(item.data as object)[dataSource.displayColumn]}</span>
+                        }
+                        <span
+                            className="text-xs text-muted-foreground">{(item.data as object)[dataSource.valueColumn]}</span>
+                    </div>
+                )
+            }}
+        />
     )
 }
