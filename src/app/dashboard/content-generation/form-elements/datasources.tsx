@@ -38,12 +38,12 @@ export const DataSources = () => {
                     fields.map((field, index) => (
                         <Card key={field.id}>
                             <CardContent className="space-y-4">
-                                <div className="grid grid-cols-3 gap-4">
+                                <div className="flex gap-4">
                                     <FormField
                                         control={form.control}
                                         name={`dataSources.${index}.datasourceId`}
                                         render={({field}) => (
-                                            <FormItem>
+                                            <FormItem className="flex-none">
                                                 <FormLabel>Source</FormLabel>
                                                 <DataSourceSelector onValueChange={field.onChange}
                                                                     value={field.value}/>
@@ -55,7 +55,7 @@ export const DataSources = () => {
                                         control={form.control}
                                         name={`dataSources.${index}.datasourceValueId`}
                                         render={({field}) => (
-                                            <FormItem className="col-span-2">
+                                            <FormItem className="grow">
                                                 <FormLabel>Source Value</FormLabel>
                                                 <DataSourceValueSelector
                                                     onValueChange={field.onChange}
@@ -113,7 +113,7 @@ const Preview = ({index}: { index: number }) => {
         enabled: !!dsId
     })
 
-    const {data: dataSourceValues} = api.genericRoute.getDatasourceValues.useQuery({datasourceId: dataSource!.id}, {
+    const {data: dataSourceValues} = api.genericRoute.getDatasourceValues.useQuery({datasourceId: dataSource?.id || 0}, {
         enabled: !!dataSource
     })
 
@@ -126,7 +126,7 @@ const Preview = ({index}: { index: number }) => {
         <div>
             <Legend>Prompt Preview</Legend>
             <div className="mt-2 text-sm">
-                {fieldValues[index].datasourcePrompt} : {(foundDsValue?.data as object)[dataSource.displayColumn]}
+                {fieldValues[index].datasourcePrompt} : {(foundDsValue?.data as object)?.[dataSource.displayColumn] || "N/A"}
             </div>
         </div>
     )

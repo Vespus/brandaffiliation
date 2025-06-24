@@ -32,7 +32,7 @@ export const DataSourceValueSelector = ({value, onValueChange, index}: DataSourc
         ?.data[dataSource.displayColumn] as string | undefined
 
     if (!dataSource) {
-        return <Skeleton className="h-9 w-full"/>
+        return <Skeleton className="h-9 w-full flex items-center px-3 text-xs">Waiting for datasource</Skeleton>
     }
 
     return (
@@ -51,12 +51,12 @@ export const DataSourceValueSelector = ({value, onValueChange, index}: DataSourc
                                  style={{height: "56px"}}>Undefined</span>
                 }
                 return (
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 min-w-0">
                         {(item.data as object)[dataSource.displayColumn] &&
                             <span>{(item.data as object)[dataSource.displayColumn]}</span>
                         }
                         <span
-                            className="text-xs text-muted-foreground">{(item.data as object)[dataSource.valueColumn]}</span>
+                            className="text-xs text-muted-foreground truncate">Value: {(item.data as object)[dataSource.valueColumn]}</span>
                     </div>
                 )
             }}
