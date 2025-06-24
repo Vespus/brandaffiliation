@@ -36,9 +36,6 @@ export default async function RootLayout({
             suppressHydrationWarning
             className={`${geistSans.variable} ${geistMono.variable}`}
         >
-            <head>
-                <script src="https://unpkg.com/react-scan/dist/auto.global.js" />
-            </head>
             <body className="bg-background text-foreground">
                 <ThemeProvider
                     attribute="class"
@@ -52,8 +49,7 @@ export default async function RootLayout({
                                 <>
                                     {children}
                                 </>
-                                <Toaster richColors/>
-
+                                <Toaster richColors duration={6000}/>
                             </NuqsAdapter>
                         </TRPCReactProvider>
                     </NextIntlClientProvider>
