@@ -2,8 +2,8 @@ import { z } from "zod";
 
 export const ContentGenerateSchema = z.object({
     prompt: z.number(),
-    brand: z.string().optional(),
-    category: z.string().optional(),
+    brand: z.number().optional(),
+    category: z.number().optional(),
     aiModel: z.array(z.number().min(1, {message: "Please select an AI model"}),),
     dataSources: z.array(
         z.object({

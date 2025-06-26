@@ -23,7 +23,7 @@ import { toast } from "sonner";
 export const TemporaryStudio = () => {
     const state = useContentGenerationStore()
     const {store} = useContentGenerationContext()
-    const {category: categoryId, brand: brandId} = useContentGenerationQueryParams()
+    const {category: categoryId, brand: brandId, setParams} = useContentGenerationQueryParams()
     const {data: categories} = api.qspayRoute.getAllCategories.useQuery(undefined, {enabled: !!categoryId})
     const {data: brands} = api.qspayRoute.getAllBrands.useQuery(undefined, {enabled: !!brandId})
 
@@ -53,15 +53,20 @@ export const TemporaryStudio = () => {
 
     //handlers
     const handleExport = async () => {
-        const _selectedOutputModel = state.streams[selectedOutputModel || outputModelData[0]?.value]
+        const selectedStreamId = (selectedOutputModel || outputModelData[0]?.value) as number
+        /*const _selectedOutputModel = state.streams[selectedStreamId]
 
-        exportAction.execute({
+        console.log(selectedOutputModel)*/
+        setParams({
+            selectedStream: selectedStreamId,
+        })
+        /*exportAction.execute({
             brandId: selectedBrand?.id,
             brandName: selectedBrand?.name ?? "",
             categoryName: selectedCategory?.name ?? "",
             categoryId: selectedCategory?.id ?? "",
             output: _selectedOutputModel.stream
-        })
+        })*/
     }
 
     return (

@@ -17,7 +17,7 @@ const translationSchema = z.object({
 
 // Add a new translation
 export const addTranslation = actionClient
-    .schema(translationSchema)
+    .inputSchema(translationSchema)
     .action(async ({parsedInput}) => {
         const existingTranslation = await db.query.translations.findFirst({
             where: and(
@@ -48,7 +48,7 @@ export const addTranslation = actionClient
     });
 
 export const updateTranslation = actionClient
-    .schema(translationSchema.extend({
+    .inputSchema(translationSchema.extend({
         id: z.number()
     }))
     .action(async ({parsedInput}) => {
@@ -68,7 +68,7 @@ export const updateTranslation = actionClient
 
 // Delete a translation
 export const deleteTranslation = actionClient
-    .schema(z.object({
+    .inputSchema(z.object({
         id: z.number()
     }))
     .action(async ({parsedInput}) => {

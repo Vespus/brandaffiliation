@@ -9,7 +9,7 @@ import { getUser } from "@/lib/get-user";
 import { eq } from "drizzle-orm";
 
 export const updateProfileAction = actionClient
-  .schema(ProfileUpdateSchema)
+  .inputSchema(ProfileUpdateSchema)
   .action(async ({ parsedInput }) => {
     const { user } = await getUser();
 

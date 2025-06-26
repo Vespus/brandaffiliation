@@ -52,7 +52,7 @@ export const addDatasource = actionClient
     });
 
 export const updateDatasource = actionClient
-    .schema(datasourceSchema.extend({
+    .inputSchema(datasourceSchema.extend({
         id: z.number()
     }))
     .action(async ({ parsedInput }) => {
@@ -93,7 +93,7 @@ export const updateDatasource = actionClient
 
 // Delete a datasource
 export const deleteDatasource = actionClient
-    .schema(z.object({
+    .inputSchema(z.object({
         id: z.number()
     }))
     .action(async ({ parsedInput }) => {

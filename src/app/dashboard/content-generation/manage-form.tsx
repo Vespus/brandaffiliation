@@ -53,10 +53,12 @@ export const ManageForm = () => {
 
     const {brand, category} = form.watch()
     useEffect(() => {
-        setParams({
+        /*setParams({
             brand: brand || null,
             category: category || null
-        })
+        })*/
+        contentStore.selectedBrand = brand
+        contentStore.selectedCategory = category
     }, [brand, category]);
 
     return (
@@ -95,10 +97,7 @@ export const ManageForm = () => {
                                 )}
                             />
                             <Legend>AI Settings</Legend>
-                            <div
-                                className="space-y-6"
-                            >
-
+                            <div className="space-y-6">
                                 <FormField
                                     control={form.control}
                                     name="prompt"

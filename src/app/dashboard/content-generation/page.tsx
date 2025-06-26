@@ -1,4 +1,5 @@
 import { ContentGenerationProvider } from "@/app/dashboard/content-generation/content-generation-context";
+import { QspayApplyDialog } from "@/app/dashboard/content-generation/dialogs/qspay-apply-dialog";
 import { ManageForm } from "@/app/dashboard/content-generation/manage-form";
 import { TemporaryStudio } from "@/app/dashboard/content-generation/temporary-studio";
 import { auth } from "@/lib/auth";
@@ -41,6 +42,7 @@ export default async function Page() {
                 <FlowStudio/>
             </ReactFlowProvider>*/}
             </div>
+            <QspayApplyDialog />
         </ContentGenerationProvider>
     )
 }

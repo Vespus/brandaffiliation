@@ -129,7 +129,6 @@ export const SaveToQSPay = actionClient
         handleValidationErrorsShape: async (ve, utils) => console.dir(ve._errors),
     })
     .action(async ({parsedInput: {brandId, brandName, categoryName, categoryId, output}}) => {
-        console.log(brandId)
         if (brandId && categoryId) {
             //combin page
             const {result: allCombinationPages} = await QSPayClient<QSPayCombin[]>("CmsCombinPage/GetAll")

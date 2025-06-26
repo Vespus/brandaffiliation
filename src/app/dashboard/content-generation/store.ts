@@ -28,10 +28,14 @@ interface ContentGenerationStoreType {
     addNode: (node: CustomNodeType) => void;
     saveStream: (model: AIModelWithProviderAndSettings, stream: MetaOutput) => void
     streams: Record<string, { model: AIModelWithProviderAndSettings, stream: MetaOutput }>
+    selectedCategory?: number,
+    selectedBrand?: number
 }
 
 export const useContentGenerationStore = create<ContentGenerationStoreType>((set, get) => ({
     streams: {},
+    selectedCategory: undefined,
+    selectedBrand: undefined,
     nodes: [],
     models: [],
     edges: [],

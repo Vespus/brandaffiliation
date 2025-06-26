@@ -3,8 +3,8 @@ import { api } from "@/lib/trpc/react";
 import { SelectProps } from "@radix-ui/react-select";
 
 type BrandSelect = Omit<SelectProps, "value" | "onValueChange"> & {
-    value?: string;
-    onValueChange?: (value?: string) => void;
+    value?: number;
+    onValueChange?: (value?: string | number) => void;
 }
 
 export const BrandSelect = ({value, onValueChange}: BrandSelect) => {
@@ -14,9 +14,10 @@ export const BrandSelect = ({value, onValueChange}: BrandSelect) => {
         <ComboboxBase
             labelKey="description"
             valueKey="id"
-            data={data || []}
+            data={data?.map(x => ({ ...x, id: Number(x.id) })) || []}
             value={value}
-            onValueChange={(val) => onValueChange?.(val)}
+            onValueChange={onValueChange}
+            valueAs="number"
             placeholder="Select a Brand"
             emptyPlaceholder="No brand selected"
         />
