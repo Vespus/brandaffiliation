@@ -9,6 +9,7 @@ export const useCustomAction = <ServerError, S extends StandardSchemaV1 | undefi
     return useAction(safeActionFn, {
         ...utils,
         onError: (errorShape) => {
+            console.log(errorShape)
             if (errorShape.error.serverError && typeof errorShape.error.serverError === 'string') {
                 toast.error(errorShape.error.serverError);
             }

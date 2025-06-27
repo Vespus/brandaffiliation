@@ -23,14 +23,19 @@ export const qspayRoute = createTRPCRouter({
             if (brandId && categoryId) {
                 //combin page
                 const {result: allCombinationPages} = await QSPayClient<QSPayCombin[]>("CmsCombinPage/GetAll")
-                console.log(allCombinationPages)
                 const foundCombinationPage = allCombinationPages.find(cp => Number(cp.category?.id || 0) === categoryId && Number(cp.brand?.id || 0) === brandId)
 
                 if (!foundCombinationPage) {
                     throw new Error("Combination page not found. BrandAffiliation can't create a new one, please create one manually then try again.")
                 }
 
-                return foundCombinationPage
+                const {result} = await QSPayClient<QSPayCombin>("CmsCombinPage/Get", {
+                    query: {
+                        combinatioId: foundCombinationPage.id
+                    }
+                })
+
+                return result
             }
             if(brandId && !categoryId) {
                 //brand page
@@ -41,8 +46,13 @@ export const qspayRoute = createTRPCRouter({
                     throw new Error("Brand page not found. BrandAffiliation can't create a new one, please create one manually then try again.")
                 }
 
+                const {result} = await QSPayClient<QSPayBrand>("CmsBrand/Get", {
+                    query: {
+                        brandId: foundBrandPage.id
+                    }
+                })
 
-                return foundBrandPage
+                return result
             }
 
             if(!brandId && categoryId) {
@@ -54,7 +64,13 @@ export const qspayRoute = createTRPCRouter({
                     throw new Error("Category page not found. BrandAffiliation can't create a new one, please create one manually then try again.")
                 }
 
-                return foundCategoryPage
+                const {result} = await QSPayClient<QSPayCategory>("CmsCategory/Get", {
+                    query: {
+                        categoryId: foundCategoryPage.id
+                    }
+                })
+
+                return result
             }
 
             throw new Error("Something went wrong. Please try again. If the problem persists, please contact support.")

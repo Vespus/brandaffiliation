@@ -57,8 +57,8 @@ const VirtualizedCommand = <T, >({
         setFilteredOptions(
             data.filter(
                 (option) =>
-                    (option[valueKey] as string).toLowerCase().includes(search.toLowerCase()) ||
-                    (option[labelKey] as string).toLowerCase().includes(search.toLowerCase())
+                    (option[valueKey] as string).toString().toLowerCase().includes(search.toLowerCase()) ||
+                    (option[labelKey] as string).toString().toLowerCase().includes(search.toLowerCase())
             ),
         );
     };

@@ -124,10 +124,8 @@ export const SaveToQSPay = actionClient
         brandName: z.string().optional(),
         categoryName: z.string().optional(),
         categoryId: z.string().optional(),
-        output: MetaOutputSchema
-    }), {
-        handleValidationErrorsShape: async (ve, utils) => console.dir(ve._errors),
-    })
+        output: z.any()
+    }))
     .action(async ({parsedInput: {brandId, brandName, categoryName, categoryId, output}}) => {
         if (brandId && categoryId) {
             //combin page

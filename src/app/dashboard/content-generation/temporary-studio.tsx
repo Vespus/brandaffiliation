@@ -28,11 +28,7 @@ export const TemporaryStudio = () => {
     const {data: brands} = api.qspayRoute.getAllBrands.useQuery(undefined, {enabled: !!brandId})
 
     //action
-    const exportAction = useCustomAction(SaveToQSPay, {
-        onSuccess: () => {
-            toast.success("Content successfully exported to QSPay")
-        }
-    })
+
 
     //combobox
     const [selectedOutputModel, setSelectedOutputModel] = useState<number | undefined>(undefined);
@@ -171,8 +167,8 @@ export const TemporaryStudio = () => {
                                                     <div className="flex flex-col space-y-1">
                                                         <h3 className="text-xs font-medium">Hero Footer (Page Bottom
                                                             Content):</h3>
-                                                        <p className="text-xs text-muted-foreground prose prose-sm dark:prose-invert [&>h1]:text-xs"
-                                                           dangerouslySetInnerHTML={{__html: stream.stream?.descriptions?.footer}}></p>
+                                                        <div className="text-xs text-muted-foreground prose prose-sm dark:prose-invert [&>h1]:text-xs"
+                                                           dangerouslySetInnerHTML={{__html: stream.stream?.descriptions?.footer}}></div>
                                                     </div>
                                                 </div>
                                             </div>

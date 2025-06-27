@@ -131,7 +131,7 @@ export const QSPayBrandSchema = z.object({
     logoSmall: z.nullable(z.string()),
     logoMedium: z.nullable(z.string()),
     logoLarge: z.nullable(z.string()),
-    config: z.nullable(z.string()),
+    config: MetaOutputSchema,
     description: z.nullable(z.string()),
 });
 
@@ -144,7 +144,8 @@ export const QSPayCategorySchema = z.object({
     mainType: z.number(),
     parentId: z.string(),
     slug: z.string(),
-    children: z.lazy(() => z.array(QSPayCategorySchema))
+    children: z.lazy(() => z.array(QSPayCategorySchema)),
+    config: MetaOutputSchema
 });
 
 export type QSPayCategory = z.infer<typeof QSPayCategorySchema>;
