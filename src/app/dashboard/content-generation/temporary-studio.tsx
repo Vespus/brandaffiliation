@@ -106,7 +106,7 @@ export const TemporaryStudio = () => {
                     <Button onClick={handleExport}
                             disabled={!state.streams.length && state.progressState !== "complete"}>
                         <SendIcon/>
-                        Apply to QSPay
+                        Edit & Send to QSPAY
                     </Button>
                 </div>
             </div>
