@@ -33,6 +33,7 @@ export const ManageForm = () => {
     const contentStore = useContentGenerationStore()
 
     async function onSubmit(values: z.infer<typeof ContentGenerateSchema>) {
+        contentStore.reset()
         const response = await CompletionStream(values);
         contentStore.setProgressState("loading")
         contentStore.setCategoryId(Number(values.category))
