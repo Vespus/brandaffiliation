@@ -23,12 +23,12 @@ import { toast } from "sonner";
 export const TemporaryStudio = () => {
     const state = useContentGenerationStore()
     const {store} = useContentGenerationContext()
-    const {category: categoryId, brand: brandId, setParams} = useContentGenerationQueryParams()
+    const {setParams} = useContentGenerationQueryParams()
+    const brandId = useContentGenerationStore(state => state.selectedBrand)
+    const categoryId = useContentGenerationStore(state => state.selectedCategory)
+
     const {data: categories} = api.qspayRoute.getAllCategories.useQuery(undefined, {enabled: !!categoryId})
     const {data: brands} = api.qspayRoute.getAllBrands.useQuery(undefined, {enabled: !!brandId})
-
-    //action
-
 
     //combobox
     const [selectedOutputModel, setSelectedOutputModel] = useState<number | undefined>(undefined);
@@ -39,8 +39,8 @@ export const TemporaryStudio = () => {
     }));
 
     //category/brand
-    const selectedCategory = categories?.find(cat => cat.id === categoryId)
-    const selectedBrand = brands?.find(brand => brand.id === brandId)
+    const selectedCategory = categories?.find(cat => cat.id === categoryId?.toString())
+    const selectedBrand = brands?.find(brand => brand.id === brandId?.toString())
     const possibleUrl = [
         store.storeUrl,
         selectedCategory?.slug.replace(/\//g, ""),
@@ -50,19 +50,9 @@ export const TemporaryStudio = () => {
     //handlers
     const handleExport = async () => {
         const selectedStreamId = (selectedOutputModel || outputModelData[0]?.value) as number
-        /*const _selectedOutputModel = state.streams[selectedStreamId]
-
-        console.log(selectedOutputModel)*/
         setParams({
             selectedStream: selectedStreamId,
         })
-        /*exportAction.execute({
-            brandId: selectedBrand?.id,
-            brandName: selectedBrand?.name ?? "",
-            categoryName: selectedCategory?.name ?? "",
-            categoryId: selectedCategory?.id ?? "",
-            output: _selectedOutputModel.stream
-        })*/
     }
 
     return (

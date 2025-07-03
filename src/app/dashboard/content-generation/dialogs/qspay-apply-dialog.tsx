@@ -2,6 +2,7 @@
 
 import { SaveToQSPay } from "@/app/dashboard/content-generation/actions";
 import { useContentGenerationContext } from "@/app/dashboard/content-generation/content-generation-context";
+import { EmptyMetaState } from "@/app/dashboard/content-generation/dialogs/empty-meta-state";
 import { useContentGenerationStore } from "@/app/dashboard/content-generation/store";
 import { MetaOutput, MetaOutputSchema } from "@/app/dashboard/content-generation/types";
 import {
@@ -26,6 +27,7 @@ import { Scroller } from "@/components/ui/scroller";
 import { Textarea } from "@/components/ui/textarea";
 import { useCustomAction } from "@/hooks/use-custom-action";
 import { api } from "@/lib/trpc/react";
+import { QSPayCombin } from "@/qspay-types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { merge, toMerged } from "es-toolkit";
 import { get, set } from "es-toolkit/compat";
@@ -42,7 +44,6 @@ type FormDataWithSelection = {
 
 export const QspayApplyDialog = () => {
     const {selectedStream, setParams} = useContentGenerationQueryParams()
-    const {store} = useContentGenerationContext()
     const zustandStore = useContentGenerationStore()
     const streams = useContentGenerationStore(state => state.streams)
     const selectedBrand = useContentGenerationStore(state => state.selectedBrand)
@@ -103,9 +104,7 @@ export const QspayApplyDialog = () => {
     const exportAction = useCustomAction(SaveToQSPay, {
         onSuccess: () => {
             toast.success("Content successfully exported to QSPay")
-            zustandStore.selectedBrand = undefined
-            zustandStore.selectedCategory = undefined
-            zustandStore.streams = {}
+            zustandStore.reset()
             setParams({selectedStream: null})
         }
     })
@@ -145,9 +144,7 @@ export const QspayApplyDialog = () => {
 
     const onSubmit = (data: FormDataWithSelection) => {
         // Filter the values to only include selected fields
-        console.log(data)
         const filteredData: Partial<MetaOutput> = {};
-
         Object.entries(data.selectedFields).forEach(([path, isSelected]) => {
             if (isSelected) {
                 const value = get(data.values, path.replace(/_/g, "."));
@@ -157,18 +154,29 @@ export const QspayApplyDialog = () => {
             }
         });
 
-        const mergedOutput = toMerged(entityData, filteredData) as MetaOutput;
-        exportAction.execute({
-            ...(selectedBrand && {
-                brandId: foundEntity?.id,
-                brandName: foundEntity?.name ?? "",
-            }),
-            ...(selectedCategory && {
-                categoryName: foundEntity?.name ?? "",
-                categoryId: foundEntity?.id ?? "",
-            }),
-            output: mergedOutput
-        })
+        const mergedOutput = toMerged(entityData || EmptyMetaState, filteredData) as MetaOutput;
+        if (foundEntity?.type === 'combin') {
+            exportAction.execute({
+                brandId: foundEntity.brand.id,
+                brandName: foundEntity.brand.name,
+                categoryId: foundEntity.category.id,
+                categoryName: foundEntity.category.name,
+                output: mergedOutput
+            })
+        }
+        if(foundEntity?.type === "brand" || foundEntity?.type === "category") {
+            exportAction.execute({
+                ...(selectedBrand && {
+                    brandId: foundEntity!.id,
+                    brandName: foundEntity?.name ?? "",
+                }),
+                ...(selectedCategory && {
+                    categoryName: foundEntity?.name ?? "",
+                    categoryId: foundEntity?.id ?? "",
+                }),
+                output: mergedOutput
+            })
+        }
     };
 
     useEffect(() => {
@@ -186,7 +194,7 @@ export const QspayApplyDialog = () => {
         }
     }, [streamData]);
 
-    if (!streamData || !entityData) {
+    if (!streamData || !foundEntity) {
         return null;
     }
 

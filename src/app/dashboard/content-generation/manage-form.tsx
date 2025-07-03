@@ -8,9 +8,6 @@ import { DataSources } from "@/app/dashboard/content-generation/form-elements/da
 import { PromptSelector } from "@/app/dashboard/content-generation/form-elements/prompt-selector";
 import { ContentGenerateSchema } from "@/app/dashboard/content-generation/schema";
 import { useContentGenerationStore } from "@/app/dashboard/content-generation/store";
-import {
-    useContentGenerationQueryParams
-} from "@/app/dashboard/content-generation/use-content-generation-query-params";
 import { Button } from "@/components/ui/button";
 import { Form, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Legend } from "@/components/ui/legend";
@@ -18,7 +15,6 @@ import { Scroller } from "@/components/ui/scroller";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { readStreamableValue } from "ai/rsc";
 import { Sparkles } from "lucide-react";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -33,13 +29,15 @@ export const ManageForm = () => {
             dataSources: []
         },
     })
-    const {setParams} = useContentGenerationQueryParams()
+
     const contentStore = useContentGenerationStore()
 
     async function onSubmit(values: z.infer<typeof ContentGenerateSchema>) {
-        contentStore.setProgressState("started")
         const response = await CompletionStream(values);
         contentStore.setProgressState("loading")
+        contentStore.setCategoryId(Number(values.category))
+        contentStore.setBrandId(Number(values.brand))
+
         Promise.all(
             response.map(async ({model, streamValue}) => {
                 for await (const value of readStreamableValue(streamValue)) {
@@ -50,16 +48,6 @@ export const ManageForm = () => {
             contentStore.setProgressState("complete")
         })
     }
-
-    const {brand, category} = form.watch()
-    useEffect(() => {
-        /*setParams({
-            brand: brand || null,
-            category: category || null
-        })*/
-        contentStore.selectedBrand = brand
-        contentStore.selectedCategory = category
-    }, [brand, category]);
 
     return (
         <div className="flex w-full flex-none flex-col gap-0 xl:max-w-xl min-h-0 py-4 pr-4">

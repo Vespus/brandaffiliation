@@ -3,6 +3,20 @@ import { createTRPCRouter, publicProcedure } from "@/lib/trpc/trpc";
 import { QSPayBrand, QSPayCategory, QSPayCombin } from "@/qspay-types";
 import { z } from "zod";
 
+type QSPayCategoryWithType = QSPayCategory & {
+    type: "category";
+}
+
+type QSPayBrandWithType = QSPayBrand & {
+    type: "brand";
+}
+
+type QSPayCombinWithType = QSPayCombin & {
+    type: "combin";
+}
+
+type UnionQSPayOutputs = QSPayCombinWithType | QSPayBrandWithType | QSPayCategoryWithType
+
 export const qspayRoute = createTRPCRouter({
     getAllBrands: publicProcedure
         .query(async ({input}) => {
@@ -19,7 +33,7 @@ export const qspayRoute = createTRPCRouter({
             categoryId: z.number().optional(),
             brandId: z.number().optional()
         }))
-        .query(async ({input: {brandId, categoryId}}) => {
+        .query(async ({input: {brandId, categoryId}}): Promise<UnionQSPayOutputs> => {
             if (brandId && categoryId) {
                 //combin page
                 const {result: allCombinationPages} = await QSPayClient<QSPayCombin[]>("CmsCombinPage/GetAll")
@@ -35,9 +49,9 @@ export const qspayRoute = createTRPCRouter({
                     }
                 })
 
-                return result
+                return {type: "combin", ...result}
             }
-            if(brandId && !categoryId) {
+            if (brandId && !categoryId) {
                 //brand page
                 const {result: allBrandPages} = await QSPayClient<QSPayBrand[]>("CmsBrand/GetAll")
                 const foundBrandPage = allBrandPages.find(cp => Number(cp.id) === brandId)
@@ -52,10 +66,10 @@ export const qspayRoute = createTRPCRouter({
                     }
                 })
 
-                return result
+                return {type: 'brand', ...result}
             }
 
-            if(!brandId && categoryId) {
+            if (!brandId && categoryId) {
                 //category page
                 const {result: allCategoryPages} = await QSPayClient<QSPayCategory[]>("CmsCategory/GetAll")
                 const foundCategoryPage = allCategoryPages.find(cp => Number(cp.id) === categoryId)
@@ -70,7 +84,7 @@ export const qspayRoute = createTRPCRouter({
                     }
                 })
 
-                return result
+                return {type: 'category', ...result}
             }
 
             throw new Error("Something went wrong. Please try again. If the problem persists, please contact support.")

@@ -1,5 +1,5 @@
 import { CustomNodeType } from "@/app/dashboard/content-generation/flow-nodes/types";
-import { MetaOutput, MetaOutputSchema } from "@/app/dashboard/content-generation/types";
+import { MetaOutput } from "@/app/dashboard/content-generation/types";
 import { AIModelWithProviderAndSettings } from '@/db/types';
 import {
     addEdge,
@@ -15,7 +15,7 @@ import { create } from 'zustand'
 interface ContentGenerationStoreType {
     nodes: CustomNodeType[]
     edges: Edge[];
-    progressState: "loading" | "idle" | "started" | "complete",
+    progressState: string | "loading" | "idle" | "started" | "complete",
     models: AIModelWithProviderAndSettings[]
     onNodesChange: OnNodesChange<CustomNodeType>
     onEdgesChange: OnEdgesChange;
@@ -29,19 +29,25 @@ interface ContentGenerationStoreType {
     saveStream: (model: AIModelWithProviderAndSettings, stream: MetaOutput) => void
     streams: Record<string, { model: AIModelWithProviderAndSettings, stream: MetaOutput }>
     selectedCategory?: number,
-    selectedBrand?: number
+    selectedBrand?: number,
+    reset: () => void
+    setCategoryId: (id: number) => void
+    setBrandId: (id: number) => void
+}
+
+const initialState = {
+    nodes: [],
+    streams: {},
+    models: [],
+    edges: [],
+    selectedCategory: undefined,
+    selectedBrand: undefined,
+    progressState: "idle"
 }
 
 export const useContentGenerationStore = create<ContentGenerationStoreType>((set, get) => ({
-    streams: {},
-    selectedCategory: undefined,
-    selectedBrand: undefined,
-    nodes: [],
-    models: [],
-    edges: [],
-    progressState: "idle",
+    ...initialState,
     setProgressState: (state) => set({progressState: state}),
-    //{...prev, [model]: (prev?.[model] || "") + value},
     onNodesChange: (changes) => {
         set({
             nodes: applyNodeChanges(changes, get().nodes),
@@ -68,7 +74,7 @@ export const useContentGenerationStore = create<ContentGenerationStoreType>((set
             nodes: [...state.nodes, node]
         }));
     },
-    updateStreams: (model: AIModelWithProviderAndSettings, stream: MetaOutput) =>
+    updateStreams: (model: AIModelWithProviderAndSettings, stream: MetaOutput) => {
         set(
             (state) => {
                 const newNodes = [...state.nodes]
@@ -92,9 +98,9 @@ export const useContentGenerationStore = create<ContentGenerationStoreType>((set
 
                 return {nodes: [...newNodes]}
             }
-        ),
+        )
+    },
     updateModels: (models: AIModelWithProviderAndSettings[]) => set({models}),
-
     saveStream: (model: AIModelWithProviderAndSettings, stream: MetaOutput) => {
         set(
             (state) => {
@@ -110,4 +116,9 @@ export const useContentGenerationStore = create<ContentGenerationStoreType>((set
             }
         )
     },
+    setCategoryId: (id: number) => set({selectedCategory: id}),
+    setBrandId: (id: number) => set({selectedBrand: id}),
+    reset: () => {
+        set(initialState)
+    }
 }))

@@ -130,7 +130,7 @@ export const SaveToQSPay = actionClient
         if (brandId && categoryId) {
             //combin page
             const {result: allCombinationPages} = await QSPayClient<QSPayCombin[]>("CmsCombinPage/GetAll")
-            const foundCombinationPage = allCombinationPages.find(cp => cp.category.id === categoryId && cp.brand.id === brandId)
+            const foundCombinationPage = allCombinationPages.find(cp => cp.category?.id === categoryId && cp.brand?.id === brandId)
 
             if (!foundCombinationPage) {
                 throw new Error("Combination page not found. BrandAffiliation can't create a new one, please create one manually then try again.")
