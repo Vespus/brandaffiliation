@@ -1,6 +1,6 @@
-import { StandardSchemaV1 } from "@standard-schema/spec";
-import { HookCallbacks, HookSafeActionFn, useAction, UseActionHookReturn } from "next-safe-action/hooks";
-import { toast } from "sonner";
+import {StandardSchemaV1} from "@standard-schema/spec";
+import {HookCallbacks, HookSafeActionFn, useAction, UseActionHookReturn} from "next-safe-action/hooks";
+import {toast} from "sonner";
 
 export const useCustomAction = <ServerError, S extends StandardSchemaV1 | undefined, CVE, Data>(
     safeActionFn: HookSafeActionFn<ServerError, S, CVE, Data>,

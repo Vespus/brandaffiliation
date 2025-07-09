@@ -1,31 +1,19 @@
-import { ModelItem } from "@/app/dashboard/configure/model-item";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { db } from "@/db";
-import { getAISettings } from "@/db/presets";
-import { aiModels } from "@/db/schema";
-import { AISetting } from "@/db/types";
-import { eq } from "drizzle-orm";
+"use client"
 
-export const Models = async () => {
-    const [AIModels, AISettings] = await Promise.all([
-        db.query.aiModels.findMany({
-            where: (
-                eq(aiModels.isActive, true)
-            ),
-            with: {
-                aiProvider: {
-                    columns: {
-                        name: true,
-                        code: true
-                    }
-                }
-            }
-        }),
-        getAISettings()
-    ])
+import {ModelItem} from "@/app/dashboard/configure/model-item";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
+import {Table, TableBody, TableHead, TableHeader, TableRow} from "@/components/ui/table"
+import {AIModel, AIProvider, AISetting} from "@/db/types";
 
-    const settingsMap = new Map((AISettings as AISetting[]).map(setting => [setting.model, setting]))
+type ModelProps = {
+    aiModels: (AIModel & {
+        aiProvider: Pick<AIProvider, "name" | "code">
+    })[],
+    aiSettings: AISetting[]
+}
+
+export const Models = ({aiModels, aiSettings}: ModelProps) => {
+    const settingsMap = new Map((aiSettings).map(setting => [setting.model, setting]))
 
     return (
         <Card>
@@ -46,12 +34,12 @@ export const Models = async () => {
                     </TableHeader>
                     <TableBody>
                         {
-                            AIModels.map((model) => (
+                            aiModels.map((model) => (
                                 <ModelItem
                                     key={model.id}
                                     model={model}
                                     settings={settingsMap.get(model.modelName)!}
-                                />
+                                ></ModelItem>
                             ))
                         }
                     </TableBody>

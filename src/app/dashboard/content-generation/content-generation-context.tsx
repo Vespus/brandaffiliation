@@ -3,7 +3,6 @@
 import { QSPayStore } from "@/qspay-types";
 import React, { ReactNode } from "react";
 
-
 export type ContentGenerationProps = {
     store: QSPayStore
 }

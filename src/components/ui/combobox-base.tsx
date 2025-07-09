@@ -1,9 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, } from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { useVirtualizer } from "@tanstack/react-virtual";
-import { Check, ChevronsUpDown } from "lucide-react";
+import {Button} from "@/components/ui/button";
+import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,} from '@/components/ui/command';
+import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
+import {cn} from "@/lib/utils";
+import {useVirtualizer} from "@tanstack/react-virtual";
+import {Check, ChevronsUpDown} from "lucide-react";
 import * as React from 'react';
 
 type VirtualizedCommandProps<T> = {
@@ -11,6 +11,7 @@ type VirtualizedCommandProps<T> = {
     data: T[];
     valueKey: keyof T;
     labelKey: keyof T;
+    className: string;
     valueAs?: "string" | "number";
     itemRenderer?: (item: T) => React.JSX.Element | null;
     itemRendererContainerHeight?: number
@@ -35,7 +36,7 @@ const VirtualizedCommand = <T, >({
                                      emptyPlaceholder = "No Item Selected",
                                      searchPlaceholder = "Search Item...",
                                      setOpen,
-                                 }: VirtualizedCommandProps<T>) => {
+                                 }: Omit<VirtualizedCommandProps<T>, "className">) => {
     const [filteredOptions, setFilteredOptions] = React.useState<T[]>(data);
     const [focusedIndex, setFocusedIndex] = React.useState(0);
     const [isKeyboardNavActive, setIsKeyboardNavActive] = React.useState(false);
@@ -188,6 +189,7 @@ export const ComboboxBase = <T, >({
                                       valueAs = "string",
                                       placeholder = "Select Item...",
                                       maskedValue,
+                                      className,
                                       ...props
                                   }: Omit<VirtualizedCommandProps<T>, "setOpen"> & { maskedValue?: any }) => {
 
@@ -201,7 +203,7 @@ export const ComboboxBase = <T, >({
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="w-full justify-between"
+                    className={cn("w-full justify-between", className)}
                 >
                     {maskedValue || selectedValue}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>

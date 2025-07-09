@@ -37,6 +37,10 @@ export const SimpleRating = ({value, scale, maxStars = 5}: SimpleRatingProps) =>
         )
     }
 
+    if(!value){
+        return null
+    }
+
     const andLabel = t("generic.and")
     const scaleLabel = t(`scale.${scale}`)
     const scaleValues = roundBothWays(value)

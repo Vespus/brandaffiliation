@@ -172,7 +172,36 @@ export const brands = pgTable("brands", {
     id: serial().primaryKey().notNull(),
     name: text().notNull(),
     slug: varchar(),
+    integrationId: text("integration_id"),
 });
+
+export const categories = pgTable("categories", {
+    id: serial().primaryKey().notNull(),
+    name: text().notNull(),
+    description: text(),
+    slug: varchar(),
+    integrationId: text("integration_id"),
+    createdAt: timestamp('created_at'),
+});
+
+export const combinations = pgTable("combinations", {
+    id: serial().primaryKey().notNull(),
+    name: text().notNull(),
+    description: text(),
+    brandId: text("brand_id"),
+    categoryId: text("category_id"),
+    integrationId: text("integration_id"),
+    createdAt: timestamp('created_at'),
+});
+
+export const contents = pgTable("contents", {
+    id: serial().primaryKey().notNull(),
+    entityType: text("entity_type").notNull(),
+    entityId: text("entity_id").notNull(),
+    config: jsonb(),
+    aiGen: boolean("ai_gen").default(false).notNull(),
+    createdAt: timestamp('created_at'),
+})
 
 export const account = pgTable("account", {
     id: text('id').primaryKey(),

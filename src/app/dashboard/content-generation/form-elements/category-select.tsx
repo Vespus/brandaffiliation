@@ -3,11 +3,9 @@ import { api } from "@/lib/trpc/react";
 import { QSPayCategory } from "@/qspay-types";
 import { SelectProps } from "@radix-ui/react-select";
 import { ArrowRightIcon } from "lucide-react";
+import {categoryFlat} from "@/utils/category-flat";
 
-const flat = (arr: QSPayCategory[]): QSPayCategory[] => arr.flatMap(({
-                                                                         children,
-                                                                         ...rest
-                                                                     }) => [rest, ...(children ? flat(children) : [])]);
+
 
 type CategorySelectProps = Omit<SelectProps, "value" | "onValueChange"> & {
     value?: number;
@@ -16,7 +14,7 @@ type CategorySelectProps = Omit<SelectProps, "value" | "onValueChange"> & {
 
 export const CategorySelect = ({value, onValueChange}: CategorySelectProps) => {
     const {data} = api.qspayRoute.getAllCategories.useQuery()
-    const dataSet = flat(data || []);
+    const dataSet = categoryFlat(data || []);
 
     return (
         <ComboboxBase

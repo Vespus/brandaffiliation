@@ -1,22 +1,13 @@
-import {
-    SidebarGroup,
-    SidebarGroupLabel,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { auth } from "@/lib/auth";
-import { getUser } from "@/lib/get-user";
-import { CogIcon, Database, GalleryVerticalEnd, Languages, SparklesIcon, UsersIcon } from "lucide-react"
-import Link from "next/link";
-import { Suspense } from "react";
+"use client"
 
-type MenuItem = {
-    name: string
-    url: string
-    icon: React.ComponentType
-    permission?: { role: "user" | "admin", permission: Record<string, string[]> }
-}
+import {SidebarGroup, SidebarGroupLabel, SidebarMenu,} from "@/components/ui/sidebar"
+import {getUser} from "@/lib/get-user";
+import {CogIcon, Database, GalleryVerticalEnd, Languages, SparklesIcon, UsersIcon} from "lucide-react"
+import {Suspense, use} from "react";
+import {MenuItem} from "@/components/sidebar/type";
+import {SingleMenuItem} from "@/components/sidebar/single-menu-item";
+import {CollapsableMenuItem} from "@/components/sidebar/collapsible-menu-item";
+import {authClient} from "@/lib/auth-client";
 
 const data: MenuItem[] = [
     {
@@ -25,9 +16,18 @@ const data: MenuItem[] = [
         icon: GalleryVerticalEnd,
     },
     {
-        name: "SEO Text Generator",
-        url: "/dashboard/content-generation",
+        name: "Generators",
         icon: SparklesIcon,
+        children: [
+            {
+                name: "SEO Generator",
+                url: "/dashboard/content-generation",
+            },
+            {
+                name: "Batch Studio",
+                url: "/dashboard/content-generation/batch-studio"
+            }
+        ]
     },
     {
         name: "Configure",
@@ -48,7 +48,7 @@ const data: MenuItem[] = [
         name: 'System Prompts',
         url: '/dashboard/prompts',
         icon: SparklesIcon,
-        permission: { role: 'admin', permission: { prompt: ['list'] } },
+        permission: {role: 'admin', permission: {prompt: ['list']}},
     },
     {
         name: "Manage Users",
@@ -65,9 +65,7 @@ export const NavList = () => {
             <SidebarMenu>
                 {data.map((item) => (
                     <Suspense key={item.name}>
-                        <NavListItem
-                            item={item}
-                        />
+                        <Guard item={item}/>
                     </Suspense>
                 ))}
             </SidebarMenu>
@@ -75,30 +73,25 @@ export const NavList = () => {
     )
 }
 
-const NavListItem = async ({item}: { item: MenuItem }) => {
-    if (item.permission) {
-        const {user} = await getUser()
-        const {success} = await auth.api.userHasPermission({
-            body: {
-                userId: user.id,
-                role: item.permission.role,
-                permission: item.permission.permission
-            }
+const Guard = ({item}: { item: MenuItem }) => {
+    /*const perm = use(new Promise(async resolve =>  {
+        if(item.permission){
+            resolve(true)
+        }
+        const res = await authClient.admin.hasPermission({
+            permission: item.permission?.permission
         })
 
-        if (!success) {
-            return null
-        }
-    }
+        console.log(res)
+        resolve(true)
+    }))*/
 
     return (
-        <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild>
-                <Link href={item.url}>
-                    <item.icon/>
-                    <span>{item.name}</span>
-                </Link>
-            </SidebarMenuButton>
-        </SidebarMenuItem>
+        <>
+            {item.children && item.children.length > 0
+                ? <CollapsableMenuItem item={item}/>
+                : <SingleMenuItem item={item}/>
+            }
+        </>
     )
 }

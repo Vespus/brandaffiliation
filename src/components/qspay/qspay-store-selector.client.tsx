@@ -3,36 +3,34 @@
 import { changeStore } from "@/components/qspay/qspay-store-selector-action";
 import { ComboboxBase } from "@/components/ui/combobox-base";
 import { useCustomAction } from "@/hooks/use-custom-action";
-import { QSPayStore } from "@/qspay-types";
 import { parseAsString, useQueryState } from "nuqs";
-import { useState } from "react";
+import {api} from "@/lib/trpc/react";
+import {useCookie} from "@/hooks/use-cookie";
+import {useState} from "react";
+import {cn} from "@/lib/utils";
 
-export const QspayStoreSelectorClient = ({
-                                             storeList,
-                                             selectedStore
-                                         }:
-                                         {
-                                             storeList: QSPayStore[],
-                                             selectedStore?: string;
-                                         }) => {
-    const [value, setValue] = useState(selectedStore);
-    const changeStoreAction = useCustomAction(changeStore)
+export function QspayStoreSelectorClient() {
+    const {data} = api.qspayRoute.getUserStores.useQuery()
+    const [value] = useCookie("qs-pay-store-id")
     const [error] = useQueryState("error", parseAsString)
+    const [optimisticValue, setOptimisticValue] = useState<string | undefined>(value ?? undefined)
+
+    const changeStoreAction = useCustomAction(changeStore)
 
     return (
         <ComboboxBase
             labelKey="name"
             valueKey="storeId"
-            value={value}
+            value={optimisticValue}
             onValueChange={(val) => {
-                setValue(val)
-                changeStoreAction.execute({storeId: val})
+                changeStoreAction.execute({storeId: val as string})
+                setOptimisticValue(val as string)
             }}
             placeholder="Select a store"
             emptyPlaceholder="No store selected"
             searchPlaceholder="Search..."
-            data={storeList}
-            className={error ? "border-red-500 dark:border-red-700" : ""}
+            data={data || []}
+            className={cn(error && "border-red-500 dark:border-red-700", "w-sm")}
         />
     )
 }
