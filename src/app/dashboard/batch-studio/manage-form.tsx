@@ -10,8 +10,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Sparkles } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import {AiModelSelect} from "@/app/dashboard/content-generation/batch-studio/form-elements/ai-model-select";
-import {BatchContentGenerateSchema} from "@/app/dashboard/content-generation/batch-studio/schema";
+import {AiModelSelect} from "@/app/dashboard/batch-studio/form-elements/ai-model-select";
+import {BatchContentGenerateSchema} from "@/app/dashboard/batch-studio/schema";
 
 export const ManageForm = () => {
     const form = useForm<z.infer<typeof BatchContentGenerateSchema>>({

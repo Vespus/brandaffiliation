@@ -1,5 +1,5 @@
-import {ManageForm} from "@/app/dashboard/content-generation/batch-studio/manage-form";
-import {searchParamsCache} from "@/app/dashboard/content-generation/batch-studio/queries";
+import {ManageForm} from "@/app/dashboard/batch-studio/manage-form";
+import {searchParamsCache} from "@/app/dashboard/batch-studio/brands/queries";
 import {SearchParams} from "nuqs/server";
 
 
@@ -12,6 +12,8 @@ export default async function Page(props: BrandsPageProps) {
     const search = searchParamsCache.parse(searchParams);
 
     return (
-        <ManageForm/>
+        <>
+            pikachu
+        </>
     )
 }

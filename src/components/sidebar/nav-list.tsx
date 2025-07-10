@@ -25,7 +25,7 @@ const data: MenuItem[] = [
             },
             {
                 name: "Batch Studio",
-                url: "/dashboard/content-generation/batch-studio"
+                url: "/dashboard/batch-studio"
             }
         ]
     },

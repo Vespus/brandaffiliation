@@ -106,6 +106,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     const [rowSelection, setRowSelection] = React.useState<RowSelectionState>(
         initialState?.rowSelection ?? {},
     );
+
     const [columnVisibility, setColumnVisibility] =
         React.useState<VisibilityState>(initialState?.columnVisibility ?? {});
 

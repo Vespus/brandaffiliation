@@ -53,8 +53,6 @@ const CollapsableMenuSubItem = ({item}: { item: MenuItem }) => {
     const splitPathname = useMemo(() => pathname.split("/").filter(Boolean).filter(x => x !== "dashboard"), [pathname])
     const splitItemPathname = useMemo(() => item.url!.split("/").filter(Boolean).filter(x => x !== "dashboard"), [item])
 
-    console.log('cem', splitPathname, splitItemPathname)
-
     return (
         <SidebarMenuSubItem key={item.name}>
             <SidebarMenuSubButton asChild className={cn(splitPathname[0] === splitItemPathname[0] && "font-semibold text-indigo-500")}>

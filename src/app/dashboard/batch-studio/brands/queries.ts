@@ -1,10 +1,10 @@
-import { db } from "@/db";
-import {brands, brandWithScales, contents,} from "@/db/schema";
-import { BrandWithCharacteristicAndScales } from "@/db/types";
-import { getSortingStateParser } from "@/lib/datatable/parsers";
-import {and, asc, count, desc, eq, gte, ilike, isNotNull, isNull, lte, sql} from "drizzle-orm";
-import {createSearchParamsCache, parseAsArrayOf, parseAsBoolean, parseAsInteger, parseAsString} from "nuqs/server";
-import { z } from "zod";
+import {db} from "@/db";
+import {brands, contents,} from "@/db/schema";
+import {BrandWithCharacteristicAndScales} from "@/db/types";
+import {getSortingStateParser} from "@/lib/datatable/parsers";
+import {and, asc, count, desc, eq, ilike, isNotNull, isNull, sql} from "drizzle-orm";
+import {createSearchParamsCache, parseAsInteger, parseAsString} from "nuqs/server";
+import {BatchStudioBrandType} from "@/app/dashboard/batch-studio/brands/batch-studio-brand-type";
 
 export const searchParamsCache = createSearchParamsCache({
     page: parseAsInteger.withDefault(1),
@@ -13,7 +13,7 @@ export const searchParamsCache = createSearchParamsCache({
         {id: "name", desc: false},
     ]),
     name: parseAsString.withDefault(""),
-    hasContent: parseAsBoolean.withDefault(false),
+    content: parseAsString
 });
 
 export const getBrands = async (input: Awaited<ReturnType<typeof searchParamsCache.parse>>) => {
@@ -21,8 +21,8 @@ export const getBrands = async (input: Awaited<ReturnType<typeof searchParamsCac
 
     const where = and(
         input.name ? ilike(brands.name, `%${input.name}%`) : undefined,
-        input.hasContent === true ? isNotNull(contents.config) : undefined,
-        input.hasContent === false ? isNull(contents.config) : undefined,
+        input.content === "yes" ? isNotNull(contents.config) : undefined,
+        input.content === "no" ? isNull(contents.config) : undefined
     )
 
     const orderBy =
@@ -38,6 +38,7 @@ export const getBrands = async (input: Awaited<ReturnType<typeof searchParamsCac
             name: brands.name,
             slug: brands.slug,
             content: contents.config,
+            integrationId: brands.integrationId,
             hasContent: sql<boolean>`(${contents.config} IS NOT NULL)`.as('hasContent'),
         })
             .from(brands)
@@ -52,16 +53,13 @@ export const getBrands = async (input: Awaited<ReturnType<typeof searchParamsCac
                 count: count(),
             })
             .from(brands)
-            .leftJoin(
-                contents,
-                and(eq(contents.entityId, brands.integrationId), eq(contents.entityType, 'brand'))
-            )
+            .leftJoin(contents, and(eq(contents.entityId, brands.integrationId), eq(contents.entityType, "brand")))
             .where(where)
             .execute()
             .then((res) => res[0]?.count ?? 0);
 
         return {
-            data,
+            data: data as BatchStudioBrandType[],
             total,
         }
     })

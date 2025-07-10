@@ -17,7 +17,7 @@ interface BrandTableActionBarProps {
     table: Table<BrandWithCharacteristicAndScales>;
 }
 
-export function BatchStudioTableActionBar({table}: BrandTableActionBarProps) {
+export function BatchStudioBrandTableActionBar({table}: BrandTableActionBarProps) {
     const rows = table.getFilteredSelectedRowModel().rows;
     const [isPending, startTransition] = React.useTransition();
     const [currentAction, setCurrentAction] = React.useState<string | null>(null);

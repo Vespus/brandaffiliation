@@ -39,7 +39,7 @@ export function DataTableToolbar<TData>({
             role="toolbar"
             aria-orientation="horizontal"
             className={cn(
-                "flex w-full items-start justify-between gap-2 p-1",
+                "flex w-full items-start justify-between gap-2 py-1",
                 className,
             )}
             {...props}
@@ -79,7 +79,7 @@ function DataTableToolbarFilter<TData>({
     {
         const columnMeta = column.columnDef.meta;
         const t = useTranslations()
-        const label = columnMeta?.labelHasTranslation && columnMeta.label ? t(columnMeta.label) : column.id
+        const label = columnMeta?.labelHasTranslation && columnMeta.label ? t(columnMeta.label) : (columnMeta?.label ? columnMeta.label : column.id)
 
         const onFilterRender = React.useCallback(() => {
             if (!columnMeta?.variant) return null;
