@@ -3,23 +3,25 @@
 import {DataTable} from "@/components/datatable/data-table"
 import {DataTableSortList} from "@/components/datatable/data-table-sort-list"
 import {use, useEffect} from "react";
-import {useTranslations} from "next-intl";
 import {useDataTable} from "@/hooks/use-data-table";
 import {DataTableToolbar} from "@/components/datatable/data-table-toolbar";
-import {getBatchStudioBrandTableColumns} from "@/app/dashboard/batch-studio/brands/batch-studio-brand-table-columns";
-import {BatchStudioBrandType} from "@/app/dashboard/batch-studio/brands/batch-studio-brand-type";
 import {Button} from "@/components/ui/button";
 import {api} from "@/lib/trpc/react";
 import {SquareDashedMousePointerIcon, SquareMousePointerIcon, XIcon} from "lucide-react";
 import {useDataTableSelectionStore} from "@/app/dashboard/batch-studio/store";
+import {BatchStudioCombinationType} from "@/app/dashboard/batch-studio/combinations/batch-studio-combination-type";
+import {
+    getBatchStudioCombinationTableColumns
+} from "@/app/dashboard/batch-studio/combinations/batch-studio-combination-table-columns";
+import {useTranslations} from "next-intl";
 
 interface BrandsTableProps {
-    promise: Promise<{ data: BatchStudioBrandType[], pageCount: number, total: number }>
+    promise: Promise<{ data: BatchStudioCombinationType[], pageCount: number, total: number }>
 }
 
-export const BatchStudioBrandTable = ({promise}: BrandsTableProps) => {
+export const BatchStudioCombinationTable = ({promise}: BrandsTableProps) => {
     const {data, pageCount, total} = use(promise)
-    const columns = getBatchStudioBrandTableColumns()
+    const columns = getBatchStudioCombinationTableColumns()
     const utils = api.useUtils()
     const t = useTranslations()
     const {selected, setSelected} = useDataTableSelectionStore()
@@ -46,14 +48,14 @@ export const BatchStudioBrandTable = ({promise}: BrandsTableProps) => {
     }, [state.rowSelection])
 
     const selectAllHandler = async () => {
-        const allBrands = await utils.client.batchStudioRoute.getAllBrands.query()
+        const allBrands = await utils.client.batchStudioRoute.getAllCombinations.query()
         const allRows = allBrands.filter(x => x.integrationId).reduce((acc, b) => (acc[b.integrationId!] = true, acc), {} as Record<string, boolean>)
         table.setRowSelection(allRows)
         setSelected(allRows)
     }
 
     const selectAllWithoutContentHandler = async () => {
-        const allBrands = await utils.client.batchStudioRoute.getAllBrandsWithNoContent.query()
+        const allBrands = await utils.client.batchStudioRoute.getAllCombinationsWithNoContent.query()
         const allRows = allBrands.filter(x => x.integrationId).reduce((acc, b) => (acc[b.integrationId!] = true, acc), {} as Record<string, boolean>)
         table.setRowSelection(allRows)
         setSelected(allRows)

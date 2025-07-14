@@ -1,10 +1,10 @@
 import {db} from "@/db";
-import {brands, contents,} from "@/db/schema";
+import {brands, categories, combinations, contents,} from "@/db/schema";
 import {BrandWithCharacteristicAndScales} from "@/db/types";
 import {getSortingStateParser} from "@/lib/datatable/parsers";
 import {and, asc, count, desc, eq, ilike, isNotNull, isNull, sql} from "drizzle-orm";
 import {createSearchParamsCache, parseAsInteger, parseAsString} from "nuqs/server";
-import {BatchStudioBrandType} from "@/app/dashboard/batch-studio/brands/batch-studio-brand-type";
+import {BatchStudioCombinationType} from "@/app/dashboard/batch-studio/combinations/batch-studio-combination-type";
 
 export const searchParamsCache = createSearchParamsCache({
     page: parseAsInteger.withDefault(1),
@@ -16,11 +16,11 @@ export const searchParamsCache = createSearchParamsCache({
     content: parseAsString
 });
 
-export const getBrands = async (input: Awaited<ReturnType<typeof searchParamsCache.parse>>) => {
+export const getCombinations = async (input: Awaited<ReturnType<typeof searchParamsCache.parse>>) => {
     const offset = (input.page - 1) * input.perPage;
 
     const where = and(
-        input.name ? ilike(brands.name, `%${input.name}%`) : undefined,
+        input.name ? ilike(combinations.name, `%${input.name}%`) : undefined,
         input.content === "yes" ? isNotNull(contents.config) : undefined,
         input.content === "no" ? isNull(contents.config) : undefined
     )
@@ -28,21 +28,25 @@ export const getBrands = async (input: Awaited<ReturnType<typeof searchParamsCac
     const orderBy =
         input.sort.length > 0
             ? input.sort.map((item) =>
-                item.desc ? desc(brands[item.id]) : asc(brands[item.id]),
+                item.desc ? desc(combinations[item.id]) : asc(combinations[item.id]),
             )
-            : [asc(brands.name)];
+            : [asc(combinations.name)];
 
 
     const {data, total} = await db.transaction(async (tx) => {
         const data = await tx.select({
-            name: brands.name,
-            slug: brands.slug,
+            name: combinations.name,
+            description: combinations.description,
             content: contents.config,
-            integrationId: brands.integrationId,
+            integrationId: combinations.integrationId,
             hasContent: sql<boolean>`(${contents.config} IS NOT NULL)`.as('hasContent'),
+            brand: brands.name,
+            category: categories.name,
         })
-            .from(brands)
-            .leftJoin(contents, and(eq(contents.entityId, brands.integrationId), eq(contents.entityType, "brand")))
+            .from(combinations)
+            .leftJoin(contents, and(eq(contents.entityId, combinations.integrationId), eq(contents.entityType, "combination")))
+            .leftJoin(brands, and(eq(combinations.brandId, brands.integrationId)))
+            .leftJoin(categories, and(eq(combinations.categoryId, categories.integrationId)))
             .where(where)
             .orderBy(...orderBy)
             .offset(offset)
@@ -52,14 +56,14 @@ export const getBrands = async (input: Awaited<ReturnType<typeof searchParamsCac
             .select({
                 count: count(),
             })
-            .from(brands)
-            .leftJoin(contents, and(eq(contents.entityId, brands.integrationId), eq(contents.entityType, "brand")))
+            .from(combinations)
+            .leftJoin(contents, and(eq(contents.entityId, combinations.integrationId), eq(contents.entityType, "combination")))
             .where(where)
             .execute()
             .then((res) => res[0]?.count ?? 0);
 
         return {
-            data: data as BatchStudioBrandType[],
+            data: data as BatchStudioCombinationType[],
             total,
         }
     })

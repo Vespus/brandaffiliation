@@ -1,4 +1,3 @@
-import {ManageForm} from "@/app/dashboard/batch-studio/manage-form";
 import {searchParamsCache} from "@/app/dashboard/batch-studio/brands/queries";
 import {SearchParams} from "nuqs/server";
 

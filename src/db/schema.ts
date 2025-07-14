@@ -203,6 +203,16 @@ export const contents = pgTable("contents", {
     createdAt: timestamp('created_at'),
 })
 
+export const tasks = pgTable("tasks", {
+    id: serial().primaryKey().notNull(),
+    entityType: text("entity_type").notNull(),
+    entityId: text("entity_id").notNull(),
+    status: text("status"),
+    oldValue: jsonb("old_value"),
+    specification: jsonb(),
+    createdAt: timestamp('created_at'),
+})
+
 export const account = pgTable("account", {
     id: text('id').primaryKey(),
     accountId: text('account_id').notNull(),

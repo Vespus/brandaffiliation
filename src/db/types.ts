@@ -4,11 +4,11 @@ import {
     aiSettingsDefault,
     brands,
     brandScales,
-    brandWithScales,
-    characteristics,
+    brandWithScales, categories,
+    characteristics, combinations,
     datasources,
     datasourceValues,
-    scales,
+    scales, tasks,
     translations
 } from "@/db/schema";
 
@@ -31,3 +31,7 @@ export type Translation = typeof translations.$inferSelect
 export type Datasource = typeof datasources.$inferSelect
 export type DatasourceValue = typeof datasourceValues.$inferSelect
 export type DatasourceWithValues = Datasource & { values: DatasourceValue[] }
+
+export type Category = typeof categories.$inferSelect
+export type Combination = typeof combinations.$inferSelect
+export type Task = typeof tasks.$inferSelect

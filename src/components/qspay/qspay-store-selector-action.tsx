@@ -14,7 +14,9 @@ export const changeStore = actionClient
         if(!storeId){
             cookieList.delete('qs-pay-store-id')
         }else {
-            cookieList.set('qs-pay-store-id', storeId)
+            cookieList.set('qs-pay-store-id', storeId, {
+                expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365)
+            })
         }
 
         revalidatePath('/', 'layout')

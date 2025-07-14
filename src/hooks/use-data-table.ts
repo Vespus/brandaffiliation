@@ -62,6 +62,7 @@ interface UseDataTableProps<TData>
     scroll?: boolean;
     shallow?: boolean;
     startTransition?: React.TransitionStartFunction;
+    onRowSelectionChange?: (updaterOrValue: Updater<RowSelectionState>) => void;
 }
 
 export function useDataTable<TData>(props: UseDataTableProps<TData>) {
@@ -77,6 +78,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
         scroll = false,
         shallow = true,
         startTransition,
+        onRowSelectionChange,
         ...tableProps
     } = props;
 
@@ -276,7 +278,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
             enableColumnFilter: false,
         },
         enableRowSelection: true,
-        onRowSelectionChange: setRowSelection,
+        onRowSelectionChange: onRowSelectionChange || setRowSelection,
         onPaginationChange,
         onSortingChange,
         onColumnFiltersChange,

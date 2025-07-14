@@ -28,9 +28,7 @@ export default async function Layout({children}: Readonly<{ children: React.Reac
                         className="relative w-0 before:absolute before:left-0 before:top-0 before:h-full before:w-px before:bg-muted hidden xl:block"></div>
                     <CombinationsWidget/>
                 </div>
-                <div className="flex flex-1 gap-4 min-h-0">
-                    {children}
-                </div>
+                {children}
             </>
         </ContentGenerationProvider>
     )
