@@ -1,9 +1,7 @@
-import { QSPayClient } from "@/lib/qs-pay-client";
-import { createTRPCRouter, publicProcedure } from "@/lib/trpc/trpc";
-import {QSPayBrand, QSPayCategory, QSPayCombin, QSPayUser} from "@/qspay-types";
-import { z } from "zod";
+import {createTRPCRouter, publicProcedure} from "@/lib/trpc/trpc";
+import {z} from "zod";
 import {brands, combinations, contents} from "@/db/schema";
-import {and, eq, isNotNull, isNull, sql} from "drizzle-orm";
+import {and, eq, isNull, sql} from "drizzle-orm";
 import {db} from "@/db";
 
 export const batchStudioRoute = createTRPCRouter({
@@ -36,7 +34,7 @@ export const batchStudioRoute = createTRPCRouter({
             return data
         }),
     getAllCombinations: publicProcedure
-        .query(async () =>{
+        .query(async () => {
             const data = await db.select({
                 name: combinations.name,
                 description: combinations.description,
@@ -50,7 +48,7 @@ export const batchStudioRoute = createTRPCRouter({
             return data
         }),
     getAllCombinationsWithNoContent: publicProcedure
-        .query(async () =>{
+        .query(async () => {
             const data = await db.select({
                 name: combinations.name,
                 description: combinations.description,
@@ -63,5 +61,14 @@ export const batchStudioRoute = createTRPCRouter({
                 .where(isNull(contents.config))
 
             return data
+        }),
+    process: publicProcedure
+        .input(
+            z.any()
+        )
+        .mutation(async ({input}) => {
+            //simulate sleep
+            await new Promise(resolve => setTimeout(resolve, 2000))
+            return input
         })
 })
