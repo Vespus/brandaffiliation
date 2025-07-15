@@ -14,3 +14,5 @@ export const BatchContentGenerateSchema = z.object({
         })
     ).optional()
 })
+
+export type BatchContentGenerateSchemaType = z.infer<typeof BatchContentGenerateSchema>

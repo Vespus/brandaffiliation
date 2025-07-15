@@ -14,6 +14,7 @@ import {
     uuid,
     varchar
 } from "drizzle-orm/pg-core"
+import {MetaOutput} from "@/app/dashboard/content-generation/types";
 
 export const brandScales = pgTable("brand_scales", {
     // You can use { mode: "bigint" } if numbers are exceeding js number limitations
@@ -204,7 +205,7 @@ export const contents = pgTable("contents", {
 })
 
 export const tasks = pgTable("tasks", {
-    id: serial().primaryKey().notNull(),
+    id: bigint({mode: "number"}).primaryKey().notNull(),
     entityType: text("entity_type").notNull(),
     entityId: text("entity_id").notNull(),
     status: text("status"),
@@ -267,6 +268,7 @@ export const verification = pgTable("verification", {
 
 export const brandWithScales = pgTable("brand_with_scales", {
     id: integer('id').notNull(),
+    integrationId: text('integration_id'),
     name: text('name').notNull(),
     price: real('price').notNull(),
     quality: real('quality').notNull(),
@@ -278,7 +280,8 @@ export const brandWithScales = pgTable("brand_with_scales", {
     recognition: real('recognition').notNull(),
     revenue: real('revenue').notNull(),
     characteristic: jsonb('characteristic').$type<{ id: number, value: string }[]>(),
-    slug: varchar()
+    slug: varchar(),
+    config: jsonb().$type<MetaOutput>()
 })
 
 export const datasources = pgTable("datasources", {

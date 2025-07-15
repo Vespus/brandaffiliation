@@ -7,10 +7,8 @@ import {
     Background,
     Controls,
     useReactFlow,
-    Node,
-    Edge
 } from '@xyflow/react';
-import { useCallback, useEffect, } from "react";
+import React, { useCallback, useEffect, } from "react";
 import { AIStreamNode } from "@/app/dashboard/content-generation/flow-nodes/ai-stream-node";
 import { CompareAgentNode } from "@/app/dashboard/content-generation/flow-nodes/compare-agent-node";
 import { ToneAgentNode } from "@/app/dashboard/content-generation/flow-nodes/tone-agent-node";
@@ -67,7 +65,7 @@ const useLayoutedElements = () => {
         });
         setNodes(children);
 
-        fitView();
+        await fitView();
     }, []);
 
     return {getLayoutedElements};
@@ -133,7 +131,7 @@ export const FlowStudio = () => {
 const ActualFlow = () => {
     const {getLayoutedElements} = useLayoutedElements();
     const state = useContentGenerationStore();
-    const { getNode, getNodes, getEdges } = useReactFlow();
+    const { getNodes, getEdges } = useReactFlow();
 
     useEffect(() => {
         if(state.progressState === 'complete') {

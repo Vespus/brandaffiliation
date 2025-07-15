@@ -18,6 +18,7 @@ export default async function Tasks() {
         .leftJoin(categories, and(or(eq(tasks.entityId, categories.integrationId), eq(categories.integrationId, combinations.categoryId))))
         .leftJoin(brands, and(or(eq(tasks.entityId, brands.integrationId), eq(brands.integrationId, combinations.brandId))))
 
+    console.log(tasksResult[0].task)
 
     return (
         <div>

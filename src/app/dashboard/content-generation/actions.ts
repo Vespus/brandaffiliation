@@ -102,7 +102,6 @@ export const CompletionStream = async (parsedInput: z.infer<typeof ContentGenera
             system: prompt.prompt,
             schema: MetaOutputSchema,
             prompt: dataSourcePrompt,
-
         })
 
         for await (const partialObject of partialObjectStream) {

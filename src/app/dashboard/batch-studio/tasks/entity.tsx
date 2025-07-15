@@ -1,11 +1,11 @@
-"use client"
-
 import {TableCell, TableRow} from "@/components/ui/table";
 import {TaskJoin} from "@/app/dashboard/batch-studio/tasks/type";
 import {api} from "@/lib/trpc/react";
 import {useEffect, useState} from "react";
 import {Progress} from "@/components/ui/progress";
 import {cn} from "@/lib/utils";
+import {Button} from "@/components/ui/button";
+import {PlayIcon} from "lucide-react";
 
 type EntityProps = {
     task: TaskJoin
@@ -42,14 +42,15 @@ export const Entity = ({
         let current = 0;
         const interval = setInterval(() => {
             current += Math.random() * 10;
-            setProgress(p => Math.min(p + 5, 90)); // Cap at 90% until real result
+            setProgress(p => Math.min(p + 5, 90));
 
             if (current >= 90) clearInterval(interval);
-        }, 300);
+        }, 500);
     };
 
     const processTask = () => {
-        jobCall.mutate(task.task)
+        console.log(typeof task.task.id)
+        jobCall.mutate(task.task.id)
     }
 
     useEffect(() => {
@@ -84,6 +85,13 @@ export const Entity = ({
                         {status}
                     </span>
                     <Progress value={progress}/>
+                </div>
+            </TableCell>
+            <TableCell>
+                <div className="flex gap-2">
+                    <Button variant="ghost" size="icon" onClick={processTask}>
+                        <PlayIcon/>
+                    </Button>
                 </div>
             </TableCell>
         </TableRow>

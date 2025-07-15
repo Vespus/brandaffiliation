@@ -11,7 +11,7 @@ type VirtualizedCommandProps<T> = {
     data: T[];
     valueKey: keyof T;
     labelKey: keyof T;
-    className: string;
+    className?: string;
     valueAs?: "string" | "number";
     itemRenderer?: (item: T) => React.JSX.Element | null;
     itemRendererContainerHeight?: number

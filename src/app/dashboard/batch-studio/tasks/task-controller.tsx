@@ -39,9 +39,8 @@ export const TaskController = ({tasks}: { tasks: TaskJoin[] }) => {
         }
     }, [runningIds, finishedIds, tasks, isRunning]);
 
-
     return (
-        <>
+        <div className="container">
             <Button onClick={startProcess}>Process</Button>
             <Table>
                 <TableHeader>
@@ -53,6 +52,7 @@ export const TaskController = ({tasks}: { tasks: TaskJoin[] }) => {
                         <TableHead>Category Name</TableHead>
                         <TableHead>Brand Name</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -68,6 +68,6 @@ export const TaskController = ({tasks}: { tasks: TaskJoin[] }) => {
                     }
                 </TableBody>
             </Table>
-        </>
+        </div>
     )
 }
