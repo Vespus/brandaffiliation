@@ -5,7 +5,7 @@ import {
     brands,
     brandScales,
     brandWithScales, categories,
-    characteristics, combinations,
+    characteristics, combinations, contents,
     datasources,
     datasourceValues,
     scales, tasks,
@@ -35,3 +35,4 @@ export type DatasourceWithValues = Datasource & { values: DatasourceValue[] }
 export type Category = typeof categories.$inferSelect
 export type Combination = typeof combinations.$inferSelect
 export type Task = typeof tasks.$inferSelect
+export type Content = typeof contents.$inferSelect

@@ -1,4 +1,4 @@
-import {Brand, Category, Combination, Task} from "@/db/types";
+import {Brand, Category, Combination, Content, Task} from "@/db/types";
 
 export type TaskJoin = {
     task: Task
@@ -6,4 +6,12 @@ export type TaskJoin = {
     category: Category
     combination: Combination
     entityName: string
+}
+
+export type ReviewJoin = {
+    brand: Brand
+    category: Category
+    combination: Combination
+    entityName: string
+    content: Content
 }

@@ -199,8 +199,9 @@ export const contents = pgTable("contents", {
     id: serial().primaryKey().notNull(),
     entityType: text("entity_type").notNull(),
     entityId: text("entity_id").notNull(),
-    config: jsonb(),
-    aiGen: boolean("ai_gen").default(false).notNull(),
+    config: jsonb().$type<MetaOutput>(),
+    oldConfig: jsonb("old_config").$type<MetaOutput>(),
+    needsReview: boolean("needs_review").default(false).notNull(),
     createdAt: timestamp('created_at'),
 })
 

@@ -8,24 +8,26 @@ import * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import {HtmlPlugin, serializeHtml} from "platejs";
 
 interface PromptEditorProps {
     defaultValue: string;
     onChange: (value: string) => void;
+    isMarkdown?: boolean;
 }
 
-export const PromptEditor = ({defaultValue, onChange}: PromptEditorProps) => {
+export const PromptEditor = ({defaultValue, onChange, isMarkdown = true}: PromptEditorProps) => {
     const editor = usePlateEditor({
         plugins: EditorKit,
         skipInitialization: true
     });
 
-    const editorInitialized = useRef(false);
     const [loading, setLoading] = useState(false);
+    const defaultValuePer = useRef(defaultValue);
 
-    const handleChange = () => {
+    const handleChange = async () => {
         setLoading(true);
-        const serializedValue = editor.api.markdown.serialize({value: editor.children});
+        const serializedValue = isMarkdown ? editor.api.markdown.serialize({value: editor.children}) : await serializeHtml(editor);
         onChange?.(serializedValue);
         setLoading(false);
     };
@@ -33,13 +35,17 @@ export const PromptEditor = ({defaultValue, onChange}: PromptEditorProps) => {
     const debouncedHandleChange = useDebouncedCallback(handleChange, 800)
 
     useEffect(() => {
-        if(!editorInitialized.current) {
+        if(isMarkdown) {
             editor.tf.init({
-                value: editor.getApi(MarkdownPlugin).markdown.deserialize(defaultValue || ""),
+                value: editor.getApi(MarkdownPlugin).markdown.deserialize(defaultValuePer.current),
             });
-            editorInitialized.current = true
+        }else{
+            editor.tf.init({
+                value: editor.getApi(HtmlPlugin).html.deserialize({element: defaultValuePer.current})
+            })
+            console.log(editor)
         }
-    }, [defaultValue, editorInitialized]);
+    }, [defaultValuePer]);
 
     return (
         <DndProvider backend={HTML5Backend}>

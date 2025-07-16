@@ -1,25 +1,28 @@
-import { appendMarkdown, getDriver } from "@/app/dashboard/content-generation/utils";
-import { db } from "@/db";
-import { getAIModelsWithProviderAndSettings } from "@/db/presets";
-import { datasources, datasourceValues, systemPrompts } from "@/db/schema";
-import { streamObject } from "ai";
-import { createStreamableValue } from "ai/rsc";
-import { and, eq, inArray, sql } from "drizzle-orm";
-import { NextRequest } from "next/server";
+import {getDriver} from "@/app/dashboard/content-generation/utils";
+import {db} from "@/db";
+import {getAIModelsWithProviderAndSettings} from "@/db/presets";
+import {
+    brandWithScales,
+    categories,
+    combinations,
+    contents,
+    datasources,
+    datasourceValues,
+    systemPrompts,
+    tasks
+} from "@/db/schema";
+import {generateObject} from "ai";
+import {and, eq, inArray, sql} from "drizzle-orm";
+import {NextRequest, NextResponse} from "next/server";
 import z from "zod";
+import {BatchContentGenerateSchemaType} from "@/app/dashboard/batch-studio/schema";
+import {MetaOutputSchema} from "@/app/dashboard/content-generation/types";
+import {revalidatePath} from "next/cache";
 
 export const maxDuration = 30;
 
 const bodySchema = z.object({
-    prompt: z.number(),
-    aiModel: z.number({message: "Please select an AI model"}),
-    dataSources: z.array(
-        z.object({
-            datasourceId: z.number().optional(),
-            datasourceValueId: z.number().optional(),
-            datasourcePrompt: z.string().optional(),
-        })
-    ).optional()
+    taskId: z.number()
 })
 
 export const POST = async (req: NextRequest) => {
@@ -29,27 +32,96 @@ export const POST = async (req: NextRequest) => {
         throw new Error("Invalid request")
     }
 
+    const [task] = await db.select().from(tasks).where(eq(tasks.id, context.taskId))
+    const specifications = task.specification as BatchContentGenerateSchemaType
+
     const [[model], prompt] = await Promise.all([
-        getAIModelsWithProviderAndSettings([context.aiModel]),
+        getAIModelsWithProviderAndSettings([specifications.aiModel]),
         db.query.systemPrompts.findFirst({
-            where: eq(systemPrompts.id, context.prompt)
+            where: eq(systemPrompts.id, specifications.prompt)
         }),
     ])
 
-    if (!model || !prompt) {
-        throw new Error("Model not found")
+    const userPrompt: string[] = []
+
+    if (task.entityType === "brand") {
+        userPrompt.push(await processBrand(task.entityId as string))
     }
 
-    let dataSourcePrompt = ""
+    if (task.entityType === "category") {
+        userPrompt.push(await processCategory(task.entityId as string))
+    }
 
-    const queryableDataSources = context.dataSources?.filter(ds => ds.datasourceId)
+    if (task.entityType === "combination") {
+        userPrompt.push(await processCombination(task.entityId as string))
+    }
+
+    userPrompt.push(await handleDataSources({dataSources: specifications.dataSources}))
+    await db.update(tasks).set({status: "inProgress"}).where(eq(tasks.id, task.id))
+
+    try {
+        await db.transaction(async (tx) => {
+            const driver = getDriver(model)
+            const {object} = await generateObject({
+                model: driver,
+                maxTokens: model.settings.maxTokens,
+                temperature: model.settings.temperature,
+                topP: model.settings.topP,
+                frequencyPenalty: model.settings.frequencyPenalty,
+                presencePenalty: model.settings.presencePenalty,
+                system: prompt!.prompt,
+                schema: MetaOutputSchema,
+                prompt: userPrompt.join("\n"),
+            })
+
+            const [currentConfig] = await tx.select().from(contents).where(and(eq(contents.entityId, task.entityId), eq(contents.entityType, task.entityType)))
+            if (currentConfig) {
+                await tx.update(contents).set({
+                    config: object,
+                    oldConfig: currentConfig.config,
+                    needsReview: true
+                }).where(and(eq(contents.entityId, task.entityId), eq(contents.entityType, task.entityType)))
+            } else {
+                await tx.insert(contents).values({
+                    entityId: task.entityId,
+                    entityType: task.entityType,
+                    config: object,
+                    oldConfig: null,
+                    needsReview: true
+                })
+            }
+            console.log('CEMSHIT', task.id)
+        })
+    } catch (e) {
+        await db.update(tasks).set({status: "failed"}).where(eq(tasks.id, task.id))
+        throw e
+    }
+
+    await db.delete(tasks).where(eq(tasks.id, task.id))
+
+    revalidatePath('/', 'layout')
+    return NextResponse.json({status: "ok"})
+}
+
+const handleDataSources = async ({dataSources}: Pick<BatchContentGenerateSchemaType, "dataSources">) => {
+    const queryableDataSources = dataSources?.filter(ds => ds.datasourceId)
+    const prompt: string[] = []
     if (queryableDataSources) {
         for await (const source of queryableDataSources) {
             const [ds] = await db.select({
                 name: datasources.name,
                 description: datasources.description,
                 data: sql<string[]>`array_agg
-                    ((${datasourceValues.data} ->> ${datasources.valueColumn})::text)`,
+                ((
+                ${datasourceValues.data}
+                -
+                >>
+                ${datasources.valueColumn}
+                )
+                :
+                :
+                text
+                )`,
             })
                 .from(datasources)
                 .leftJoin(datasourceValues,
@@ -61,31 +133,42 @@ export const POST = async (req: NextRequest) => {
                 .where(eq(datasources.id, source.datasourceId as number))
                 .groupBy(datasources.id)
 
-            dataSourcePrompt = appendMarkdown(dataSourcePrompt, `${source.datasourcePrompt}: ${ds.data.join(", ")}`)
+            prompt.push(`<Datasource>${source.datasourcePrompt}: ${ds.data.join(", ")}</Datasource>`)
         }
     }
-    const driver = getDriver(model);
 
-    const {partialObjectStream} = streamObject({
-        model: driver,
-        maxTokens: model.settings.maxTokens,
-        temperature: model.settings.temperature,
-        topP: model.settings.topP,
-        frequencyPenalty: model.settings.frequencyPenalty,
-        presencePenalty: model.settings.presencePenalty,
-        system: prompt.prompt,
-        schema: z.object({
-            hero_header: z.string().describe("Hero header of the SEO Text Content"),
-            hero_description: z.string().describe("Hero description of the SEO Text Content with at least 2 long paragraphs"),
-            meta_title: z.string().describe("Meta title of the generated SEO Text Content"),
-            meta_description: z.string().describe("Meta description of the generated SEO Text Content"),
-            meta_keywords: z.string().describe("Meta keywords of the generated SEO Text Content"),
-        }),
-        prompt: dataSourcePrompt
-    })
+    return prompt.join("\n")
+}
+const processBrand = async (id: string) => {
+    const scaleMap = ["price", "quality", "focus", "design", "positioning", "origin", "heritage", "recognition", "revenue"]
 
-    for await (const partialObject of partialObjectStream) {
-        console.clear();
-    }
+    const [brand] = await db.select().from(brandWithScales).where(eq(brandWithScales.integrationId, id))
 
+    const brandHeaderInformation = `<BrandName>${brand.name}</BrandName><BrandMetaData>${JSON.stringify(brand.config)}</BrandMetaData>`
+    const brandScaleInformation = `<BrandScales>${scaleMap.map(s => `<Scale>${s}:${brand[s]}/5</Scale>`).join("\n")}</BrandScales>`
+    const brandCharacteristics = `<BrandCharacteristics>${brand.characteristic?.map(c => `<Characteristic>${c.value}</Characteristic>`).join("\n")}</BrandCharacteristics>`
+
+    return `<Brand>${brandHeaderInformation}${brandScaleInformation}${brandCharacteristics}</Brand>`
+}
+const processCategory = async (id: string) => {
+    const [category] = await db.select()
+        .from(categories)
+        .leftJoin(contents, and(eq(contents.entityId, categories.integrationId), eq(contents.entityType, "category")))
+        .where(eq(categories.integrationId, id))
+
+    const categoryHeaderInformation = `<CategoryName>${category.categories.name}</CategoryName>`
+    const categoryMetaData = category.contents ? `<CategoryMetaData>${JSON.stringify(category.contents.config)}</CategoryMetaData>` : undefined
+
+    return `<Category>${categoryHeaderInformation}${categoryMetaData}</Category>`
+}
+const processCombination = async (id: string) => {
+    const [combination] = await db.select()
+        .from(combinations)
+        .leftJoin(contents, and(eq(contents.entityId, combinations.integrationId), eq(contents.entityType, "combination")))
+        .where(eq(combinations.integrationId, id))
+
+    const brand = await processBrand(combination.combinations.brandId!)
+    const category = await processCategory(combination.combinations.categoryId!)
+
+    return brand + category
 }

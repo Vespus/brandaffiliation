@@ -1,7 +1,6 @@
 import {TableCell, TableRow} from "@/components/ui/table";
 import {TaskJoin} from "@/app/dashboard/batch-studio/tasks/type";
-import {api} from "@/lib/trpc/react";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {Progress} from "@/components/ui/progress";
 import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
@@ -19,46 +18,53 @@ export const Entity = ({
                            task,
                            shouldStart,
                            onJobStart,
-                           onJobComplete
+                           onJobComplete,
+                           onJobError
                        }: EntityProps) => {
-    const jobCall = api.batchStudioRoute.process.useMutation({
-        onSuccess: () => {
-            setProgress(100)
-            setStatus("success")
-            onJobComplete?.(task)
-        },
-        onSettled: () => {
-            setProgress(100)
-        },
-        onError: () => {
-            setStatus("error")
-        }
-    })
+
+    const interval = useRef<ReturnType<typeof setInterval> | number>(0);
     const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
     const [progress, setProgress] = useState(0);
     const [hasStarted, setHasStarted] = useState(false);
-
     const simulateProgress = () => {
         let current = 0;
-        const interval = setInterval(() => {
+        interval.current = setInterval(() => {
             current += Math.random() * 10;
             setProgress(p => Math.min(p + 5, 90));
-
-            if (current >= 90) clearInterval(interval);
-        }, 500);
+            if (current >= 90) clearInterval(interval.current);
+        }, 1500);
     };
 
-    const processTask = () => {
-        console.log(typeof task.task.id)
-        jobCall.mutate(task.task.id)
+    const processTask = async () => {
+        setHasStarted(true);
+        onJobStart?.(task)
+        setStatus("loading");
+        simulateProgress();
+
+        try {
+            const response = await fetch("/api/content-stream", {
+                method: 'POST',
+                body: JSON.stringify({taskId: task.task.id}),
+            })
+
+            if(!response.ok){
+                setStatus("error")
+                onJobError?.(task)
+            }else{
+                setStatus("success")
+                onJobComplete?.(task)
+            }
+        } catch (e) {
+            setStatus("error")
+            onJobError?.(task)
+        }
+
+        clearInterval(interval.current)
+        setProgress(100)
     }
 
     useEffect(() => {
         if (shouldStart && !hasStarted) {
-            setHasStarted(true);
-            onJobStart?.(task)
-            setStatus("loading");
-            simulateProgress();
             processTask();
         }
     }, [shouldStart]);
@@ -82,7 +88,8 @@ export const Entity = ({
                             status === "idle" && "text-muted-foreground"
                         )}
                     >
-                        {status}
+                        {status} {status === "success" &&
+                        <span className="text-muted-foreground">/ Waiting Review</span>}
                     </span>
                     <Progress value={progress}/>
                 </div>

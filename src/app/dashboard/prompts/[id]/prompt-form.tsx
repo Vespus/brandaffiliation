@@ -32,7 +32,6 @@ interface PromptFormProps {
 export function PromptForm({prompt}: PromptFormProps) {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [activeTab, setActiveTab] = useState("edit");
 
     const form = useForm<PromptFormData>({
         resolver: zodResolver(promptSchema),
@@ -42,8 +41,6 @@ export function PromptForm({prompt}: PromptFormProps) {
             prompt: prompt?.prompt || "",
         },
     });
-
-    const watchedPrompt = form.watch("prompt");
 
     async function onSubmit(data: PromptFormData) {
         setIsSubmitting(true);
@@ -116,37 +113,7 @@ export function PromptForm({prompt}: PromptFormProps) {
                                 <FormItem>
                                     <FormLabel>Prompt Content</FormLabel>
                                     <FormControl>
-                                        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                                            <TabsList className="grid w-full grid-cols-2">
-                                                <TabsTrigger value="edit" className="flex items-center gap-2">
-                                                    <FileText className="h-4 w-4"/>
-                                                    Editor
-                                                </TabsTrigger>
-                                                <TabsTrigger value="preview" className="flex items-center gap-2">
-                                                    <Eye className="h-4 w-4"/>
-                                                    Preview
-                                                </TabsTrigger>
-                                            </TabsList>
-
-                                            <TabsContent value="edit" className="mt-4">
-                                                <PromptEditor defaultValue={field.value} onChange={field.onChange}/>
-                                            </TabsContent>
-
-                                            <TabsContent value="preview" className="mt-4">
-                                                <div className="border rounded-md min-h-[400px] p-4 bg-muted/30">
-                                                    {watchedPrompt ? (
-                                                        <div className="prose dark:prose-invert">
-                                                            <Markdown>{watchedPrompt}</Markdown>
-                                                        </div>
-                                                    ) : (
-                                                        <p className="text-muted-foreground italic">
-                                                            No content to preview. Switch to the Editor tab to start
-                                                            writing.
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            </TabsContent>
-                                        </Tabs>
+                                        <PromptEditor defaultValue={field.value} onChange={field.onChange}/>
                                     </FormControl>
                                     <FormMessage/>
                                 </FormItem>
