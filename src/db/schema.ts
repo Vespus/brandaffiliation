@@ -174,6 +174,7 @@ export const brands = pgTable("brands", {
     name: text().notNull(),
     slug: varchar(),
     integrationId: text("integration_id"),
+    integrationName: text("integration_name"),
 });
 
 export const categories = pgTable("categories", {
@@ -182,6 +183,7 @@ export const categories = pgTable("categories", {
     description: text(),
     slug: varchar(),
     integrationId: text("integration_id"),
+    integrationName: text("integration_name"),
     createdAt: timestamp('created_at'),
 });
 

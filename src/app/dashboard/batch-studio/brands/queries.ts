@@ -59,7 +59,7 @@ export const getBrands = async (input: Awaited<ReturnType<typeof searchParamsCac
             .then((res) => res[0]?.count ?? 0);
 
         return {
-            data: data as BatchStudioBrandType[],
+            data: data as unknown as BatchStudioBrandType[],
             total,
         }
     })

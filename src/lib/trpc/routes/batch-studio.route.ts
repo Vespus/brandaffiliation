@@ -78,6 +78,35 @@ export const batchStudioRoute = createTRPCRouter({
 
             return data
         }),
+    getAllCategories: publicProcedure
+        .query(async () => {
+            const data = await db.select({
+                name: categories.name,
+                description: categories.description,
+                content: contents.config,
+                integrationId: categories.integrationId,
+                hasContent: sql<boolean>`(${contents.config} IS NOT NULL)`.as('hasContent'),
+            })
+                .from(categories)
+                .leftJoin(contents, and(eq(contents.entityId, categories.integrationId), eq(contents.entityType, "category")))
+
+            return data
+        }),
+    getAllCategoriesWithNoContent: publicProcedure
+        .query(async () => {
+            const data = await db.select({
+                name: categories.name,
+                description: categories.description,
+                content: contents.config,
+                integrationId: categories.integrationId,
+                hasContent: sql<boolean>`(${contents.config} IS NOT NULL)`.as('hasContent'),
+            })
+                .from(categories)
+                .leftJoin(contents, and(eq(contents.entityId, categories.integrationId), eq(contents.entityType, "category")))
+                .where(isNull(contents.config))
+
+            return data
+        }),
     process: publicProcedure
         .input(z.number())
         .mutation(async ({input}) => {

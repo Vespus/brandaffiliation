@@ -18,9 +18,7 @@ export default async function Layout({children}: Readonly<{ children: React.Reac
 
     return (
         <ContentGenerationProvider store={store}>
-            <div className="h-full flex-1 min-h-0">
                 {children}
-            </div>
         </ContentGenerationProvider>
     )
 }

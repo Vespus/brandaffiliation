@@ -59,6 +59,7 @@ const processBrands = async (brands: QSPayBrand[]) => {
                 name: brand.description!,
                 slug: brand.slug.toLowerCase().replace(/\//g, ""),
                 integrationId: brand.id,
+                integrationName: brand.name
             })))
         }
 
@@ -66,7 +67,8 @@ const processBrands = async (brands: QSPayBrand[]) => {
             await Promise.all(updateDiff.map(async (brand) => await tx
                 .update(localBrandsTable)
                 .set({
-                    integrationId: brand.id
+                    integrationId: brand.id,
+                    integrationName: brand.name
                 })
                 .where(eq(localBrandsTable.slug, brand.slug.toLowerCase().replace(/\//g, "")))
             ))
@@ -109,6 +111,7 @@ const processCategories = async (categories: QSPayCategory[]) => {
                 slug: category.slug.toLowerCase().replace(/\//g, ""),
                 description: category.description,
                 integrationId: category.id,
+                integrationName: category.name,
             })))
         }
 
@@ -116,7 +119,8 @@ const processCategories = async (categories: QSPayCategory[]) => {
             await Promise.all(updateDiff.map(async (category) => await tx
                 .update(localCategoriesTable)
                 .set({
-                    integrationId: category.id
+                    integrationId: category.id,
+                    integrationName: category.name
                 })
                 .where(eq(localCategoriesTable.slug, category.slug.toLowerCase().replace(/\//g, "")))
             ))
