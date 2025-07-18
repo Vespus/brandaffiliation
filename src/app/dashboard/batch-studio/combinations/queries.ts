@@ -63,7 +63,7 @@ export const getCombinations = async (input: Awaited<ReturnType<typeof searchPar
             .then((res) => res[0]?.count ?? 0);
 
         return {
-            data: data as BatchStudioCombinationType[],
+            data: data as unknown as BatchStudioCombinationType[],
             total,
         }
     })

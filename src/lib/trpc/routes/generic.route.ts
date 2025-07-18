@@ -86,17 +86,6 @@ export const genericRoute = createTRPCRouter({
 
             return brand
         }),
-    promptPreview: publicProcedure
-        .input(ContentGenerateSchema)
-        .query(async ({input}) => {
-            const [brand] = await db.select().from(brandWithScales).where(eq(brandWithScales.id, input.brand))
-            return formatPrompt({
-                category: input.category,
-                season: input.season,
-                brand: brand,
-                prompt: input.customPrompt
-            })
-        }),
     getDatasourceById: publicProcedure
         .input(z.object({id: z.number()}))
         .query(async ({input}) => {

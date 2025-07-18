@@ -1,6 +1,6 @@
 import { BrandWithCharacteristicAndScales } from "@/db/types";
 
-export const DEFAULT_SCALE_WEIGHTS: Record<keyof Omit<BrandWithCharacteristicAndScales, "characteristic" | "slug" | "name" | "id">, number> = {
+export const DEFAULT_SCALE_WEIGHTS: Record<keyof Omit<BrandWithCharacteristicAndScales, "characteristic" | "slug" | "name" | "id" | "integrationId" | "config">, number> = {
     price: 0.125,
     quality: 0.125,
     focus: 0.1,

@@ -30,7 +30,6 @@ export const PromptArea = ({...props}: PromptAreaType) => {
         <div className="flex flex-col gap-4 min-w-0" data-registry="plate">
             <div className="flex gap-4">
                 <UserPrompts/>
-                <Preview/>
             </div>
 
             <ShortcodeWrapper editor={ref}>
@@ -43,38 +42,5 @@ export const PromptArea = ({...props}: PromptAreaType) => {
                 <p className="text-muted-foreground text-xs mt-1">Shortcode list is available on *right click*</p>
             </ShortcodeWrapper>
         </div>
-    )
-}
-
-const Preview = () => {
-    const formContext = useFormContext<z.infer<typeof ContentGenerateSchema>>()
-    const [open, setOpen] = React.useState(false)
-    const {data} = api.genericRoute.promptPreview.useQuery(formContext.getValues(), {
-        enabled: open
-    })
-
-    return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button
-                    variant="outline"
-                    type="button"
-                >
-                    <ScanEyeIcon/>
-                    Preview
-                </Button>
-            </DialogTrigger>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Preview</DialogTitle>
-                    <DialogDescription>See your formatted prompt after you add shortcodes</DialogDescription>
-                </DialogHeader>
-                <div className="prose prose-sm max-h-96 overflow-y-auto">
-                    <Markdown>
-                        {data as string}
-                    </Markdown>
-                </div>
-            </DialogContent>
-        </Dialog>
     )
 }

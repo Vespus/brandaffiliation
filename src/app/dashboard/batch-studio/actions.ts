@@ -33,8 +33,6 @@ export const saveTask = actionClient
 
         const existingIdList = existingTasks.map(x => x.entityId)
         const insertTask = parsedInput.filter(x => !existingIdList.includes(x.entityId))
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
         await db.insert(tasks).values(insertTask)
     })
 
@@ -111,9 +109,11 @@ export const SaveReviewTaskToQSPay = actionClient
 
             const {result: remoteCombination} = await QSPayClient<QSPayCombin>("CmsCombinPage/Get", {
                 query: {
-                    combinationId: combination.integrationId!
+                    combinatioId: combination.integrationId!
                 }
             })
+
+            console.log('CEM',remoteCombination)
 
             const {result: editResult} = await QSPayClient<QSPayCombin[]>("CmsCombinPage/EditDescription", {
                 method: "POST",

@@ -1,7 +1,8 @@
-import { ProfileForm } from "@/app/dashboard/profile/profile-form";
-import { getUser } from "@/lib/get-user";
+import {ProfileForm} from "@/app/dashboard/profile/profile-form";
+import {getUser} from "@/lib/get-user";
+import {Metadata} from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
     title: "Profile | Brand Affiliation",
     description: "Manage your profile settings",
 };

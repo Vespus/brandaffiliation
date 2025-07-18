@@ -1,5 +1,5 @@
 import {
-    bigint,
+    bigint, bigserial,
     boolean,
     foreignKey,
     index,
@@ -188,7 +188,7 @@ export const categories = pgTable("categories", {
 });
 
 export const combinations = pgTable("combinations", {
-    id: serial().primaryKey().notNull(),
+    id: bigserial({mode: "number"}).primaryKey().notNull(),
     name: text().notNull(),
     description: text(),
     brandId: text("brand_id"),
@@ -198,7 +198,7 @@ export const combinations = pgTable("combinations", {
 });
 
 export const contents = pgTable("contents", {
-    id: bigint({mode: "number"}).primaryKey().notNull(),
+    id: bigserial({mode: "number"}).primaryKey().notNull(),
     entityType: text("entity_type").notNull(),
     entityId: text("entity_id").notNull(),
     config: jsonb().$type<MetaOutput>(),
@@ -208,7 +208,7 @@ export const contents = pgTable("contents", {
 })
 
 export const tasks = pgTable("tasks", {
-    id: bigint({mode: "number"}).primaryKey().notNull(),
+    id: bigserial({mode: "number"}).primaryKey(),
     entityType: text("entity_type").notNull(),
     entityId: text("entity_id").notNull(),
     status: text("status"),
