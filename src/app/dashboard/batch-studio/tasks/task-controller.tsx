@@ -4,9 +4,10 @@ import {Table, TableBody, TableHead, TableHeader, TableRow} from "@/components/u
 import {Entity} from "@/app/dashboard/batch-studio/tasks/entity";
 import {TaskJoin} from "@/app/dashboard/batch-studio/tasks/type";
 import {useEffect, useState} from "react";
-import {Button} from "@/components/ui/button";
+import {Button, buttonVariants} from "@/components/ui/button";
 import {BanIcon, PauseIcon, PlayIcon} from "lucide-react";
 import {useRouter} from "next/navigation";
+import Link from "next/link";
 
 const MAX_CONCURRENCY = 3;
 
@@ -59,9 +60,14 @@ export const TaskController = ({tasks}: { tasks: TaskJoin[] }) => {
                             <PlayIcon/>}</Button>}
                     {isRunning && <Button variant="outline" onClick={() => setIsRunning(false)}><BanIcon/></Button>}
                 </div>
-                <div className="text-xs flex flex-col">
-                    <span>{tasks.length} Total task records</span>
-                    <span>{finishedIds.length} processed in {runningIds.length} queue</span>
+                <div className="flex gap-4">
+                    <div className="text-xs flex flex-col">
+                        <span>{tasks.length} Total task records</span>
+                        <span>{finishedIds.length} processed in {runningIds.length} queue</span>
+                    </div>
+                    <div>
+                        <Link href="/dashboard/batch-studio/review" className={buttonVariants()}>Go To Reviews</Link>
+                    </div>
                 </div>
             </div>
             <Table>
