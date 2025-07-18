@@ -87,7 +87,7 @@ export const TaskController = ({tasks}: { tasks: TaskJoin[] }) => {
                     {
                         tasks.map(task => (
                             <Entity
-                                key={task.task.entityType + task.task.entityId}
+                                key={task.task.entityType + task.task.entityId + task.task.id}
                                 task={task as TaskJoin}
                                 shouldStart={isRunning && runningIds.includes(task.task.id)}
                                 onJobComplete={handleTaskFinished}

@@ -1,25 +1,30 @@
-import { BrandsWidget } from "@/app/dashboard/batch-studio/widgets/brands-widget";
-import { CategoriesWidget } from "@/app/dashboard/batch-studio/widgets/categories-widget";
-import { CombinationsWidget } from "@/app/dashboard/batch-studio/widgets/combinations-widget";
-import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { db } from "@/db";
-import { brands, categories, combinations, contents, tasks } from "@/db/schema";
-import { cn } from "@/lib/utils";
-import {and, eq, isNull, or, sql} from "drizzle-orm";
+import {BrandsWidget} from "@/app/dashboard/batch-studio/widgets/brands-widget";
+import {CategoriesWidget} from "@/app/dashboard/batch-studio/widgets/categories-widget";
+import {CombinationsWidget} from "@/app/dashboard/batch-studio/widgets/combinations-widget";
+import {buttonVariants} from "@/components/ui/button";
+import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
+import {db} from "@/db";
+import {brands, categories, combinations, contents, tasks} from "@/db/schema";
+import {cn} from "@/lib/utils";
+import {and, eq, or, sql} from "drizzle-orm";
 import Link from "next/link";
 import React from "react";
 
 export default async function Page() {
     const [awaitingTasks, awaitingReviews] = await Promise.all([
-        db.select({
-            task: tasks,
-            entityName: sql`COALESCE(${brands.name},${categories.name},${combinations.name})`.as("entityName"),
-            brand: brands,
-            category: categories,
-            combination: combinations
-        })
+        db
+            .select({
+                task: tasks,
+                entityName: sql`COALESCE(
+                ${brands.name},
+                ${categories.name},
+                ${combinations.name}
+                )`.as("entityName"),
+                brand: brands,
+                category: categories,
+                combination: combinations
+            })
             .from(tasks)
             .leftJoin(combinations, and(eq(tasks.entityType, "combination"), eq(tasks.entityId, combinations.integrationId)))
             .leftJoin(categories, and(or(eq(tasks.entityType, "combination"), eq(tasks.entityType, "category")), or(eq(tasks.entityId, categories.integrationId), eq(categories.integrationId, combinations.categoryId))))
@@ -28,9 +33,11 @@ export default async function Page() {
             .select({
                 content: contents,
                 entityName: sql`COALESCE
-                ( ${brands.name},
-                    ${categories.name},
-                    ${combinations.name})`.as("entityName"),
+                (
+                ${brands.name},
+                ${categories.name},
+                ${combinations.name}
+                )`.as("entityName"),
                 brand: brands,
                 category: categories,
                 combination: combinations
@@ -56,7 +63,8 @@ export default async function Page() {
                         <CardDescription>Top 5 tasks that waits to get processed</CardDescription>
                     </CardHeader>
                     <CardContent className="flex-1">
-                        {awaitingTasks.length > 0 && <p className="text-xs text-muted-foreground">You have currently {awaitingTasks.length} unprocessed tasks.</p>}
+                        {awaitingTasks.length > 0 && <p className="text-xs text-muted-foreground">You have
+                            currently {awaitingTasks.length} unprocessed tasks.</p>}
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -72,7 +80,7 @@ export default async function Page() {
                                 {awaitingTasks.slice(0, 5).map(task => (
                                     <TableRow key={task.task.id}>
                                         <TableCell>{task.task.id}</TableCell>
-                                        <TableCell>{task.entityName}</TableCell>
+                                        <TableCell>{task.entityName as string}</TableCell>
                                         <TableCell>{task.task.entityType}</TableCell>
                                         <TableCell>{task.combination?.description || "N/A"}</TableCell>
                                         <TableCell>{task.category?.description || "N/A"}</TableCell>
@@ -107,7 +115,8 @@ export default async function Page() {
                     </CardHeader>
                     <CardContent className="flex-1">
                         {awaitingReviews.length > 0 &&
-                            <p className="text-xs text-muted-foreground">{awaitingReviews.length} tasks are processed. They are waiting for approval to get integrated
+                            <p className="text-xs text-muted-foreground">{awaitingReviews.length} tasks are processed.
+                                They are waiting for approval to get integrated
                                 into QSPay.</p>}
                         <Table>
                             <TableHeader>
@@ -124,7 +133,7 @@ export default async function Page() {
                                 {awaitingReviews.slice(0, 5).map(task => (
                                     <TableRow key={task.content.id}>
                                         <TableCell>{task.content.id}</TableCell>
-                                        <TableCell>{task.entityName}</TableCell>
+                                        <TableCell>{task.entityName as string}</TableCell>
                                         <TableCell>{task.content.entityType}</TableCell>
                                         <TableCell>{task.combination?.description || "N/A"}</TableCell>
                                         <TableCell>{task.category?.description || "N/A"}</TableCell>

@@ -198,7 +198,7 @@ export const combinations = pgTable("combinations", {
 });
 
 export const contents = pgTable("contents", {
-    id: serial().primaryKey().notNull(),
+    id: bigint({mode: "number"}).primaryKey().notNull(),
     entityType: text("entity_type").notNull(),
     entityId: text("entity_id").notNull(),
     config: jsonb().$type<MetaOutput>(),
@@ -212,7 +212,6 @@ export const tasks = pgTable("tasks", {
     entityType: text("entity_type").notNull(),
     entityId: text("entity_id").notNull(),
     status: text("status"),
-    oldValue: jsonb("old_value"),
     specification: jsonb(),
     createdAt: timestamp('created_at'),
 })

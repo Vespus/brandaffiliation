@@ -11,6 +11,9 @@ import { toHtml } from 'hast-util-to-html'
 import { common, createLowlight } from 'lowlight'
 import { SaveIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
+import {useCustomAction} from "@/hooks/use-custom-action";
+import {SaveReviewTaskToQSPay} from "@/app/dashboard/batch-studio/actions";
+import {toast} from "sonner";
 
 export const ReviewCard = ({item}: { item: ReviewJoin }) => {
     const form = useForm<PartialMetaOutput>({
@@ -39,8 +42,21 @@ export const ReviewCard = ({item}: { item: ReviewJoin }) => {
         }
     })
 
+    const singleSaveAction = useCustomAction(SaveReviewTaskToQSPay, {
+        onSuccess: () => {
+            toast.success("Successfully saved")
+        }
+    })
+
     const handleSubmit = async (values: PartialMetaOutput) => {
-        console.log(values)
+        singleSaveAction.execute({
+            config: values,
+            content: {
+                contentId: item.content.id,
+                entityType: item.content.entityType,
+                entityId: item.content.entityId
+            }
+        })
     }
 
     return (
@@ -89,7 +105,7 @@ export const ReviewCard = ({item}: { item: ReviewJoin }) => {
                                             </FormControl>
                                             <FormDescription className="text-xs">
                                                 The title that valued inside head section.
-                                                e.g: <code>{"<meta name='description' content='...'></meta>"}</code>
+                                                e.g: <code>{"<meta name='description' content='...'/>"}</code>
                                             </FormDescription>
                                             <FormMessage/>
                                         </FormItem>
@@ -109,7 +125,7 @@ export const ReviewCard = ({item}: { item: ReviewJoin }) => {
                                             </FormControl>
                                             <FormDescription className="text-xs">
                                                 Useful for e-commerce pages, defines the category of page
-                                                e.g: <code>{"<meta name='category' content='hemden'></meta>"}</code>
+                                                e.g: <code>{"<meta name='category' content='hemden'/>"}</code>
                                             </FormDescription>
                                             <FormMessage/>
                                         </FormItem>

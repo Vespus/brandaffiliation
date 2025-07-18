@@ -60,38 +60,35 @@ export const POST = async (req: NextRequest) => {
     await db.update(tasks).set({status: "inProgress"}).where(eq(tasks.id, task.id))
 
     try {
-        await db.transaction(async (tx) => {
-            const driver = getDriver(model)
-            const {object} = await generateObject({
-                model: driver,
-                maxTokens: model.settings.maxTokens,
-                temperature: model.settings.temperature,
-                topP: model.settings.topP,
-                frequencyPenalty: model.settings.frequencyPenalty,
-                presencePenalty: model.settings.presencePenalty,
-                system: prompt!.prompt,
-                schema: MetaOutputSchema,
-                prompt: userPrompt.join("\n"),
-            })
-
-            const [currentConfig] = await tx.select().from(contents).where(and(eq(contents.entityId, task.entityId), eq(contents.entityType, task.entityType)))
-            if (currentConfig) {
-                await tx.update(contents).set({
-                    config: object,
-                    oldConfig: currentConfig.config,
-                    needsReview: true
-                }).where(and(eq(contents.entityId, task.entityId), eq(contents.entityType, task.entityType)))
-            } else {
-                await tx.insert(contents).values({
-                    entityId: task.entityId,
-                    entityType: task.entityType,
-                    config: object,
-                    oldConfig: null,
-                    needsReview: true
-                })
-            }
-            console.log('CEMSHIT', task.id)
+        const driver = getDriver(model)
+        const {object} = await generateObject({
+            model: driver,
+            maxTokens: model.settings.maxTokens,
+            temperature: model.settings.temperature,
+            topP: model.settings.topP,
+            frequencyPenalty: model.settings.frequencyPenalty,
+            presencePenalty: model.settings.presencePenalty,
+            system: prompt!.prompt,
+            schema: MetaOutputSchema,
+            prompt: userPrompt.join("\n"),
         })
+
+        const [currentConfig] = await db.select().from(contents).where(and(eq(contents.entityId, task.entityId), eq(contents.entityType, task.entityType)))
+        if (currentConfig) {
+            await db.update(contents).set({
+                config: object,
+                oldConfig: currentConfig.config,
+                needsReview: true
+            }).where(and(eq(contents.entityId, task.entityId), eq(contents.entityType, task.entityType)))
+        } else {
+            await db.insert(contents).values({
+                entityId: task.entityId,
+                entityType: task.entityType,
+                config: object,
+                oldConfig: null,
+                needsReview: true
+            })
+        }
     } catch (e) {
         await db.update(tasks).set({status: "failed"}).where(eq(tasks.id, task.id))
         throw e
