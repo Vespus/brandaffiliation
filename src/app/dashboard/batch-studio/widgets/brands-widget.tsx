@@ -17,7 +17,7 @@ export const BrandsWidget = async () => {
     const missingContentCount = totalBrands.count - brands.length
 
     return (
-        <div className="w-full sm:w-1/2 sm:px-7 xl:w-1/4 bg-amber-50 p-4 rounded-lg">
+        <div className="w-full sm:w-1/2 sm:px-7 xl:w-1/4 bg-amber-50 dark:bg-muted p-4 rounded-lg">
             <div className="text-muted-foreground text-sm">Brands</div>
             <div className="mt-1 flex flex-col gap-1.5">
                 <div className="text-lg font-semibold">{totalBrands.count} records</div>

@@ -1,14 +1,14 @@
-"use client"
-
 import {QSPayServiceClient} from "@/components/qspay/qspay-service-client";
 import {cn} from "@/lib/utils";
 import {cva} from "class-variance-authority";
 import {CircleSmallIcon} from "lucide-react";
 import {useCookie} from "@/hooks/use-cookie";
 import {QspayStoreSelectorClient} from "@/components/qspay/qspay-store-selector.client";
+import {cookies} from "next/headers";
 
-export const QSPayService = () => {
-    const [isActive] = useCookie("qs-pay-integration-key")
+export const QSPayService = async () => {
+    const cookie = await cookies()
+    const isActive = cookie.get("qs-pay-integration-key")?.value
 
     const badgeVariants = cva("inline-flex h-6 items-center justify-center gap-2 whitespace-nowrap rounded-md px-2 text-xs", {
         variants: {
@@ -31,7 +31,7 @@ export const QSPayService = () => {
             {isActive && (
                 <QspayStoreSelectorClient/>
             )}
-            <div className={cn(badgeVariants({variant: isActive ? "success" : "error"}))}>
+            <div className={cn(badgeVariants({variant: isActive ? "success" : "error"}), isActive && "h-9")}>
                 <CircleSmallIcon fill="currentColor" size={12}/>
                 {isActive ? "Connected" : "Disconnected"}
             </div>
