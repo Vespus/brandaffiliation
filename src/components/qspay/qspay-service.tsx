@@ -8,7 +8,7 @@ import {useCookie} from "@/hooks/use-cookie";
 import {QspayStoreSelectorClient} from "@/components/qspay/qspay-store-selector.client";
 
 export const QSPayService = () => {
-    const isActive = useCookie("qs-pay-integration-key")
+    const [isActive] = useCookie("qs-pay-integration-key")
 
     const badgeVariants = cva("inline-flex h-6 items-center justify-center gap-2 whitespace-nowrap rounded-md px-2 text-xs", {
         variants: {

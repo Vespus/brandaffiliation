@@ -1,6 +1,3 @@
-import {BrandsWidget} from "@/app/dashboard/batch-studio/widgets/brands-widget";
-import {CategoriesWidget} from "@/app/dashboard/batch-studio/widgets/categories-widget";
-import {CombinationsWidget} from "@/app/dashboard/batch-studio/widgets/combinations-widget";
 import {ContentGenerationProvider} from "@/app/dashboard/content-generation/content-generation-context";
 import {cookies} from "next/headers";
 import {QSPayClient} from "@/lib/qs-pay-client";
@@ -18,7 +15,7 @@ export default async function Layout({children}: Readonly<{ children: React.Reac
 
     return (
         <ContentGenerationProvider store={store}>
-                {children}
+            {children}
         </ContentGenerationProvider>
     )
 }
