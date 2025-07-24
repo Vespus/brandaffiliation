@@ -3,7 +3,7 @@
     "src/app/**/*": {
       "maxDuration": 60
     },
-    "api/**/*.ts": {
+    "src/app/api/**/*.ts": {
       "maxDuration": 60
     }
   }
