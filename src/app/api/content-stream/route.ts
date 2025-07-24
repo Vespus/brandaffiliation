@@ -19,7 +19,7 @@ import {BatchContentGenerateSchemaType} from "@/app/dashboard/batch-studio/schem
 import {MetaOutputSchema} from "@/app/dashboard/content-generation/types";
 import {revalidatePath} from "next/cache";
 
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 const bodySchema = z.object({
     taskId: z.number()
