@@ -1,24 +1,23 @@
 "use client"
 
-import {DataSources} from "@/app/dashboard/content-generation/form-elements/datasources";
-import {PromptSelector} from "@/app/dashboard/content-generation/form-elements/prompt-selector";
-import { Button, buttonVariants } from "@/components/ui/button";
-import {Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
-import {Legend} from "@/components/ui/legend";
-import {Scroller} from "@/components/ui/scroller";
-import {zodResolver} from "@hookform/resolvers/zod";
-import {Sparkles} from "lucide-react";
-import {useForm} from "react-hook-form";
-import {z} from "zod";
-import {AiModelSelect} from "@/app/dashboard/batch-studio/form-elements/ai-model-select";
-import {BatchContentGenerateSchema} from "@/app/dashboard/batch-studio/schema";
-import {Checkbox} from "@/components/ui/checkbox";
-import {useDataTableSelectionStore} from "@/app/dashboard/batch-studio/store";
-import {useCustomAction} from "@/hooks/use-custom-action";
-import {saveTask} from "@/app/dashboard/batch-studio/actions";
-import {toast} from "sonner";
-import {TipTapEditor} from "@/components/tiptap/editor";
-import Link from "next/link";
+import { DataSources } from "@/app/dashboard/content-generation/form-elements/datasources";
+import { PromptSelector } from "@/app/dashboard/content-generation/form-elements/prompt-selector";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Legend } from "@/components/ui/legend";
+import { Scroller } from "@/components/ui/scroller";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Sparkles } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { AiModelSelect } from "@/app/dashboard/batch-studio/form-elements/ai-model-select";
+import { BatchContentGenerateSchema } from "@/app/dashboard/batch-studio/schema";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useDataTableSelectionStore } from "@/app/dashboard/batch-studio/store";
+import { useCustomAction } from "@/hooks/use-custom-action";
+import { saveTask } from "@/app/dashboard/batch-studio/actions";
+import { toast } from "sonner";
+import { TipTapEditor } from "@/components/tiptap/editor";
 import { useRouter } from "next/navigation";
 
 export const ManageForm = () => {
@@ -131,7 +130,7 @@ export const ManageForm = () => {
                                                 </FormControl>
                                                 <FormLabel>Use category SEO content if exists</FormLabel>
                                             </div>
-                                            <FormDescription className="text-xs">If relevant QSPay category's content
+                                            <FormDescription className="text-xs">If relevant QSPay category&#39;s content
                                                 exists appends the existing content to the generated prompt to enrich
                                                 the content</FormDescription>
                                             <FormMessage/>

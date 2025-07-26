@@ -1,4 +1,3 @@
-
 import { env } from "@/env";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
@@ -6,9 +5,12 @@ import postgres from "postgres";
 import * as schema from "./schema";
 import * as relations from "./relations";
 
-// Global variable to store our singleton instances
+// Create the schema object first
+const fullSchema = { ...schema, ...relations };
+
+// Global variable to store our singleton instances with proper typing
 declare global {
-    var __db: ReturnType<typeof drizzle> | undefined;
+    var __db: ReturnType<typeof drizzle<typeof fullSchema>> | undefined;
     var __client: ReturnType<typeof postgres> | undefined;
 }
 
@@ -25,7 +27,7 @@ function createDatabase() {
 
     if (!global.__db) {
         global.__db = drizzle(global.__client, {
-            schema: { ...schema, ...relations },
+            schema: fullSchema,
             logger: false
         });
     }

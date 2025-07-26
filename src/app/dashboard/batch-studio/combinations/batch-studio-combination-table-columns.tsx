@@ -18,7 +18,7 @@ declare module '@tanstack/react-table' {
     }
 }
 
-export function getBatchStudioCombinationTableColumns(): ColumnDef<BatchStudioCombinationType>[] {
+export function useGetBatchStudioCombinationTableColumns(): ColumnDef<BatchStudioCombinationType>[] {
     const {currentStore} = useQSPayContext()
 
     return [
@@ -73,7 +73,7 @@ export function getBatchStudioCombinationTableColumns(): ColumnDef<BatchStudioCo
         {
             id: "name",
             accessorKey: "name",
-            header: ({column, table: {options: {meta}}}) => (
+            header: ({column}) => (
                 <DataTableColumnHeader column={column} title="Name"/>
             ),
             cell: ({row}) => <div className="text-xs">{row.getValue("name")}</div>,

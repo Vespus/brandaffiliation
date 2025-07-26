@@ -62,10 +62,6 @@ export const formatPrompt = async ({category, season, brand, prompt}: {
     )
 }
 
-export const formatPrompt2 = async ({prompt, datasources}: { prompt: string, datasources: any }) => {
-    return prompt
-}
-
 export const appendMarkdown = (original: string, toAppend: string): string => {
     const trimmedOriginal = original.replace(/\n*$/, '\n');
     const ensuredToAppend = toAppend.endsWith('\n') ? toAppend : toAppend + '\n';

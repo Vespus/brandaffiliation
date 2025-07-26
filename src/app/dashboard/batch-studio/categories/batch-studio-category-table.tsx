@@ -1,7 +1,7 @@
 "use client"
 
 import {
-    getBatchStudioCategoryTableColumns
+    useGetBatchStudioCategoryTableColumns
 } from "@/app/dashboard/batch-studio/categories/batch-studio-category-table-columns";
 import { BatchStudioCategoryType } from "@/app/dashboard/batch-studio/categories/batch-studio-category-type";
 import { useDataTableSelectionStore } from "@/app/dashboard/batch-studio/store";
@@ -21,7 +21,7 @@ interface CategoriesTableProps {
 
 export const BatchStudioCategoryTable = ({promise}: CategoriesTableProps) => {
     const {data, pageCount, total} = use(promise)
-    const columns = getBatchStudioCategoryTableColumns()
+    const columns = useGetBatchStudioCategoryTableColumns()
     const utils = api.useUtils()
     const t = useTranslations()
     const {selected, setSelected} = useDataTableSelectionStore()

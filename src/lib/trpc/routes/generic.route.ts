@@ -1,8 +1,15 @@
-import { ContentGenerateSchema } from "@/app/dashboard/content-generation/schema";
 import { formatPrompt } from "@/app/dashboard/content-generation/utils";
 import { getDatasourceById } from "@/app/dashboard/datasources/queries";
 import { db } from "@/db";
-import { aiModels, brands as brandTable, brandWithScales, datasourceValues, datasources, translations, userPrompts } from "@/db/schema";
+import {
+    aiModels,
+    brands as brandTable,
+    brandWithScales,
+    datasources,
+    datasourceValues,
+    translations,
+    userPrompts
+} from "@/db/schema";
 import { getUser } from "@/lib/get-user";
 import { createTRPCRouter, publicProcedure } from "@/lib/trpc/trpc";
 import { eq } from "drizzle-orm";
@@ -68,7 +75,7 @@ export const genericRoute = createTRPCRouter({
                 throw Error("User not found")
             }
 
-            return await db.query.userPrompts.findMany({where: eq(userPrompts.userId, user!.id)})
+            return db.query.userPrompts.findMany({where: eq(userPrompts.userId, user!.id)});
         }),
     getTranslationById: publicProcedure
         .input(z.object({id: z.number()}))
@@ -99,11 +106,11 @@ export const genericRoute = createTRPCRouter({
             if (input?.isMultiple !== undefined) {
                 return await db.query.datasources.findMany({
                     where: eq(datasources.isMultiple, input.isMultiple),
-                    orderBy: (datasources, { asc }) => [asc(datasources.name)]
+                    orderBy: (datasources, {asc}) => [asc(datasources.name)]
                 });
             }
             return await db.query.datasources.findMany({
-                orderBy: (datasources, { asc }) => [asc(datasources.name)]
+                orderBy: (datasources, {asc}) => [asc(datasources.name)]
             });
         }),
     getDatasourceValues: publicProcedure

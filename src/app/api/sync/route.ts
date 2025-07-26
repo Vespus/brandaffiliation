@@ -1,16 +1,18 @@
-import {NextRequest, NextResponse} from "next/server";
-import {QSPayClient} from "@/lib/qs-pay-client";
-import {QSPayBrand, QSPayCategory, QSPayCombin} from "@/qspay-types";
-import {db} from "@/db";
+import { NextResponse } from "next/server";
+import { QSPayClient } from "@/lib/qs-pay-client";
+import { QSPayBrand, QSPayCategory, QSPayCombin } from "@/qspay-types";
+import { db } from "@/db";
 import {
-    brands as localBrandsTable, categories as localCategoriesTable, combinations as localCombinationsTable,
+    brands as localBrandsTable,
+    categories as localCategoriesTable,
+    combinations as localCombinationsTable,
     contents
 } from "@/db/schema";
-import {and, eq} from "drizzle-orm";
-import {categoryFlat} from "@/utils/category-flat";
-import {isEmpty} from "@/utils/is-empty";
+import { and, eq } from "drizzle-orm";
+import { categoryFlat } from "@/utils/category-flat";
+import { isEmpty } from "@/utils/is-empty";
 
-export const GET = async (request: NextRequest) => {
+export const GET = async () => {
     const [{result: remoteBrands}, {result: categories}, {result: combinations}] = await Promise.all([
         QSPayClient<QSPayBrand[]>("CmsBrand/GetAll"),
         QSPayClient<QSPayCategory[]>("CmsCategory/GetAll"),
@@ -48,7 +50,7 @@ const processBrands = async (brands: QSPayBrand[]) => {
         const isExists = localBrands.find(x => x.slug?.toLowerCase() === remoteBrand.slug.toLowerCase().replace(/\//g, ""))
         if (!isExists) {
             insertDiff.push(remoteBrand)
-        } else if(isExists.integrationId !== remoteBrand.id) {
+        } else if (isExists.integrationId !== remoteBrand.id) {
             updateDiff.push(remoteBrand)
         }
     }
@@ -99,7 +101,7 @@ const processCategories = async (categories: QSPayCategory[]) => {
         const isExists = localCategories.find(x => x.slug?.toLowerCase() === remoteCategory.slug.toLowerCase().replace(/\//g, ""))
         if (!isExists) {
             insertDiff.push(remoteCategory)
-        } else if(isExists.integrationId !== remoteCategory.id) {
+        } else if (isExists.integrationId !== remoteCategory.id) {
             updateDiff.push(remoteCategory)
         }
     }
@@ -144,7 +146,7 @@ const processCombinations = async (combinations: QSPayCombin[]) => {
         const isExists = localCombinations.find(x => x.brandId === remoteCombination.brand.id && x.categoryId === remoteCombination.category.id)
         if (!isExists) {
             insertDiff.push(remoteCombination)
-        } else if(isExists.integrationId !== remoteCombination.id) {
+        } else if (isExists.integrationId !== remoteCombination.id) {
             updateDiff.push(remoteCombination)
         }
     }

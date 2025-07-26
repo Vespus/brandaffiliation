@@ -6,8 +6,6 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { QSPayContextProvider } from "@/hooks/contexts/use-qspay-context";
-import { QSPayClient } from "@/lib/qs-pay-client";
-import { QSPayUser } from "@/qspay-types";
 import { getQspayUser } from "@/lib/get-qspay-user";
 
 export default async function DashboardLayout({children}: Readonly<{ children: React.ReactNode; }>) {
@@ -19,7 +17,7 @@ export default async function DashboardLayout({children}: Readonly<{ children: R
         redirect("/auth/sign-in")
     }
 
-    const QSPayUser= await getQspayUser();
+    const QSPayUser = await getQspayUser();
     const storeId = cookie.get("qs-pay-store-id")?.value;
 
     return (

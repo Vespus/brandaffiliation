@@ -1,7 +1,6 @@
 "use client"
 
 import { SaveToQSPay } from "@/app/dashboard/content-generation/actions";
-import { useContentGenerationContext } from "@/app/dashboard/content-generation/content-generation-context";
 import { EmptyMetaState } from "@/app/dashboard/content-generation/dialogs/empty-meta-state";
 import { useContentGenerationStore } from "@/app/dashboard/content-generation/store";
 import { MetaOutput, MetaOutputSchema } from "@/app/dashboard/content-generation/types";
@@ -27,9 +26,8 @@ import { Scroller } from "@/components/ui/scroller";
 import { Textarea } from "@/components/ui/textarea";
 import { useCustomAction } from "@/hooks/use-custom-action";
 import { api } from "@/lib/trpc/react";
-import { QSPayCombin } from "@/qspay-types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { merge, toMerged } from "es-toolkit";
+import { toMerged } from "es-toolkit";
 import { get, set } from "es-toolkit/compat";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -164,7 +162,7 @@ export const QspayApplyDialog = () => {
                 output: mergedOutput
             })
         }
-        if(foundEntity?.type === "brand" || foundEntity?.type === "category") {
+        if (foundEntity?.type === "brand" || foundEntity?.type === "category") {
             exportAction.execute({
                 ...(selectedBrand && {
                     brandId: foundEntity!.id,
@@ -231,7 +229,8 @@ export const QspayApplyDialog = () => {
                                                     <div className="flex-1">Original Value</div>
                                                 </div>
                                                 {children.map(({path, label, type: Component}) => (
-                                                    <div key={path} className="flex gap-4 min-w-0 pb-4 border-b last:border-b-0">
+                                                    <div key={path}
+                                                         className="flex gap-4 min-w-0 pb-4 border-b last:border-b-0">
                                                         <div className="w-6 flex-none flex justify-center">
                                                             <FormField
                                                                 name={`selectedFields.${path.replace(/\./g, "_")}`}

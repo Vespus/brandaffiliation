@@ -5,7 +5,6 @@ import { getPromptsTableColumns } from "@/app/dashboard/prompts/prompt-table-col
 import { DataTable } from "@/components/datatable/data-table"
 import { DataTableSortList } from "@/components/datatable/data-table-sort-list"
 import { DataTableToolbar } from "@/components/datatable/data-table-toolbar";
-import { Button } from "@/components/ui/button";
 import { useDataTable } from "@/hooks/use-data-table";
 import { Plus } from "lucide-react";
 import Link from "next/link";
@@ -39,7 +38,7 @@ export const PromptsTable = ({promise}: PromptsTableProps) => {
                 actionBar={
                     <div className="flex items-center gap-2">
                         <Link href="/dashboard/prompts/new">
-                            <Plus className="mr-2 h-4 w-4" />
+                            <Plus className="mr-2 h-4 w-4"/>
                             Create Prompt
                         </Link>
                     </div>

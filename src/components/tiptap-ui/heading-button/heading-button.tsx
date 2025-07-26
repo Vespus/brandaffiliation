@@ -4,7 +4,7 @@ import * as React from "react"
 
 import {useTiptapEditor} from "@/hooks/use-tiptap-editor"
 import {useHeading, UseHeadingConfig} from "@/components/tiptap-ui/heading-button/use-heading";
-import {ToolbarButton} from "@/components/editor/ui/toolbar";
+import {ToolbarButton} from "@/components/tiptap/toolbar";
 
 export type HeadingButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & UseHeadingConfig
 

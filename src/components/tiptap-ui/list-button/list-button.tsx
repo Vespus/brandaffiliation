@@ -4,7 +4,7 @@ import * as React from "react"
 
 import {useTiptapEditor} from "@/hooks/use-tiptap-editor"
 import {useList, UseListConfig} from "@/components/tiptap-ui/list-button/use-list";
-import {ToolbarButton} from "@/components/editor/ui/toolbar";
+import {ToolbarButton} from "@/components/tiptap/toolbar";
 
 export type ListButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "type"> & UseListConfig
 

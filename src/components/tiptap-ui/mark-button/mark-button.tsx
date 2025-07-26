@@ -1,7 +1,7 @@
 import * as React from "react"
 
 import {useTiptapEditor} from "@/hooks/use-tiptap-editor"
-import {ToolbarButton} from "@/components/editor/ui/toolbar";
+import {ToolbarButton} from "@/components/tiptap/toolbar";
 import {useMark, UseMarkConfigType} from "@/components/tiptap-ui/mark-button/use-mark";
 
 type MarkButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "type"> & UseMarkConfigType

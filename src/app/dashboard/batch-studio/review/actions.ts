@@ -6,7 +6,6 @@ import { contents } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 export const removeReviewTask = actionClient
     .inputSchema(z.object({contentId: z.number()}))

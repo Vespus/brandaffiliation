@@ -1,7 +1,6 @@
 "use client"
 
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { CalendarWithTime } from "@/components/ui/calendar-with-time";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -11,15 +10,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
-import { getDate } from "@/utils/date";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UserWithRole } from "better-auth/plugins";
 import { differenceInSeconds, format, fromUnixTime, getUnixTime } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { User } from "better-auth";
+
+export type UserWithRole = User & {
+    role?: string;
+    banned?: boolean | null;
+    banReason?: string | null;
+    banExpires?: Date | null;
+}
 
 const userSchema = z.object({
     role: z.string().min(1, "Role is required").max(50, "Role must be less than 50 characters"),
@@ -71,13 +76,13 @@ export const UserForm = ({user}: { user: UserWithRole }) => {
             userId: user.id,
             role: data.role as "user" | "admin",
         })
-        if(data.banned){
+        if (data.banned) {
             await authClient.admin.banUser({
                 userId: user.id,
                 banReason: data.banReason,
                 banExpiresIn: data.banExpiresIn ? differenceInSeconds(fromUnixTime(data.banExpiresIn!), new Date()) : undefined
             })
-        }else if(!data.banned && user.banned){
+        } else if (!data.banned && user.banned) {
             await authClient.admin.unbanUser({
                 userId: user.id
             })
@@ -181,7 +186,7 @@ export const UserForm = ({user}: { user: UserWithRole }) => {
                                                         ) : (
                                                             <span>Pick a date</span>
                                                         )}
-                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50"/>
                                                     </Button>
                                                 </FormControl>
                                             </PopoverTrigger>

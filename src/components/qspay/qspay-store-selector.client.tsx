@@ -15,7 +15,7 @@ export function QspayStoreSelectorClient({storeList, currentValue}: { storeList:
     const [optimisticValue, setOptimisticValue] = useState<string | undefined>(currentValue ?? undefined)
 
     const changeStoreAction = useCustomAction(changeStore, {
-        onSuccess: (res) => {
+        onSuccess: () => {
             router.refresh()
         }
     })

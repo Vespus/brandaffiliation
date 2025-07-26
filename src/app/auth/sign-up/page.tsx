@@ -1,5 +1,4 @@
 import { SignupForm } from "@/app/auth/sign-up/signup-form";
-import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { ArrowLeft } from "lucide-react";

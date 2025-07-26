@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { useQSPayContext } from "@/hooks/contexts/use-qspay-context";
 
-export function getBatchStudioCategoryTableColumns(): ColumnDef<BatchStudioCategoryType>[] {
+export function useGetBatchStudioCategoryTableColumns(): ColumnDef<BatchStudioCategoryType>[] {
     const {currentStore} = useQSPayContext()
 
     return [
@@ -46,7 +46,7 @@ export function getBatchStudioCategoryTableColumns(): ColumnDef<BatchStudioCateg
         {
             id: "description",
             accessorKey: "description",
-            header: ({column, table: {options: {meta}}}) => (
+            header: ({column}) => (
                 <DataTableColumnHeader column={column} title="Name"/>
             ),
             cell: ({row}) => <div className="text-xs">{row.getValue("description")}</div>,
@@ -67,12 +67,13 @@ export function getBatchStudioCategoryTableColumns(): ColumnDef<BatchStudioCateg
                 <DataTableColumnHeader column={column} title="Slug"/>
             ),
             cell: ({row}) => {
-                if(currentStore) {
+                if (currentStore) {
                     const url = new URL(currentStore?.storeUrl)
                     url.pathname = row.original.slug.split("/").filter(Boolean).join("/")
 
                     return (
-                        <Link href={url.toString()} target="_blank" className="text-xs underline">{url.toString()}</Link>
+                        <Link href={url.toString()} target="_blank"
+                              className="text-xs underline">{url.toString()}</Link>
                     )
                 }
                 return <span className="text-xs">N/A</span>
@@ -105,15 +106,15 @@ export function getBatchStudioCategoryTableColumns(): ColumnDef<BatchStudioCateg
                 return (
                     <div className="flex gap-2 items-center">
                         <Badge variant={hasMetaTitle ? "outline" : "destructive"} className="gap-1">
-                            {hasMetaTitle ? <CheckIcon className="text-emerald-500" /> : <XIcon className="text-white" />}
+                            {hasMetaTitle ? <CheckIcon className="text-emerald-500"/> : <XIcon className="text-white"/>}
                             Meta Title
                         </Badge>
                         <Badge variant={hasHeader ? "outline" : "destructive"} className="gap-1">
-                            {hasHeader ? <CheckIcon className="text-emerald-500" /> : <XIcon className="text-white" />}
+                            {hasHeader ? <CheckIcon className="text-emerald-500"/> : <XIcon className="text-white"/>}
                             Top Text
                         </Badge>
                         <Badge variant={hasFooter ? "outline" : "destructive"} className="gap-1">
-                            {hasFooter ? <CheckIcon className="text-emerald-500" /> : <XIcon className="text-white" />}
+                            {hasFooter ? <CheckIcon className="text-emerald-500"/> : <XIcon className="text-white"/>}
                             Footer Text
                         </Badge>
                     </div>

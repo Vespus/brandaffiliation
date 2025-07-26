@@ -74,8 +74,6 @@ export const SaveReviewTaskToQSPay = actionClient
                     config: toMerged(remoteBrand.config, parsedInput.config)
                 })
             })
-
-            console.log(editResult)
         }
 
         if (entityType === "category") {

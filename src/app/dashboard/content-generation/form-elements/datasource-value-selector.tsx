@@ -2,7 +2,6 @@ import { ComboboxBase } from "@/components/ui/combobox-base";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/trpc/react";
 import { SelectProps } from "@radix-ui/react-select";
-import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 type DataSourceValueSelectorProps = Omit<SelectProps, "value" | "onValueChange"> & {
@@ -12,7 +11,6 @@ type DataSourceValueSelectorProps = Omit<SelectProps, "value" | "onValueChange">
 }
 
 export const DataSourceValueSelector = ({value, onValueChange, index}: DataSourceValueSelectorProps) => {
-    const [open, setOpen] = useState(false)
     const formContext = useFormContext()
     const dataSourceFormValues = formContext.watch("dataSources") as { datasourceId: number }[]
 

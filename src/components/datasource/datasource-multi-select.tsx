@@ -1,22 +1,10 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Check, ChevronsUpDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from "@/components/ui/command";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger, } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
-import { Datasource } from "@/db/types";
 import { api } from "@/lib/trpc/react";
 
 interface DatasourceMultiSelectProps {
@@ -27,11 +15,11 @@ interface DatasourceMultiSelectProps {
 }
 
 export function DatasourceMultiSelect({
-    value,
-    onChange,
-    placeholder = "Select values",
-    disabled = false,
-}: DatasourceMultiSelectProps) {
+                                          value,
+                                          onChange,
+                                          placeholder = "Select values",
+                                          disabled = false,
+                                      }: DatasourceMultiSelectProps) {
     const [open, setOpen] = useState(false);
     const [datasourceOpen, setDatasourceOpen] = useState(false);
     const [selectedDatasourceId, setSelectedDatasourceId] = useState<number | null>(null);
@@ -39,25 +27,25 @@ export function DatasourceMultiSelect({
     const [selectedLabels, setSelectedLabels] = useState<Record<string, string>>({});
 
     // Fetch available datasources using tRPC
-    const { data: datasourceList = [] } = api.genericRoute.getDatasources.useQuery(
-        { isMultiple: true },
-        { staleTime: 5 * 60 * 1000 } // Cache for 5 minutes
+    const {data: datasourceList = []} = api.genericRoute.getDatasources.useQuery(
+        {isMultiple: true},
+        {staleTime: 5 * 60 * 1000} // Cache for 5 minutes
     );
 
     // Get the selected datasource
     const selectedDatasource = datasourceList.find(d => d.id === selectedDatasourceId) || null;
 
     // Fetch datasource values when a datasource is selected
-    const { data: datasourceValuesData = [], isLoading } = api.genericRoute.getDatasourceValues.useQuery(
-        { datasourceId: selectedDatasourceId as number },
-        { 
+    const {data: datasourceValuesData = [], isLoading} = api.genericRoute.getDatasourceValues.useQuery(
+        {datasourceId: selectedDatasourceId as number},
+        {
             enabled: !!selectedDatasourceId,
             staleTime: 5 * 60 * 1000 // Cache for 5 minutes
         }
     );
 
     // Transform datasource values into items for the select
-    const datasourceItems = selectedDatasource 
+    const datasourceItems = selectedDatasource
         ? datasourceValuesData.map((item) => {
             const data = item.data as Record<string, string>;
             return {
@@ -74,7 +62,7 @@ export function DatasourceMultiSelect({
             datasourceItems.forEach(item => {
                 labelsMap[item.value] = item.label;
             });
-            setSelectedLabels(prev => ({ ...prev, ...labelsMap }));
+            setSelectedLabels(prev => ({...prev, ...labelsMap}));
         }
     }, [datasourceItems]);
 
@@ -125,12 +113,12 @@ export function DatasourceMultiSelect({
                             {selectedDatasource
                                 ? selectedDatasource.name
                                 : "Select datasource"}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent className="p-0" align="start">
                         <Command>
-                            <CommandInput placeholder="Search datasources..." />
+                            <CommandInput placeholder="Search datasources..."/>
                             <CommandList>
                                 <CommandEmpty>No datasources found.</CommandEmpty>
                                 <CommandGroup>
@@ -174,14 +162,14 @@ export function DatasourceMultiSelect({
                                     {isLoading
                                         ? "Loading values..."
                                         : selectedValues.length > 0
-                                        ? `${selectedValues.length} selected`
-                                        : placeholder}
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                            ? `${selectedValues.length} selected`
+                                            : placeholder}
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="p-0" align="start">
                                 <Command>
-                                    <CommandInput placeholder="Search values..." />
+                                    <CommandInput placeholder="Search values..."/>
                                     <CommandList>
                                         <CommandEmpty>No values found.</CommandEmpty>
                                         <CommandGroup>
@@ -201,7 +189,7 @@ export function DatasourceMultiSelect({
                                                             )}
                                                         >
                                                             {selectedValues.includes(item.value) && (
-                                                                <Check className="h-3 w-3" />
+                                                                <Check className="h-3 w-3"/>
                                                             )}
                                                         </div>
                                                         {item.label}
@@ -223,7 +211,7 @@ export function DatasourceMultiSelect({
                                             className="ml-1 rounded-full outline-none focus:ring-2 focus:ring-offset-2"
                                             onClick={() => handleRemoveValue(value)}
                                         >
-                                            <X className="h-3 w-3" />
+                                            <X className="h-3 w-3"/>
                                         </button>
                                     </Badge>
                                 ))}

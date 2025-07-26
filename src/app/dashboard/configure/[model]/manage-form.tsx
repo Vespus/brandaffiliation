@@ -20,7 +20,6 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 import { AIModel, AISetting } from "@/db/types";
 import { useCustomAction } from "@/hooks/use-custom-action";
 import { zodResolver } from "@hookform/resolvers/zod";

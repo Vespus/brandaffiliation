@@ -6,6 +6,7 @@ import { useFileUpload } from '@/hooks/use-file-upload'
 import { uploadFiles } from "@/lib/uploadthing";
 import { CircleUserRoundIcon, Loader, XIcon } from "lucide-react"
 import * as React from "react";
+import Image from "next/image";
 
 type AvatarFieldProps = React.ComponentProps<"select"> & {
     onChange?: (value: string) => void
@@ -59,7 +60,7 @@ export default function AvatarField({onChange, ...props}: AvatarFieldProps) {
                 aria-label={previewUrl ? "Change image" : "Upload image"}
             >
                 {previewUrl ? (
-                    <img
+                    <Image
                         loading="lazy"
                         className="size-full object-cover"
                         src={previewUrl}

@@ -27,7 +27,7 @@ const formSchema = z.object({
 });
 
 export function DatasourceCreateForm() {
-    const { createDatasource, setParams } = useDatasourceParams();
+    const {createDatasource, setParams} = useDatasourceParams();
     const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
     const [csvData, setCsvData] = useState<Record<string, string>[]>([]);
     const [isParsingCsv, setIsParsingCsv] = useState(false);
@@ -45,7 +45,7 @@ export function DatasourceCreateForm() {
 
     // Use the custom action hook for the server action
     const addDatasourceAction = useCustomAction(addDatasource, {
-        onSuccess: ({ data }) => {
+        onSuccess: ({data}) => {
             toast.success(data?.message);
             form.reset();
             setCsvHeaders([]);
@@ -109,13 +109,13 @@ export function DatasourceCreateForm() {
                         <FormField
                             control={form.control}
                             name="name"
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <FormItem>
                                     <FormLabel>Name</FormLabel>
                                     <FormControl>
                                         <Input placeholder="e.g., Brands, Countries, Products" {...field} />
                                     </FormControl>
-                                    <FormMessage />
+                                    <FormMessage/>
                                 </FormItem>
                             )}
                         />
@@ -123,17 +123,17 @@ export function DatasourceCreateForm() {
                         <FormField
                             control={form.control}
                             name="description"
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <FormItem>
                                     <FormLabel>Description (Optional)</FormLabel>
                                     <FormControl>
-                                        <Textarea 
+                                        <Textarea
                                             placeholder="Enter a description for this datasource"
                                             {...field}
                                             value={field.value || ''}
                                         />
                                     </FormControl>
-                                    <FormMessage />
+                                    <FormMessage/>
                                 </FormItem>
                             )}
                         />
@@ -141,8 +141,9 @@ export function DatasourceCreateForm() {
                         <FormField
                             control={form.control}
                             name="isMultiple"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                            render={({field}) => (
+                                <FormItem
+                                    className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                                     <FormControl>
                                         <Checkbox
                                             checked={field.value}
@@ -154,7 +155,8 @@ export function DatasourceCreateForm() {
                                             Allow Multiple Selection
                                         </FormLabel>
                                         <p className="text-sm text-muted-foreground">
-                                            Enable this if users should be able to select multiple values from this datasource
+                                            Enable this if users should be able to select multiple values from this
+                                            datasource
                                         </p>
                                     </div>
                                 </FormItem>
@@ -164,7 +166,7 @@ export function DatasourceCreateForm() {
                         <FormField
                             control={form.control}
                             name="csvFile"
-                            render={({ field: { onChange, value, ...field } }) => (
+                            render={({field: {onChange, value, ...field}}) => (
                                 <FormItem>
                                     <FormLabel>CSV File</FormLabel>
                                     <FormControl>
@@ -172,6 +174,7 @@ export function DatasourceCreateForm() {
                                             type="file"
                                             accept=".csv"
                                             onChange={(e) => {
+                                                void value;
                                                 const file = e.target.files?.[0];
                                                 if (file) {
                                                     onChange(file);
@@ -181,7 +184,7 @@ export function DatasourceCreateForm() {
                                             {...field}
                                         />
                                     </FormControl>
-                                    <FormMessage />
+                                    <FormMessage/>
                                 </FormItem>
                             )}
                         />
@@ -191,7 +194,7 @@ export function DatasourceCreateForm() {
                                 <FormField
                                     control={form.control}
                                     name="valueColumn"
-                                    render={({ field }) => (
+                                    render={({field}) => (
                                         <FormItem>
                                             <FormLabel>Value Column</FormLabel>
                                             <FormControl>
@@ -206,7 +209,7 @@ export function DatasourceCreateForm() {
                                                     ))}
                                                 </select>
                                             </FormControl>
-                                            <FormMessage />
+                                            <FormMessage/>
                                         </FormItem>
                                     )}
                                 />
@@ -214,7 +217,7 @@ export function DatasourceCreateForm() {
                                 <FormField
                                     control={form.control}
                                     name="displayColumn"
-                                    render={({ field }) => (
+                                    render={({field}) => (
                                         <FormItem>
                                             <FormLabel>Display Column</FormLabel>
                                             <FormControl>
@@ -229,7 +232,7 @@ export function DatasourceCreateForm() {
                                                     ))}
                                                 </select>
                                             </FormControl>
-                                            <FormMessage />
+                                            <FormMessage/>
                                         </FormItem>
                                     )}
                                 />

@@ -1,21 +1,19 @@
 "use client";
 
 import { createPrompt, type PromptFormData, updatePrompt } from "@/app/dashboard/prompts/actions";
-import { PromptEditor } from "@/app/dashboard/prompts/prompt-editor";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { systemPrompts } from "@/db/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, FileText, Save } from "lucide-react";
+import { Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import Markdown from "react-markdown";
 import { toast } from "sonner";
 import { z } from "zod";
+import { TipTapEditor } from "@/components/tiptap/editor";
 
 const promptSchema = z.object({
     name: z.string().min(1, "Name is required").max(255, "Name too long"),
@@ -58,6 +56,7 @@ export function PromptForm({prompt}: PromptFormProps) {
                 toast.error(result.error || "Something went wrong");
             }
         } catch (error) {
+            void error;
             toast.error("Something went wrong");
         } finally {
             setIsSubmitting(false);
@@ -113,7 +112,7 @@ export function PromptForm({prompt}: PromptFormProps) {
                                 <FormItem>
                                     <FormLabel>Prompt Content</FormLabel>
                                     <FormControl>
-                                        <PromptEditor defaultValue={field.value} onChange={field.onChange}/>
+                                        <TipTapEditor value={field.value} onChange={field.onChange}/>
                                     </FormControl>
                                     <FormMessage/>
                                 </FormItem>

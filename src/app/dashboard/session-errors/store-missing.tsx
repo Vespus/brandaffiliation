@@ -16,7 +16,7 @@ export const StoreMissing = () => {
     const [error, setError] = useQueryState("error", parseAsString)
 
     return (
-        <AlertDialog open={Boolean(error)} onOpenChange={val => setError(null)}>
+        <AlertDialog open={Boolean(error)} onOpenChange={() => setError(null)}>
             <AlertDialogContent>
                 <div className="flex flex-col gap-2 max-sm:items-center sm:flex-row sm:gap-4">
                     <div
@@ -36,7 +36,6 @@ export const StoreMissing = () => {
                     <AlertDialogAction>Continue</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
-
         </AlertDialog>
     )
 

@@ -2,20 +2,8 @@ import { useState } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from "@/components/ui/command";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
-import { Datasource } from "@/db/types";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger, } from "@/components/ui/popover";
 import { api } from "@/lib/trpc/react";
 
 interface DatasourceSelectProps {
@@ -26,34 +14,34 @@ interface DatasourceSelectProps {
 }
 
 export function DatasourceSelect({
-    value,
-    onChange,
-    placeholder = "Select a value",
-    disabled = false,
-}: DatasourceSelectProps) {
+                                     value,
+                                     onChange,
+                                     placeholder = "Select a value",
+                                     disabled = false,
+                                 }: DatasourceSelectProps) {
     const [open, setOpen] = useState(false);
     const [selectedDatasourceId, setSelectedDatasourceId] = useState<number | null>(null);
 
     // Fetch available datasources using tRPC
-    const { data: datasourceList = [] } = api.genericRoute.getDatasources.useQuery(
-        { isMultiple: false },
-        { staleTime: 5 * 60 * 1000 } // Cache for 5 minutes
+    const {data: datasourceList = []} = api.genericRoute.getDatasources.useQuery(
+        {isMultiple: false},
+        {staleTime: 5 * 60 * 1000} // Cache for 5 minutes
     );
 
     // Get the selected datasource
     const selectedDatasource = datasourceList.find(d => d.id === selectedDatasourceId) || null;
 
     // Fetch datasource values when a datasource is selected
-    const { data: datasourceValuesData = [], isLoading } = api.genericRoute.getDatasourceValues.useQuery(
-        { datasourceId: selectedDatasourceId as number },
-        { 
+    const {data: datasourceValuesData = [], isLoading} = api.genericRoute.getDatasourceValues.useQuery(
+        {datasourceId: selectedDatasourceId as number},
+        {
             enabled: !!selectedDatasourceId,
             staleTime: 5 * 60 * 1000 // Cache for 5 minutes
         }
     );
 
     // Transform datasource values into items for the select
-    const datasourceItems = selectedDatasource 
+    const datasourceItems = selectedDatasource
         ? datasourceValuesData.map((item) => {
             const data = item.data as Record<string, string>;
             return {
@@ -78,12 +66,12 @@ export function DatasourceSelect({
                             {selectedDatasource
                                 ? selectedDatasource.name
                                 : "Select datasource"}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent className="p-0" align="start">
                         <Command>
-                            <CommandInput placeholder="Search datasources..." />
+                            <CommandInput placeholder="Search datasources..."/>
                             <CommandList>
                                 <CommandEmpty>No datasources found.</CommandEmpty>
                                 <CommandGroup>
@@ -125,14 +113,14 @@ export function DatasourceSelect({
                                 {isLoading
                                     ? "Loading values..."
                                     : value
-                                    ? datasourceItems.find((item) => item.value === value)?.label || value
-                                    : placeholder}
-                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                        ? datasourceItems.find((item) => item.value === value)?.label || value
+                                        : placeholder}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="p-0" align="start">
                             <Command>
-                                <CommandInput placeholder="Search values..." />
+                                <CommandInput placeholder="Search values..."/>
                                 <CommandList>
                                     <CommandEmpty>No values found.</CommandEmpty>
                                     <CommandGroup>

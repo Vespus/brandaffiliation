@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import { useCustomAction } from "@/hooks/use-custom-action";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { User } from "better-auth";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -56,7 +55,7 @@ export const ProfileForm = ({user}: ProfileFormProps) => {
                                 render={({field}) => (
                                     <FormItem>
                                         <FormControl>
-                                            <AvatarField {...field} onChange={field.onChange} />
+                                            <AvatarField {...field} onChange={field.onChange}/>
                                         </FormControl>
                                         <FormMessage/>
                                     </FormItem>

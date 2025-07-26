@@ -1,13 +1,11 @@
 "use client"
 
-import {SidebarGroup, SidebarGroupLabel, SidebarMenu,} from "@/components/ui/sidebar"
-import {getUser} from "@/lib/get-user";
-import {CogIcon, Database, GalleryVerticalEnd, Languages, SparklesIcon, UsersIcon} from "lucide-react"
-import {Suspense, use} from "react";
-import {MenuItem} from "@/components/sidebar/type";
-import {SingleMenuItem} from "@/components/sidebar/single-menu-item";
-import {CollapsableMenuItem} from "@/components/sidebar/collapsible-menu-item";
-import {authClient} from "@/lib/auth-client";
+import { SidebarGroup, SidebarGroupLabel, SidebarMenu, } from "@/components/ui/sidebar"
+import { CogIcon, Database, GalleryVerticalEnd, Languages, SparklesIcon, UsersIcon } from "lucide-react"
+import { Suspense } from "react";
+import { MenuItem } from "@/components/sidebar/type";
+import { SingleMenuItem } from "@/components/sidebar/single-menu-item";
+import { CollapsableMenuItem } from "@/components/sidebar/collapsible-menu-item";
 
 const data: MenuItem[] = [
     {

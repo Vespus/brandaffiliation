@@ -1,5 +1,5 @@
 import { env } from "@/env";
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 
 type ValidationError = {
     field: string;
@@ -21,11 +21,10 @@ type Request = RequestInit & {
 
 export async function QSPayClient<T>(path: string, init?: Request): Promise<GenericResponse<T>> {
     const cookieStore = await cookies()
-    const headersList = await headers()
 
     init = init ?? {}
 
-    const {query, body, method, ...rest} = init
+    const {query, body, method} = init
     const uri = new URL(env.QSPAY_URL as string);
     uri.pathname = path;
 

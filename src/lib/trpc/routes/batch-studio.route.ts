@@ -1,24 +1,7 @@
-import {createTRPCRouter, publicProcedure} from "@/lib/trpc/trpc";
-import {z} from "zod";
-import {
-    brands,
-    brandWithScales,
-    categories,
-    combinations,
-    contents,
-    datasources,
-    datasourceValues,
-    systemPrompts,
-    tasks
-} from "@/db/schema";
-import {and, eq, inArray, isNull, sql} from "drizzle-orm";
-import {db} from "@/db";
-import {getAIModelsWithProviderAndSettings} from "@/db/presets";
-import {BatchContentGenerateSchemaType} from "@/app/dashboard/batch-studio/schema";
-import {getDriver} from "@/app/dashboard/content-generation/utils";
-import {generateObject} from "ai";
-import {MetaOutputSchema} from "@/app/dashboard/content-generation/types";
-import {revalidatePath} from "next/cache";
+import { createTRPCRouter, publicProcedure } from "@/lib/trpc/trpc";
+import { brands, categories, combinations, contents } from "@/db/schema";
+import { and, eq, isNull, sql } from "drizzle-orm";
+import { db } from "@/db";
 
 export const batchStudioRoute = createTRPCRouter({
     getAllBrands: publicProcedure
@@ -106,11 +89,6 @@ export const batchStudioRoute = createTRPCRouter({
                 .where(isNull(contents.config))
 
             return data
-        }),
-    process: publicProcedure
-        .input(z.number())
-        .mutation(async ({input}) => {
-
         })
 })
 

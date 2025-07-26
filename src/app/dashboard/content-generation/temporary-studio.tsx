@@ -1,6 +1,5 @@
 "use client"
 
-import { SaveToQSPay } from "@/app/dashboard/content-generation/actions";
 import { useContentGenerationContext } from "@/app/dashboard/content-generation/content-generation-context";
 import { ProviderIcon } from "@/app/dashboard/content-generation/form-elements/provider-icon";
 import { useContentGenerationStore } from "@/app/dashboard/content-generation/store";
@@ -14,11 +13,9 @@ import { ComboboxBase } from "@/components/ui/combobox-base";
 import { Label } from "@/components/ui/label";
 import { Legend } from "@/components/ui/legend";
 import { Scroller } from "@/components/ui/scroller";
-import { useCustomAction } from "@/hooks/use-custom-action";
 import { api } from "@/lib/trpc/react";
 import { ExternalLinkIcon, SendIcon } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 
 export const TemporaryStudio = () => {
     const state = useContentGenerationStore()
@@ -113,7 +110,7 @@ export const TemporaryStudio = () => {
             <div className="px-12 py-4 flex-1 flex items-center">
                 <Carousel className="w-full">
                     <CarouselContent className="-ml-4">
-                        {Object.entries(state.streams).map(([modelId, stream], index) => (
+                        {Object.entries(state.streams).map(([modelId, stream]) => (
                             <CarouselItem className="basis-1 pl-4 lg:basis-1/2 2xl:basis-1/3" key={modelId}>
                                 <div className="p-1">
                                     <BaseNode>
@@ -157,8 +154,9 @@ export const TemporaryStudio = () => {
                                                     <div className="flex flex-col space-y-1">
                                                         <h3 className="text-xs font-medium">Hero Footer (Page Bottom
                                                             Content):</h3>
-                                                        <div className="text-xs text-muted-foreground prose prose-sm dark:prose-invert [&>h1]:text-xs"
-                                                           dangerouslySetInnerHTML={{__html: stream.stream?.descriptions?.footer}}></div>
+                                                        <div
+                                                            className="text-xs text-muted-foreground prose prose-sm dark:prose-invert [&>h1]:text-xs"
+                                                            dangerouslySetInnerHTML={{__html: stream.stream?.descriptions?.footer}}></div>
                                                     </div>
                                                 </div>
                                             </div>

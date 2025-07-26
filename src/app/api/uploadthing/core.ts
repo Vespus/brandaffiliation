@@ -9,9 +9,9 @@ export const ourFileRouter = {
     // Define as many FileRoutes as you like, each with a unique routeSlug
     profilePictures: f({ image: { maxFileSize: "2MB", maxFileCount: 1 } })
         // Set permissions and file types for this FileRoute
-        .middleware(async ({ req, files }) => {
+        .middleware(async ({ files }) => {
             const {user} = await getUser();
-            // eslint-disable-next-line @typescript-eslint/only-throw-error
+             
             if (!user) throw new UploadThingError("Unauthorized");
 
             const newFiles = files.map((file) => {

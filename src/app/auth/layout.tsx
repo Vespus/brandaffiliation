@@ -1,5 +1,5 @@
 import React from "react";
-import { BluetoothConnected, GalleryVerticalEnd } from "lucide-react";
+import { GalleryVerticalEnd } from "lucide-react";
 
 export default function AuthLayout({children}: { children: React.ReactNode }) {
     return (

@@ -3,8 +3,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { api } from "@/lib/trpc/react";
 import { cn } from "@/lib/utils";
-import { Check, ChevronsUpDown, Trash2Icon } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { Check, ChevronsUpDown } from "lucide-react";
 import * as React from "react";
 
 type PromptSelectorType = {

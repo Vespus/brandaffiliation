@@ -5,7 +5,6 @@ import { systemPrompts } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { z } from "zod";
 
@@ -18,11 +17,11 @@ const promptSchema = z.object({
 export type PromptFormData = z.infer<typeof promptSchema>;
 
 async function checkAdminPermissions(userId: string) {
-    const { success } = await auth.api.userHasPermission({
+    const {success} = await auth.api.userHasPermission({
         body: {
             userId,
             role: "admin",
-            permission: { prompt: ["create", "delete"] },
+            permission: {prompt: ["create", "delete"]},
         },
     });
 
@@ -54,10 +53,10 @@ export async function createPrompt(data: PromptFormData) {
                 description: validatedData.description || null,
                 prompt: validatedData.prompt,
             })
-            .returning({ id: systemPrompts.id });
+            .returning({id: systemPrompts.id});
 
         revalidatePath("/dashboard/prompts");
-        return { success: true, data: prompt };
+        return {success: true, data: prompt};
     } catch (error) {
         console.error("Error creating prompt:", error);
         return {
@@ -92,7 +91,7 @@ export async function updatePrompt(id: number, data: PromptFormData) {
                 updatedAt: new Date().toISOString(),
             })
             .where(eq(systemPrompts.id, id))
-            .returning({ id: systemPrompts.id });
+            .returning({id: systemPrompts.id});
 
         if (!prompt) {
             throw new Error("Prompt not found");
@@ -100,7 +99,7 @@ export async function updatePrompt(id: number, data: PromptFormData) {
 
         revalidatePath("/dashboard/prompts");
         revalidatePath(`/dashboard/prompts/${id}`);
-        return { success: true, data: prompt };
+        return {success: true, data: prompt};
     } catch (error) {
         console.error("Error updating prompt:", error);
         return {
@@ -126,14 +125,14 @@ export async function deletePrompt(id: number) {
         const [deleted] = await db
             .delete(systemPrompts)
             .where(eq(systemPrompts.id, id))
-            .returning({ id: systemPrompts.id });
+            .returning({id: systemPrompts.id});
 
         if (!deleted) {
             throw new Error("Prompt not found");
         }
 
         revalidatePath("/dashboard/prompts");
-        return { success: true };
+        return {success: true};
     } catch (error) {
         console.error("Error deleting prompt:", error);
         return {

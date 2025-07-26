@@ -210,6 +210,7 @@ export function DatasourceEditDialog() {
                                                 type="file"
                                                 accept=".csv"
                                                 onChange={(e) => {
+                                                    void value;
                                                     const file = e.target.files?.[0];
                                                     if (file) {
                                                         onChange(file);

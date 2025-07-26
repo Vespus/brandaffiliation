@@ -11,7 +11,7 @@ import { SquareDashedMousePointerIcon, SquareMousePointerIcon, XIcon } from "luc
 import { useDataTableSelectionStore } from "@/app/dashboard/batch-studio/store";
 import { BatchStudioCombinationType } from "@/app/dashboard/batch-studio/combinations/batch-studio-combination-type";
 import {
-    getBatchStudioCombinationTableColumns
+    useGetBatchStudioCombinationTableColumns
 } from "@/app/dashboard/batch-studio/combinations/batch-studio-combination-table-columns";
 import { useTranslations } from "next-intl";
 
@@ -21,7 +21,7 @@ interface BrandsTableProps {
 
 export const BatchStudioCombinationTable = ({promise}: BrandsTableProps) => {
     const {data, pageCount, total} = use(promise)
-    const columns = getBatchStudioCombinationTableColumns()
+    const columns = useGetBatchStudioCombinationTableColumns()
     const utils = api.useUtils()
     const t = useTranslations()
     const {selected, setSelected} = useDataTableSelectionStore()

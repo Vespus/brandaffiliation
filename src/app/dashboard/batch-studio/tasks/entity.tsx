@@ -84,6 +84,7 @@ export const Entity = ({
                 onJobComplete?.(task)
             }
         } catch (e) {
+            void e;
             setStatus("error")
             onJobError?.(task)
         }

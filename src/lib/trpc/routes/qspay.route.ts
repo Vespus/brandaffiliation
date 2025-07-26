@@ -1,6 +1,6 @@
 import { QSPayClient } from "@/lib/qs-pay-client";
 import { createTRPCRouter, publicProcedure } from "@/lib/trpc/trpc";
-import {QSPayBrand, QSPayCategory, QSPayCombin, QSPayUser} from "@/qspay-types";
+import { QSPayBrand, QSPayCategory, QSPayCombin, QSPayUser } from "@/qspay-types";
 import { z } from "zod";
 
 type QSPayCategoryWithType = QSPayCategory & {
@@ -24,7 +24,7 @@ export const qspayRoute = createTRPCRouter({
             return result.companies[0]?.merchants[0]?.stores || []
         }),
     getAllBrands: publicProcedure
-        .query(async ({input}) => {
+        .query(async () => {
             const {result} = await QSPayClient<QSPayBrand[]>("CmsBrand/GetAll")
             return result
         }),

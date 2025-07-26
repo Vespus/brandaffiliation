@@ -1,12 +1,12 @@
 "use client"
 
-import {Table, TableBody, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {Entity} from "@/app/dashboard/batch-studio/tasks/entity";
-import {TaskJoin} from "@/app/dashboard/batch-studio/tasks/type";
-import {useEffect, useState} from "react";
-import {Button, buttonVariants} from "@/components/ui/button";
-import {BanIcon, PauseIcon, PlayIcon} from "lucide-react";
-import {useRouter} from "next/navigation";
+import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Entity } from "@/app/dashboard/batch-studio/tasks/entity";
+import { TaskJoin } from "@/app/dashboard/batch-studio/tasks/type";
+import { useEffect, useState } from "react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { BanIcon, PauseIcon, PlayIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 const MAX_CONCURRENCY = 3;
@@ -14,7 +14,7 @@ const MAX_CONCURRENCY = 3;
 export const TaskController = ({tasks}: { tasks: TaskJoin[] }) => {
     const [runningIds, setRunningIds] = useState<number[]>([]);
     const [finishedIds, setFinishedIds] = useState<number[]>([]);
-    const [errorIds, setErrorIds] = useState<number[]>([]);
+    const [, setErrorIds] = useState<number[]>([]);
     const [isRunning, setIsRunning] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
     const router = useRouter()

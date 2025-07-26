@@ -1,17 +1,14 @@
 "use client";
 
-import {DataTableColumnHeader} from "@/components/datatable/data-table-column-header";
-import {buttonVariants} from "@/components/ui/button";
-import {SimpleRating} from "@/components/ui/simple-rating";
-import {BrandWithCharacteristicAndScales} from "@/db/types";
-import {ColumnDef, RowData} from "@tanstack/react-table";
-import {ArrowBigRightDash, ArrowRight, CheckIcon, CrossIcon, StarIcon, Text, XIcon,} from "lucide-react";
+import { DataTableColumnHeader } from "@/components/datatable/data-table-column-header";
+import { ColumnDef, RowData } from "@tanstack/react-table";
+import { CheckIcon, StarIcon, Text, XIcon, } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
-import {BatchStudioBrandType} from "@/app/dashboard/batch-studio/brands/batch-studio-brand-type";
-import {Checkbox} from "@/components/ui/checkbox";
-import {MetaOutput} from "@/app/dashboard/content-generation/types";
-import {Badge} from "@/components/ui/badge";
+import { BatchStudioBrandType } from "@/app/dashboard/batch-studio/brands/batch-studio-brand-type";
+import { Checkbox } from "@/components/ui/checkbox";
+import { MetaOutput } from "@/app/dashboard/content-generation/types";
+import { Badge } from "@/components/ui/badge";
 import { useQSPayContext } from "@/hooks/contexts/use-qspay-context";
 
 declare module '@tanstack/react-table' {
@@ -21,7 +18,7 @@ declare module '@tanstack/react-table' {
     }
 }
 
-export function getBatchStudioBrandTableColumns(): ColumnDef<BatchStudioBrandType>[] {
+export function useGetBatchStudioBrandTableColumns(): ColumnDef<BatchStudioBrandType>[] {
     const {currentStore} = useQSPayContext()
 
     return [
@@ -77,12 +74,13 @@ export function getBatchStudioBrandTableColumns(): ColumnDef<BatchStudioBrandTyp
                 <DataTableColumnHeader column={column} title="Slug"/>
             ),
             cell: ({row}) => {
-                if(currentStore) {
+                if (currentStore) {
                     const url = new URL(currentStore?.storeUrl)
                     url.pathname = row.original.slug.split("/").filter(Boolean).join("/")
 
                     return (
-                        <Link href={url.toString()} target="_blank" className="text-xs underline">{url.toString()}</Link>
+                        <Link href={url.toString()} target="_blank"
+                              className="text-xs underline">{url.toString()}</Link>
                     )
                 }
                 return <span className="text-xs">N/A</span>
@@ -115,15 +113,15 @@ export function getBatchStudioBrandTableColumns(): ColumnDef<BatchStudioBrandTyp
                 return (
                     <div className="flex gap-2 items-center">
                         <Badge variant={hasMetaTitle ? "outline" : "destructive"} className="gap-1">
-                            {hasMetaTitle ? <CheckIcon className="text-emerald-500" /> : <XIcon className="text-white" />}
+                            {hasMetaTitle ? <CheckIcon className="text-emerald-500"/> : <XIcon className="text-white"/>}
                             Meta Title
                         </Badge>
                         <Badge variant={hasHeader ? "outline" : "destructive"} className="gap-1">
-                            {hasHeader ? <CheckIcon className="text-emerald-500" /> : <XIcon className="text-white" />}
+                            {hasHeader ? <CheckIcon className="text-emerald-500"/> : <XIcon className="text-white"/>}
                             Top Text
                         </Badge>
                         <Badge variant={hasFooter ? "outline" : "destructive"} className="gap-1">
-                            {hasFooter ? <CheckIcon className="text-emerald-500" /> : <XIcon className="text-white" />}
+                            {hasFooter ? <CheckIcon className="text-emerald-500"/> : <XIcon className="text-white"/>}
                             Footer Text
                         </Badge>
                     </div>

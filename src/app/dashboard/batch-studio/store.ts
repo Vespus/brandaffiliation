@@ -9,7 +9,7 @@ const initialState = {
     selected: {}
 }
 
-export const useDataTableSelectionStore = create<DataTableSelectionStoreType>((set, get) => ({
+export const useDataTableSelectionStore = create<DataTableSelectionStoreType>((set) => ({
     ...initialState,
     setSelected: (row: Record<string, boolean>) => set({selected: row}),
 }))

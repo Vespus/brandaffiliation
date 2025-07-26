@@ -387,7 +387,6 @@ export const ComparisonFormField = <
     TFieldValues extends FieldValues = FieldValues,
     TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
 >({
-      children,
       oldConfig,
       type,
       path,
@@ -395,12 +394,9 @@ export const ComparisonFormField = <
       render,
       description,
       errors,
-      typeCustomRender,
       ...props
   }: ControllerProps<TFieldValues, TName> & {
-      children?: React.ReactNode
       type?: string
-      typeCustomRender?: (oldValue: any) => React.ReactNode
       label: string
       oldConfig?: MetaOutput | null
       description?: React.ReactNode

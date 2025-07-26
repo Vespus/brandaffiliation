@@ -5,7 +5,7 @@ import Text from '@tiptap/extension-text'
 import Heading from '@tiptap/extension-heading'
 import { Placeholder, UndoRedo } from '@tiptap/extensions'
 import { ListKit } from '@tiptap/extension-list'
-import { Toolbar, ToolbarGroup } from "@/components/editor/ui/toolbar";
+import { Toolbar, ToolbarGroup } from "@/components/tiptap/toolbar";
 import {
     BoldIcon,
     Heading1Icon,

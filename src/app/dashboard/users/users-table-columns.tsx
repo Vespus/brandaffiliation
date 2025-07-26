@@ -28,7 +28,7 @@ export function getUsersTableColumns(): ColumnDef<User>[] {
         {
             id: "name",
             accessorKey: "name",
-            header: ({column, table: {options: {meta}}}) => (
+            header: ({column}) => (
                 <DataTableColumnHeader column={column} title="Name"/>
             ),
             cell: ({row}) => <div className="font-semibold">{row.getValue("name")}</div>,

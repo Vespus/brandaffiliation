@@ -6,7 +6,7 @@ import { use, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useDataTable } from "@/hooks/use-data-table";
 import { DataTableToolbar } from "@/components/datatable/data-table-toolbar";
-import { getBatchStudioBrandTableColumns } from "@/app/dashboard/batch-studio/brands/batch-studio-brand-table-columns";
+import { useGetBatchStudioBrandTableColumns } from "@/app/dashboard/batch-studio/brands/batch-studio-brand-table-columns";
 import { BatchStudioBrandType } from "@/app/dashboard/batch-studio/brands/batch-studio-brand-type";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/trpc/react";
@@ -19,7 +19,7 @@ interface BrandsTableProps {
 
 export const BatchStudioBrandTable = ({promise}: BrandsTableProps) => {
     const {data, pageCount, total} = use(promise)
-    const columns = getBatchStudioBrandTableColumns()
+    const columns = useGetBatchStudioBrandTableColumns()
     const utils = api.useUtils()
     const t = useTranslations()
     const {selected, setSelected} = useDataTableSelectionStore()

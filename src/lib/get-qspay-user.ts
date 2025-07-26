@@ -12,6 +12,7 @@ export const getQspayUser = async () => {
         const {result} = await QSPayClient<QSPayUser>("User/Get")
         return result;
     }catch(e){
+        void e
         return null
     }
 }

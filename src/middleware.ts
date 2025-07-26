@@ -1,6 +1,6 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export default async function middleware(request: NextRequest) {
+export default async function middleware() {
     return NextResponse.next();
 }
 

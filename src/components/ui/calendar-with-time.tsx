@@ -5,7 +5,6 @@ import { Calendar, CalendarProps } from "@/components/ui/calendar"
 import { Scroller } from "@/components/ui/scroller";
 import { format, fromUnixTime, getUnixTime } from "date-fns"
 import * as React from "react";
-import { useState } from "react";
 
 export type CalendarWithTimeProps = CalendarProps & {
     dateFormat?: string;
@@ -37,7 +36,7 @@ export const CalendarWithTime = ({
     }
 
     const handleDateChange = (date: Date | undefined) => {
-        if(!date){
+        if (!date) {
             onValueChange?.(undefined)
             return
         }
