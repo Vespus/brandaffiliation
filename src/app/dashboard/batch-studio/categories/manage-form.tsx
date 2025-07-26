@@ -2,7 +2,7 @@
 
 import {DataSources} from "@/app/dashboard/content-generation/form-elements/datasources";
 import {PromptSelector} from "@/app/dashboard/content-generation/form-elements/prompt-selector";
-import {Button} from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
 import {Legend} from "@/components/ui/legend";
 import {Scroller} from "@/components/ui/scroller";
@@ -17,13 +17,19 @@ import {useDataTableSelectionStore} from "@/app/dashboard/batch-studio/store";
 import {useCustomAction} from "@/hooks/use-custom-action";
 import {saveTask} from "@/app/dashboard/batch-studio/actions";
 import {toast} from "sonner";
+import {TipTapEditor} from "@/components/tiptap/editor";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export const ManageForm = () => {
+    const router = useRouter()
     const form = useForm<z.infer<typeof BatchContentGenerateSchema>>({
         resolver: zodResolver(BatchContentGenerateSchema),
         defaultValues: {
             prompt: undefined,
             aiModel: undefined,
+            useCategoryContent: true,
+            userPromptPrefix: "",
             dataSources: []
         },
     })
@@ -31,12 +37,18 @@ export const ManageForm = () => {
     const selectedRows = useDataTableSelectionStore(s => s.selected)
     const saveTaskAction = useCustomAction(saveTask, {
         onSuccess: () => {
-            toast.success("Successfully added to queue")
+            toast.success("Successfully added to queue", {
+                position: "bottom-center",
+                action: {
+                    label: "Go to tasks",
+                    onClick: () => router.push("/dashboard/batch-studio/tasks")
+                },
+            })
         }
     })
 
     async function onSubmit(values: z.infer<typeof BatchContentGenerateSchema>) {
-        if(Object.keys(selectedRows).length === 0){
+        if (Object.keys(selectedRows).length === 0) {
             toast.error("Please select at least one entity to generate content for")
             return
         }
@@ -57,9 +69,9 @@ export const ManageForm = () => {
     }
 
     return (
-        <div className="flex w-full flex-none flex-col gap-0 xl:max-w-xl min-h-0 py-4 pr-4">
+        <div className="flex w-full flex-none flex-col gap-0 md:max-w-md 3xl:max-w-xl min-h-0 py-4 pr-4">
             <div className="flex-none ">
-                <h1 className="text-lg font-semibold">Category Content Studio</h1>
+                <h1 className="text-lg font-semibold">Category Batch Studio</h1>
                 <p className="text-sm text-muted-foreground">
                     Choose AI model and customize your prompt
                 </p>
@@ -88,6 +100,40 @@ export const ManageForm = () => {
                                         <FormItem>
                                             <FormLabel>AI Model</FormLabel>
                                             <AiModelSelect value={field.value} onValueChange={field.onChange}/>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                            <div className="space-y-4">
+                                <Legend className="mb-4">Content Enrichment</Legend>
+                                <FormField
+                                    control={form.control}
+                                    name="userPromptPrefix"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>Custom User Prompt</FormLabel>
+                                            <FormControl>
+                                                <TipTapEditor {...field} />
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="useCategoryContent"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <div className="flex flex-row items-center gap-2">
+                                                <FormControl>
+                                                    <Checkbox checked={field.value}
+                                                              onCheckedChange={(checked) => field.onChange(checked)}/>
+                                                </FormControl>
+                                                <FormLabel>Use category SEO content if exists</FormLabel>
+                                            </div>
+                                            <FormDescription className="text-xs">If relevant QSPay category's content
+                                                exists appends the existing content to the generated prompt to enrich
+                                                the content</FormDescription>
                                             <FormMessage/>
                                         </FormItem>
                                     )}

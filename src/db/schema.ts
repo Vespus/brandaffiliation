@@ -15,6 +15,7 @@ import {
     varchar
 } from "drizzle-orm/pg-core"
 import {MetaOutput} from "@/app/dashboard/content-generation/types";
+import { BatchContentGenerateSchemaType } from "@/app/dashboard/batch-studio/schema";
 
 export const brandScales = pgTable("brand_scales", {
     // You can use { mode: "bigint" } if numbers are exceeding js number limitations
@@ -203,7 +204,7 @@ export const contents = pgTable("contents", {
     entityId: text("entity_id").notNull(),
     config: jsonb().$type<MetaOutput>(),
     oldConfig: jsonb("old_config").$type<MetaOutput>(),
-    needsReview: boolean("needs_review").default(false).notNull(),
+    needsReview: boolean("needs_review").default(false),
     createdAt: timestamp('created_at'),
 })
 
@@ -212,7 +213,7 @@ export const tasks = pgTable("tasks", {
     entityType: text("entity_type").notNull(),
     entityId: text("entity_id").notNull(),
     status: text("status"),
-    specification: jsonb(),
+    specification: jsonb().$type<BatchContentGenerateSchemaType>(),
     createdAt: timestamp('created_at'),
 })
 

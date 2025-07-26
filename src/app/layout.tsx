@@ -45,11 +45,8 @@ export default async function RootLayout({
                     <NextIntlClientProvider>
                         <TRPCReactProvider>
                             <NuqsAdapter>
-
-                                <>
-                                    {children}
-                                </>
-                                <Toaster richColors duration={6000}/>
+                                {children}
+                                <Toaster duration={10000}/>
                             </NuqsAdapter>
                         </TRPCReactProvider>
                     </NextIntlClientProvider>

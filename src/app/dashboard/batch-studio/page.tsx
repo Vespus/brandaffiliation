@@ -1,7 +1,7 @@
 import {BrandsWidget} from "@/app/dashboard/batch-studio/widgets/brands-widget";
 import {CategoriesWidget} from "@/app/dashboard/batch-studio/widgets/categories-widget";
 import {CombinationsWidget} from "@/app/dashboard/batch-studio/widgets/combinations-widget";
-import {buttonVariants} from "@/components/ui/button";
+import {Button, buttonVariants} from "@/components/ui/button";
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {db} from "@/db";
@@ -9,7 +9,17 @@ import {brands, categories, combinations, contents, tasks} from "@/db/schema";
 import {cn} from "@/lib/utils";
 import {and, eq, or, sql} from "drizzle-orm";
 import Link from "next/link";
-import React from "react";
+import React, {Suspense} from "react";
+import {Skeleton} from "@/components/ui/skeleton";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import {AlertCircle, CheckCircle2, Clock, TrendingUp, Zap} from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 
 export default async function Page() {
     const [awaitingTasks, awaitingReviews] = await Promise.all([
@@ -50,118 +60,214 @@ export default async function Page() {
     ])
 
     return (
-        <div className="h-full flex-1 min-h-0">
-            <div className="flex flex-none flex-col min-h-0 flex-wrap gap-4 pb-6 xl:flex-row border-b">
-                <BrandsWidget/>
-                <CategoriesWidget/>
-                <CombinationsWidget/>
+        <div className="h-full flex-1 min-h-0 justify-center max-w-full w-7xl mx-auto p-6">
+            <div className="grid grid-cols-3 gap-4 mb-4">
+                <Suspense fallback={<WidgetSkeletons/>}>
+                    <BrandsWidget/>
+                    <CategoriesWidget/>
+                    <CombinationsWidget/>
+                </Suspense>
             </div>
-            <div className="flex gap-4">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Awaiting Tasks</CardTitle>
-                        <CardDescription>Top 5 tasks that waits to get processed</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex-1">
-                        {awaitingTasks.length > 0 && <p className="text-xs text-muted-foreground">You have
-                            currently {awaitingTasks.length} unprocessed tasks.</p>}
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead className="w-[100px]">Identifier</TableHead>
-                                    <TableHead>Task Name</TableHead>
-                                    <TableHead>Task Type</TableHead>
-                                    <TableHead>Combination Name</TableHead>
-                                    <TableHead>Category Name</TableHead>
-                                    <TableHead>Brand Name</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {awaitingTasks.slice(0, 5).map(task => (
-                                    <TableRow key={task.task.id}>
-                                        <TableCell>{task.task.id}</TableCell>
-                                        <TableCell>{task.entityName as string}</TableCell>
-                                        <TableCell>{task.task.entityType}</TableCell>
-                                        <TableCell>{task.combination?.description || "N/A"}</TableCell>
-                                        <TableCell>{task.category?.description || "N/A"}</TableCell>
-                                        <TableCell>{task.brand?.name || "N/A"}</TableCell>
+
+            <Tabs defaultValue="tasks" className="space-y-6">
+                <div className="flex items-center justify-between">
+                    <TabsList className="grid w-fit grid-cols-2">
+                        <TabsTrigger value="tasks" className="flex items-center space-x-2">
+                            <Clock className="h-4 w-4"/>
+                            <span>Pending Tasks</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="reviews" className="flex items-center space-x-2">
+                            <CheckCircle2 className="h-4 w-4"/>
+                            <span>Awaiting Review</span>
+                        </TabsTrigger>
+                    </TabsList>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button className="bg-blue-600 hover:bg-blue-700">
+                                <Zap className="h-4 w-4 mr-2"/>
+                                Generate Content
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-56" align="start">
+                            <DropdownMenuGroup>
+                                <Link href="/dashboard/batch-studio/brands">
+                                    <DropdownMenuItem>
+                                        Brand Content
+                                    </DropdownMenuItem>
+                                </Link>
+                                <Link href="/dashboard/batch-studio/categories">
+                                    <DropdownMenuItem>
+                                        Category Content
+                                    </DropdownMenuItem>
+                                </Link>
+                                <Link href="/dashboard/batch-studio/combinations">
+                                    <DropdownMenuItem>
+                                        Combination Content
+                                    </DropdownMenuItem>
+                                </Link>
+                            </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+
+                <TabsContent value="tasks">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center space-x-2">
+                                <AlertCircle className="h-5 w-5 text-amber-500"/>
+                                <span>Processing Queue</span>
+                            </CardTitle>
+                            <CardDescription>{awaitingTasks.length > 0 &&
+                                <p className="text-xs text-muted-foreground">You have
+                                    currently {awaitingTasks.length} unprocessed tasks.</p>}</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="w-[100px]">Identifier</TableHead>
+                                        <TableHead>Task Name</TableHead>
+                                        <TableHead>Task Type</TableHead>
+                                        <TableHead>Combination Name</TableHead>
+                                        <TableHead>Category Name</TableHead>
+                                        <TableHead>Brand Name</TableHead>
                                     </TableRow>
-                                ))}
-                                {
-                                    awaitingTasks.length === 0 && (
-                                        <TableRow>
-                                            <TableCell colSpan={6} className="text-center">
-                                                No tasks to process right now.
-                                            </TableCell>
+                                </TableHeader>
+                                <TableBody>
+                                    {awaitingTasks.slice(0, 5).map(task => (
+                                        <TableRow key={task.task.id}>
+                                            <TableCell>{task.task.id}</TableCell>
+                                            <TableCell>{task.entityName as string}</TableCell>
+                                            <TableCell>{task.task.entityType}</TableCell>
+                                            <TableCell>{task.combination?.description || "N/A"}</TableCell>
+                                            <TableCell>{task.category?.description || "N/A"}</TableCell>
+                                            <TableCell>{task.brand?.name || "N/A"}</TableCell>
                                         </TableRow>
-                                    )
+                                    ))}
+                                    {
+                                        awaitingTasks.length === 0 && (
+                                            <TableRow>
+                                                <TableCell colSpan={6} className="text-center">
+                                                    No tasks to process right now.
+                                                </TableCell>
+                                            </TableRow>
+                                        )
+                                    }
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                        <CardFooter>
+                            <Link
+                                className={cn(buttonVariants({variant: "outline"}))}
+                                href="/dashboard/batch-studio/tasks"
+                            >
+                                Go to Tasks
+                            </Link>
+                        </CardFooter>
+                    </Card>
+                </TabsContent>
+                <TabsContent value="reviews">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center space-x-2">
+                                <TrendingUp className="h-5 w-5 text-green-500"/>
+                                <span>Ready for Review</span>
+                            </CardTitle>
+                            <CardDescription>
+                                {awaitingReviews.length > 0 &&
+                                    <p className="text-xs text-muted-foreground">
+                                        {awaitingReviews.length} tasks are processed. They are waiting for approval to
+                                        get integrated into QSPay.
+                                    </p>
                                 }
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                    <CardFooter className="flex justify-end">
-                        <Link
-                            className={cn(buttonVariants())}
-                            href="/dashboard/batch-studio/tasks"
-                        >
-                            Go to Tasks
-                        </Link>
-                    </CardFooter>
-                </Card>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Awaiting Review</CardTitle>
-                        <CardDescription>Top 5 generated contents awaiting for review</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex-1">
-                        {awaitingReviews.length > 0 &&
-                            <p className="text-xs text-muted-foreground">{awaitingReviews.length} tasks are processed.
-                                They are waiting for approval to get integrated
-                                into QSPay.</p>}
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead className="w-[100px]">Identifier</TableHead>
-                                    <TableHead>Task Name</TableHead>
-                                    <TableHead>Task Type</TableHead>
-                                    <TableHead>Combination Name</TableHead>
-                                    <TableHead>Category Name</TableHead>
-                                    <TableHead>Brand Name</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {awaitingReviews.slice(0, 5).map(task => (
-                                    <TableRow key={task.content.id}>
-                                        <TableCell>{task.content.id}</TableCell>
-                                        <TableCell>{task.entityName as string}</TableCell>
-                                        <TableCell>{task.content.entityType}</TableCell>
-                                        <TableCell>{task.combination?.description || "N/A"}</TableCell>
-                                        <TableCell>{task.category?.description || "N/A"}</TableCell>
-                                        <TableCell>{task.brand?.name || "N/A"}</TableCell>
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="w-[100px]">Identifier</TableHead>
+                                        <TableHead>Task Name</TableHead>
+                                        <TableHead>Task Type</TableHead>
+                                        <TableHead>Combination Name</TableHead>
+                                        <TableHead>Category Name</TableHead>
+                                        <TableHead>Brand Name</TableHead>
                                     </TableRow>
-                                ))}
-                                {
-                                    awaitingReviews.length === 0 && (
-                                        <TableRow>
-                                            <TableCell colSpan={6} className="text-center">
-                                                No contents awaiting for review
-                                            </TableCell>
+                                </TableHeader>
+                                <TableBody>
+                                    {awaitingReviews.slice(0, 5).map(task => (
+                                        <TableRow key={task.content.id}>
+                                            <TableCell>{task.content.id}</TableCell>
+                                            <TableCell>{task.entityName as string}</TableCell>
+                                            <TableCell>{task.content.entityType}</TableCell>
+                                            <TableCell>{task.combination?.description || "N/A"}</TableCell>
+                                            <TableCell>{task.category?.description || "N/A"}</TableCell>
+                                            <TableCell>{task.brand?.name || "N/A"}</TableCell>
                                         </TableRow>
-                                    )
-                                }
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                    <CardFooter className="flex justify-end">
-                        <Link
-                            className={cn(buttonVariants())}
-                            href="/dashboard/batch-studio/review"
-                        >
-                            Go to Reviews
-                        </Link>
-                    </CardFooter>
-                </Card>
-            </div>
+                                    ))}
+                                    {
+                                        awaitingReviews.length === 0 && (
+                                            <TableRow>
+                                                <TableCell colSpan={6} className="text-center">
+                                                    No contents awaiting for review
+                                                </TableCell>
+                                            </TableRow>
+                                        )
+                                    }
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                        <CardFooter>
+                            <Link
+                                className={cn(buttonVariants({variant: "outline"}))}
+                                href="/dashboard/batch-studio/review"
+                            >
+                                Go to Reviews
+                            </Link>
+                        </CardFooter>
+                    </Card>
+                </TabsContent>
+
+            </Tabs>
+
         </div>
+    )
+}
+
+const WidgetSkeletons = () => {
+    return (
+        <>
+            <Card>
+                <CardContent>
+                    <div className="flex flex-col gap-1">
+                        <Skeleton className="h-4 w-full max-w-full"></Skeleton>
+                        <Skeleton className="h-4 w-1/12 max-w-full"></Skeleton>
+                        <Skeleton className="h-4 w-2/12 max-w-full"></Skeleton>
+                        <Skeleton className="h-4 w-5/12 max-w-full"></Skeleton>
+                    </div>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardContent>
+                    <div className="flex flex-col gap-1">
+                        <Skeleton className="h-4 w-full max-w-full"></Skeleton>
+                        <Skeleton className="h-4 w-4/12 max-w-full"></Skeleton>
+                        <Skeleton className="h-4 w-7/12 max-w-full"></Skeleton>
+                        <Skeleton className="h-4 w-2/12 max-w-full"></Skeleton>
+                    </div>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardContent>
+                    <div className="flex flex-col gap-1">
+                        <Skeleton className="h-4 w-full max-w-full"></Skeleton>
+                        <Skeleton className="h-4 w-2/12 max-w-full"></Skeleton>
+                        <Skeleton className="h-4 w-10/12 max-w-full"></Skeleton>
+                        <Skeleton className="h-4 w-4/12 max-w-full"></Skeleton>
+                    </div>
+                </CardContent>
+            </Card>
+        </>
     )
 }

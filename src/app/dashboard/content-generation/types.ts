@@ -28,7 +28,7 @@ export type MetaOutput = z.infer<typeof MetaOutputSchema>
 
 export const PartialMetaOutputSchema = z.object({
     meta: z.object({
-        title: z.string().optional().describe("Meta title"),
+        title: z.string().min(2),
         description: z.string().optional().describe("Meta description, use ascii chars like ▶ between emphasis sentences"),
         category: z.string().optional().describe("Category name"),
         openGraph: z.object({

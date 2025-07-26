@@ -183,40 +183,6 @@ export function DataTableFilterMenu<TData>({
         debouncedSetFilters([]);
     }, [debouncedSetFilters]);
 
-    React.useEffect(() => {
-        function onKeyDown(event: KeyboardEvent) {
-            if (
-                event.target instanceof HTMLInputElement ||
-                event.target instanceof HTMLTextAreaElement
-            ) {
-                return;
-            }
-
-            if (
-                event.key.toLowerCase() === OPEN_MENU_SHORTCUT &&
-                !event.ctrlKey &&
-                !event.metaKey &&
-                !event.shiftKey
-            ) {
-                event.preventDefault();
-                setOpen(true);
-            }
-
-            if (
-                event.key.toLowerCase() === OPEN_MENU_SHORTCUT &&
-                event.shiftKey &&
-                !open &&
-                filters.length > 0
-            ) {
-                event.preventDefault();
-                onFilterRemove(filters[filters.length - 1]?.filterId ?? "");
-            }
-        }
-
-        window.addEventListener("keydown", onKeyDown);
-        return () => window.removeEventListener("keydown", onKeyDown);
-    }, [open, filters, onFilterRemove]);
-
     const onTriggerKeyDown = React.useCallback(
         (event: React.KeyboardEvent<HTMLButtonElement>) => {
             if (

@@ -67,28 +67,27 @@ export const BatchStudioCategoryTable = ({promise}: CategoriesTableProps) => {
     }
 
     return (
-        <div className="flex-1 p-4 flex flex-col min-h-0 ">
-            <DataTable table={table}>
-                <DataTableToolbar table={table}>
-                    <DataTableSortList table={table} align="end"/>
-                </DataTableToolbar>
-                <div className="flex items-center h-9 gap-4">
+        <DataTable table={table}>
+            <DataTableToolbar table={table}>
+                <DataTableSortList table={table} align="end"/>
+            </DataTableToolbar>
+            <div className="flex items-center h-9 gap-4">
                     <span
                         className="text-sm">You&apos;ve selected {Object.keys(selected).length} records</span>
-                    <Button size="sm" variant="link" onClick={selectAllHandler}><SquareMousePointerIcon/>Select All
-                        Records</Button>
-                    <Button size="sm" variant="link"
-                            onClick={selectAllWithoutContentHandler}><SquareDashedMousePointerIcon/>Select w/o Contents</Button>
-                    {
-                        Object.keys(selected).length > 0 && (
-                            <>
-                                <Button size="sm" variant="link" onClick={clearSelectionHandler}><XIcon/>Clear
-                                    Selected</Button>
-                            </>
-                        )
-                    }
-                </div>
-            </DataTable>
-        </div>
+                <Button size="sm" variant="link" onClick={selectAllHandler}><SquareMousePointerIcon/>Select All
+                    Records</Button>
+                <Button size="sm" variant="link"
+                        onClick={selectAllWithoutContentHandler}><SquareDashedMousePointerIcon/>Select w/o
+                    Contents</Button>
+                {
+                    Object.keys(selected).length > 0 && (
+                        <>
+                            <Button size="sm" variant="link" onClick={clearSelectionHandler}><XIcon/>Clear
+                                Selected</Button>
+                        </>
+                    )
+                }
+            </div>
+        </DataTable>
     )
 }

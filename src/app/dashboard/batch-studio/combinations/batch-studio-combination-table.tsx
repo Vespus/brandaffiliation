@@ -1,19 +1,19 @@
 "use client"
 
-import {DataTable} from "@/components/datatable/data-table"
-import {DataTableSortList} from "@/components/datatable/data-table-sort-list"
-import {use, useEffect} from "react";
-import {useDataTable} from "@/hooks/use-data-table";
-import {DataTableToolbar} from "@/components/datatable/data-table-toolbar";
-import {Button} from "@/components/ui/button";
-import {api} from "@/lib/trpc/react";
-import {SquareDashedMousePointerIcon, SquareMousePointerIcon, XIcon} from "lucide-react";
-import {useDataTableSelectionStore} from "@/app/dashboard/batch-studio/store";
-import {BatchStudioCombinationType} from "@/app/dashboard/batch-studio/combinations/batch-studio-combination-type";
+import { DataTable } from "@/components/datatable/data-table"
+import { DataTableSortList } from "@/components/datatable/data-table-sort-list"
+import { use, useEffect } from "react";
+import { useDataTable } from "@/hooks/use-data-table";
+import { DataTableToolbar } from "@/components/datatable/data-table-toolbar";
+import { Button } from "@/components/ui/button";
+import { api } from "@/lib/trpc/react";
+import { SquareDashedMousePointerIcon, SquareMousePointerIcon, XIcon } from "lucide-react";
+import { useDataTableSelectionStore } from "@/app/dashboard/batch-studio/store";
+import { BatchStudioCombinationType } from "@/app/dashboard/batch-studio/combinations/batch-studio-combination-type";
 import {
     getBatchStudioCombinationTableColumns
 } from "@/app/dashboard/batch-studio/combinations/batch-studio-combination-table-columns";
-import {useTranslations} from "next-intl";
+import { useTranslations } from "next-intl";
 
 interface BrandsTableProps {
     promise: Promise<{ data: BatchStudioCombinationType[], pageCount: number, total: number }>
@@ -67,28 +67,32 @@ export const BatchStudioCombinationTable = ({promise}: BrandsTableProps) => {
     }
 
     return (
-        <div className="flex-1 p-4 flex flex-col min-h-0 ">
-            <DataTable table={table}>
-                <DataTableToolbar table={table}>
-                    <DataTableSortList table={table} align="end"/>
-                </DataTableToolbar>
-                <div className="flex items-center h-9 gap-4">
-                    <span
-                        className="text-sm">You&apos;ve selected {Object.keys(selected).length} records</span>
-                    <Button size="sm" variant="link" onClick={selectAllHandler}><SquareMousePointerIcon/>Select All
-                        Records</Button>
-                    <Button size="sm" variant="link"
-                            onClick={selectAllWithoutContentHandler}><SquareDashedMousePointerIcon/>Select w/o Contents</Button>
-                    {
-                        Object.keys(selected).length > 0 && (
-                            <>
-                                <Button size="sm" variant="link" onClick={clearSelectionHandler}><XIcon/>Clear
-                                    Selected</Button>
-                            </>
-                        )
-                    }
-                </div>
-            </DataTable>
-        </div>
+        <DataTable table={table}>
+            <DataTableToolbar table={table}>
+                <DataTableSortList table={table} align="end"/>
+            </DataTableToolbar>
+            <div className="flex items-center h-9 gap-4">
+                <span className="text-sm">You&apos;ve selected {Object.keys(selected).length} records</span>
+                <Button size="sm" variant="link" onClick={selectAllHandler}><SquareMousePointerIcon/>
+                    Select All Records
+                </Button>
+                <Button
+                    size="sm"
+                    variant="link"
+                    onClick={selectAllWithoutContentHandler}
+                >
+                    <SquareDashedMousePointerIcon/>
+                    Select w/o Contents
+                </Button>
+                {
+                    Object.keys(selected).length > 0 && (
+                        <>
+                            <Button size="sm" variant="link" onClick={clearSelectionHandler}><XIcon/>Clear
+                                Selected</Button>
+                        </>
+                    )
+                }
+            </div>
+        </DataTable>
     )
 }

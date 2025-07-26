@@ -10,6 +10,9 @@ import Link from "next/link";
 import * as React from "react";
 import {BatchStudioBrandType} from "@/app/dashboard/batch-studio/brands/batch-studio-brand-type";
 import {Checkbox} from "@/components/ui/checkbox";
+import {MetaOutput} from "@/app/dashboard/content-generation/types";
+import {Badge} from "@/components/ui/badge";
+import { useQSPayContext } from "@/hooks/contexts/use-qspay-context";
 
 declare module '@tanstack/react-table' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -19,6 +22,8 @@ declare module '@tanstack/react-table' {
 }
 
 export function getBatchStudioBrandTableColumns(): ColumnDef<BatchStudioBrandType>[] {
+    const {currentStore} = useQSPayContext()
+
     return [
         {
             id: "select",
@@ -71,7 +76,17 @@ export function getBatchStudioBrandTableColumns(): ColumnDef<BatchStudioBrandTyp
             header: ({column}) => (
                 <DataTableColumnHeader column={column} title="Slug"/>
             ),
-            cell: ({row}) => <div>/{row.getValue("slug")}</div>,
+            cell: ({row}) => {
+                if(currentStore) {
+                    const url = new URL(currentStore?.storeUrl)
+                    url.pathname = row.original.slug.split("/").filter(Boolean).join("/")
+
+                    return (
+                        <Link href={url.toString()} target="_blank" className="text-xs underline">{url.toString()}</Link>
+                    )
+                }
+                return <span className="text-xs">N/A</span>
+            },
             enableSorting: false,
             enableColumnFilter: false,
         },
@@ -91,11 +106,29 @@ export function getBatchStudioBrandTableColumns(): ColumnDef<BatchStudioBrandTyp
             header: ({column}) => (
                 <DataTableColumnHeader column={column} title="Content"/>
             ),
-            cell: ({row}) => (
-                <div className="truncate max-w-xs">
-                    {row.getValue("content") ? JSON.stringify(row.getValue("content")) : <span><XIcon/></span>}
-                </div>
-            ),
+            cell: ({row}) => {
+                const value = row.getValue("content") as MetaOutput
+                const hasHeader = value?.descriptions?.header
+                const hasFooter = value?.descriptions?.footer
+                const hasMetaTitle = value?.meta?.title
+
+                return (
+                    <div className="flex gap-2 items-center">
+                        <Badge variant={hasMetaTitle ? "outline" : "destructive"} className="gap-1">
+                            {hasMetaTitle ? <CheckIcon className="text-emerald-500" /> : <XIcon className="text-white" />}
+                            Meta Title
+                        </Badge>
+                        <Badge variant={hasHeader ? "outline" : "destructive"} className="gap-1">
+                            {hasHeader ? <CheckIcon className="text-emerald-500" /> : <XIcon className="text-white" />}
+                            Top Text
+                        </Badge>
+                        <Badge variant={hasFooter ? "outline" : "destructive"} className="gap-1">
+                            {hasFooter ? <CheckIcon className="text-emerald-500" /> : <XIcon className="text-white" />}
+                            Footer Text
+                        </Badge>
+                    </div>
+                )
+            },
             enableSorting: false,
             enableColumnFilter: true,
             meta: {

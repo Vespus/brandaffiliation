@@ -40,6 +40,7 @@ export function DataTablePagination<TData>({
                 {table.getFilteredRowModel().rows.length} row(s) selected.
             </div>
             <div className="flex flex-col-reverse items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
+                <span className="text-muted-foreground text-sm">{table.getRowCount()} Records</span>
                 <div className="flex items-center space-x-2">
                     <p className="whitespace-nowrap font-medium text-sm">Rows per page</p>
                     <Select

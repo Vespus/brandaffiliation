@@ -1,11 +1,15 @@
 "use client";
 
-import {DataTableColumnHeader} from "@/components/datatable/data-table-column-header";
-import {ColumnDef, RowData} from "@tanstack/react-table";
-import {StarIcon, Text, XIcon,} from "lucide-react";
+import { DataTableColumnHeader } from "@/components/datatable/data-table-column-header";
+import { ColumnDef, RowData } from "@tanstack/react-table";
+import { CheckIcon, StarIcon, Text, XIcon, } from "lucide-react";
 import * as React from "react";
-import {Checkbox} from "@/components/ui/checkbox";
-import {BatchStudioCombinationType} from "@/app/dashboard/batch-studio/combinations/batch-studio-combination-type";
+import { Checkbox } from "@/components/ui/checkbox";
+import { BatchStudioCombinationType } from "@/app/dashboard/batch-studio/combinations/batch-studio-combination-type";
+import { MetaOutput } from "@/app/dashboard/content-generation/types";
+import { Badge } from "@/components/ui/badge";
+import { useQSPayContext } from "@/hooks/contexts/use-qspay-context";
+import Link from "next/link";
 
 declare module '@tanstack/react-table' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -15,6 +19,8 @@ declare module '@tanstack/react-table' {
 }
 
 export function getBatchStudioCombinationTableColumns(): ColumnDef<BatchStudioCombinationType>[] {
+    const {currentStore} = useQSPayContext()
+
     return [
         {
             id: "select",
@@ -45,17 +51,37 @@ export function getBatchStudioCombinationTableColumns(): ColumnDef<BatchStudioCo
             size: 40,
         },
         {
+            id: "brand",
+            accessorKey: "brand",
+            header: ({column, table: {options: {meta}}}) => (
+                <DataTableColumnHeader column={column} title={meta!.t("brand.label")!}/>
+            ),
+            cell: ({row}) => <div className="font-medium text-xs">{row.getValue("brand")}</div>,
+            enableSorting: false,
+            enableColumnFilter: false,
+        },
+        {
+            id: "category",
+            accessorKey: "category",
+            header: ({column}) => (
+                <DataTableColumnHeader column={column} title="Category"/>
+            ),
+            cell: ({row}) => <div className="font-medium text-xs">{row.getValue("category")}</div>,
+            enableSorting: false,
+            enableColumnFilter: false,
+        },
+        {
             id: "name",
             accessorKey: "name",
             header: ({column, table: {options: {meta}}}) => (
-                <DataTableColumnHeader column={column} title="Combination Name"/>
+                <DataTableColumnHeader column={column} title="Name"/>
             ),
-            cell: ({row}) => <div>{row.getValue("name")}</div>,
+            cell: ({row}) => <div className="text-xs">{row.getValue("name")}</div>,
             enableSorting: true,
             enableHiding: false,
             meta: {
-                label: "Brand Title",
-                placeholder: "Search brands...",
+                label: "Combination Name",
+                placeholder: "Search combinations...",
                 variant: "text",
                 icon: Text,
             },
@@ -67,29 +93,26 @@ export function getBatchStudioCombinationTableColumns(): ColumnDef<BatchStudioCo
             header: ({column}) => (
                 <DataTableColumnHeader column={column} title="Description"/>
             ),
-            cell: ({row}) => <div>{row.getValue("description")}</div>,
+            cell: ({row}) => <div className="text-xs">{row.getValue("description")}</div>,
             enableSorting: false,
             enableColumnFilter: false,
         },
         {
-            id: "brand",
-            accessorKey: "brand",
-            header: ({column, table: {options: {meta}}}) => (
-                <DataTableColumnHeader column={column} title={meta!.t("brand.label")!}/>
-            ),
-            cell: ({row}) => <div>{row.getValue("brand")}</div>,
-            enableSorting: false,
-            enableColumnFilter: false,
-        },
-        {
-            id: "category",
-            accessorKey: "category",
+            id: "slug",
             header: ({column}) => (
-                <DataTableColumnHeader column={column} title="Category"/>
+                <DataTableColumnHeader column={column} title="Slug"/>
             ),
-            cell: ({row}) => <div>{row.getValue("category")}</div>,
-            enableSorting: false,
-            enableColumnFilter: false,
+            cell: ({row}) => {
+                if(currentStore) {
+                    const url = new URL(currentStore?.storeUrl)
+                    url.pathname = [row.original.categorySlug, row.original.brandSlug].join("/").split("/").filter(Boolean).join("/")
+
+                    return (
+                        <Link href={url.toString()} target="_blank" className="text-xs underline">{url.toString()}</Link>
+                    )
+                }
+                return <span className="text-xs">N/A</span>
+            }
         },
         {
             id: "integrationId",
@@ -97,7 +120,7 @@ export function getBatchStudioCombinationTableColumns(): ColumnDef<BatchStudioCo
             header: ({column}) => (
                 <DataTableColumnHeader column={column} title="QSPay Identifier"/>
             ),
-            cell: ({row}) => <div>{row.getValue("integrationId")}</div>,
+            cell: ({row}) => <div className="text-xs">{row.getValue("integrationId")}</div>,
             enableSorting: false,
             enableColumnFilter: false,
         },
@@ -107,11 +130,29 @@ export function getBatchStudioCombinationTableColumns(): ColumnDef<BatchStudioCo
             header: ({column}) => (
                 <DataTableColumnHeader column={column} title="Content"/>
             ),
-            cell: ({row}) => (
-                <div className="truncate max-w-xs">
-                    {row.getValue("content") ? JSON.stringify(row.getValue("content")) : <span><XIcon/></span>}
-                </div>
-            ),
+            cell: ({row}) => {
+                const value = row.getValue("content") as MetaOutput
+                const hasHeader = value?.descriptions?.header
+                const hasFooter = value?.descriptions?.footer
+                const hasMetaTitle = value?.meta?.title
+
+                return (
+                    <div className="flex gap-2 items-center">
+                        <Badge variant={hasMetaTitle ? "outline" : "destructive"} className="gap-1">
+                            {hasMetaTitle ? <CheckIcon className="text-emerald-500" /> : <XIcon className="text-white" />}
+                            Meta Title
+                        </Badge>
+                        <Badge variant={hasHeader ? "outline" : "destructive"} className="gap-1">
+                            {hasHeader ? <CheckIcon className="text-emerald-500" /> : <XIcon className="text-white" />}
+                            Top Text
+                        </Badge>
+                        <Badge variant={hasFooter ? "outline" : "destructive"} className="gap-1">
+                            {hasFooter ? <CheckIcon className="text-emerald-500" /> : <XIcon className="text-white" />}
+                            Footer Text
+                        </Badge>
+                    </div>
+                )
+            },
             enableSorting: false,
             enableColumnFilter: true,
             meta: {

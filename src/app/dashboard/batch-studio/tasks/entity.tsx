@@ -1,10 +1,12 @@
-import {TableCell, TableRow} from "@/components/ui/table";
-import {TaskJoin} from "@/app/dashboard/batch-studio/tasks/type";
-import {useEffect, useRef, useState} from "react";
-import {Progress} from "@/components/ui/progress";
-import {cn} from "@/lib/utils";
-import {Button} from "@/components/ui/button";
-import {PlayIcon} from "lucide-react";
+import { TableCell, TableRow } from "@/components/ui/table";
+import { TaskJoin } from "@/app/dashboard/batch-studio/tasks/type";
+import { useEffect, useRef, useState } from "react";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { PlayIcon, Trash2Icon } from "lucide-react";
+import { useCustomAction } from "@/hooks/use-custom-action";
+import { RemoveTaskAction } from "@/app/dashboard/batch-studio/tasks/action";
 
 type EntityProps = {
     task: TaskJoin
@@ -26,13 +28,40 @@ export const Entity = ({
     const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
     const [progress, setProgress] = useState(0);
     const [hasStarted, setHasStarted] = useState(false);
+
     const simulateProgress = () => {
         let current = 0;
+        const startTime = Date.now();
+        const targetDuration = 20000 + Math.random() * 10000; // 20-30 seconds
+
         interval.current = setInterval(() => {
-            current += Math.random() * 10;
-            setProgress(p => Math.min(p + 5, 90));
-            if (current >= 90) clearInterval(interval.current);
-        }, 1500);
+            const elapsed = Date.now() - startTime;
+            const timeProgress = elapsed / targetDuration;
+
+            // Calculate how much we should have progressed by now
+            const expectedProgress = Math.min(timeProgress * 90, 90);
+
+            // Add some randomness but keep it realistic
+            const randomFactor = 0.5 + Math.random(); // 0.5 to 1.5 multiplier
+            const baseIncrement = (expectedProgress - current) * 0.3 * randomFactor;
+
+            // Ensure we always make some progress, but vary the amount
+            const increment = Math.max(0.5, Math.min(baseIncrement, 8));
+
+            current += increment;
+
+            // Sometimes have small pauses or slower periods
+            const shouldPause = Math.random() < 0.15; // 15% chance
+            if (!shouldPause) {
+                setProgress(prev => Math.min(prev + increment, 90));
+            }
+
+            // Clear when we reach 90% or time is up
+            if (current >= 90 || elapsed >= targetDuration) {
+                setProgress(90);
+                clearInterval(interval.current);
+            }
+        }, 300 + Math.random() * 700); // Random interval between 300ms-1000ms
     };
 
     const processTask = async () => {
@@ -47,10 +76,10 @@ export const Entity = ({
                 body: JSON.stringify({taskId: task.task.id}),
             })
 
-            if(!response.ok){
+            if (!response.ok) {
                 setStatus("error")
                 onJobError?.(task)
-            }else{
+            } else {
                 setStatus("success")
                 onJobComplete?.(task)
             }
@@ -62,6 +91,8 @@ export const Entity = ({
         clearInterval(interval.current)
         setProgress(100)
     }
+
+    const removeTask = useCustomAction(RemoveTaskAction)
 
     useEffect(() => {
         if (shouldStart && !hasStarted) {
@@ -95,9 +126,13 @@ export const Entity = ({
                 </div>
             </TableCell>
             <TableCell>
-                <div className="flex gap-2">
-                    <Button variant="ghost" size="icon" onClick={processTask}>
-                        <PlayIcon/>
+                <div className="flex gap-1 justify-end">
+                    <Button variant="outline" size="icon" className="p-" loading={status === "loading"} onClick={processTask}>
+                        <PlayIcon className="size-4 text-emerald-500"/>
+                    </Button>
+                    <Button variant="outline" size="icon" loading={status === "loading"}
+                            onClick={() => removeTask.execute({taskId: task.task.id})}>
+                        <Trash2Icon className="size-4"/>
                     </Button>
                 </div>
             </TableCell>

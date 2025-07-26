@@ -1,4 +1,3 @@
-import { BatchStudioContextProvider } from "@/app/dashboard/batch-studio/categories/context";
 import { ManageForm } from "@/app/dashboard/batch-studio/categories/manage-form";
 import { BatchStudioCategoryTable } from "@/app/dashboard/batch-studio/categories/batch-studio-category-table";
 import { getCategories, searchParamsCache } from "@/app/dashboard/batch-studio/categories/queries";
@@ -16,11 +15,9 @@ export default async function Page(props: CategoriesPageProps) {
     const promise = getCategories(search)
 
     return (
-        <BatchStudioContextProvider>
-            <div className="flex flex-1 gap-4 min-h-0">
-                <ManageForm/>
-                <BatchStudioCategoryTable promise={promise}/>
-            </div>
-        </BatchStudioContextProvider>
+        <div className="flex flex-1 gap-4 min-h-0">
+            <ManageForm/>
+            <BatchStudioCategoryTable promise={promise}/>
+        </div>
     )
 }

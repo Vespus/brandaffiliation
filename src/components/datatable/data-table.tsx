@@ -1,17 +1,10 @@
-import { type Table as TanstackTable, flexRender } from "@tanstack/react-table";
+import { flexRender, type Table as TanstackTable } from "@tanstack/react-table";
 import type * as React from "react";
 
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import {getCommonPinningStyles} from "@/lib/datatable/data-table";
-import {DataTablePagination} from "@/components/datatable/data-table-pagination";
+import { getCommonPinningStyles } from "@/lib/datatable/data-table";
+import { DataTablePagination } from "@/components/datatable/data-table-pagination";
 
 interface DataTableProps<TData> extends React.ComponentProps<"div"> {
     table: TanstackTable<TData>;
@@ -25,6 +18,7 @@ export function DataTable<TData>({
                                      className,
                                      ...props
                                  }: DataTableProps<TData>) {
+
     return (
         <div
             className={cn("flex w-full flex-col gap-2.5 overflow-auto", className)}
@@ -41,7 +35,7 @@ export function DataTable<TData>({
                                         key={header.id}
                                         colSpan={header.colSpan}
                                         style={{
-                                            ...getCommonPinningStyles({ column: header.column }),
+                                            ...getCommonPinningStyles({column: header.column}),
                                         }}
                                     >
                                         {header.isPlaceholder
@@ -60,13 +54,14 @@ export function DataTable<TData>({
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
+                                    row-id={row.id}
                                     data-state={row.getIsSelected() && "selected"}
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell
                                             key={cell.id}
                                             style={{
-                                                ...getCommonPinningStyles({ column: cell.column }),
+                                                ...getCommonPinningStyles({column: cell.column}),
                                             }}
                                         >
                                             {flexRender(
@@ -91,10 +86,11 @@ export function DataTable<TData>({
                 </Table>
             </div>
             <div className="flex flex-col gap-2.5">
-                <DataTablePagination table={table} />
+                <DataTablePagination table={table}/>
                 {actionBar &&
                     table.getFilteredSelectedRowModel().rows.length > 0 &&
-                    actionBar}
+                    actionBar
+                }
             </div>
         </div>
     );

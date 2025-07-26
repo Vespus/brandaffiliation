@@ -13,6 +13,7 @@ export default  function Page() {
         });
         console.log(newUser);
     }
+
     return (
         <div>
             <StoreMissing />

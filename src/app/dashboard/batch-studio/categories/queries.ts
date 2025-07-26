@@ -1,6 +1,6 @@
 import { BatchStudioCategoryType } from "@/app/dashboard/batch-studio/categories/batch-studio-category-type";
 import { db } from "@/db";
-import { categories, contents, } from "@/db/schema";
+import { categories, contents } from "@/db/schema";
 import { Category } from "@/db/types";
 import { getSortingStateParser } from "@/lib/datatable/parsers";
 import { and, asc, count, desc, eq, ilike, isNotNull, isNull, sql } from "drizzle-orm";
@@ -22,7 +22,8 @@ export const getCategories = async (input: Awaited<ReturnType<typeof searchParam
     const where = and(
         input.name ? ilike(categories.name, `%${input.name}%`) : undefined,
         input.content === "yes" ? isNotNull(contents.config) : undefined,
-        input.content === "no" ? isNull(contents.config) : undefined
+        input.content === "no" ? isNull(contents.config) : undefined,
+        isNotNull(categories.integrationId)
     )
 
     const orderBy =

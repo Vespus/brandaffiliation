@@ -22,7 +22,8 @@ export const getBrands = async (input: Awaited<ReturnType<typeof searchParamsCac
     const where = and(
         input.name ? ilike(brands.name, `%${input.name}%`) : undefined,
         input.content === "yes" ? isNotNull(contents.config) : undefined,
-        input.content === "no" ? isNull(contents.config) : undefined
+        input.content === "no" ? isNull(contents.config) : undefined,
+        isNotNull(brands.integrationId)
     )
 
     const orderBy =

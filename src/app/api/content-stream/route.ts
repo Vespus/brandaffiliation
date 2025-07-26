@@ -1,6 +1,6 @@
-import {getDriver} from "@/app/dashboard/content-generation/utils";
-import {db} from "@/db";
-import {getAIModelsWithProviderAndSettings} from "@/db/presets";
+import { getDriver } from "@/app/dashboard/content-generation/utils";
+import { db } from "@/db";
+import { getAIModelsWithProviderAndSettings } from "@/db/presets";
 import {
     brandWithScales,
     categories,
@@ -11,13 +11,14 @@ import {
     systemPrompts,
     tasks
 } from "@/db/schema";
-import {generateObject} from "ai";
-import {and, eq, inArray, sql} from "drizzle-orm";
-import {NextRequest, NextResponse} from "next/server";
+import { generateObject } from "ai";
+import { and, eq, inArray, sql } from "drizzle-orm";
+import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
-import {BatchContentGenerateSchemaType} from "@/app/dashboard/batch-studio/schema";
-import {MetaOutputSchema} from "@/app/dashboard/content-generation/types";
-import {revalidatePath} from "next/cache";
+import { BatchContentGenerateSchemaType } from "@/app/dashboard/batch-studio/schema";
+import { MetaOutputSchema } from "@/app/dashboard/content-generation/types";
+import { revalidatePath } from "next/cache";
+import { Task } from "@/db/types";
 
 export const maxDuration = 60;
 
@@ -44,16 +45,20 @@ export const POST = async (req: NextRequest) => {
 
     const userPrompt: string[] = []
 
+    if(specifications.userPromptPrefix){
+        userPrompt.push(specifications.userPromptPrefix)
+    }
+
     if (task.entityType === "brand") {
-        userPrompt.push(await processBrand(task.entityId as string))
+        userPrompt.push(await processBrand(task))
     }
 
     if (task.entityType === "category") {
-        userPrompt.push(await processCategory(task.entityId as string))
+        userPrompt.push(await processCategory(task))
     }
 
     if (task.entityType === "combination") {
-        userPrompt.push(await processCombination(task.entityId as string))
+        userPrompt.push(await processCombination(task))
     }
 
     userPrompt.push(await handleDataSources({dataSources: specifications.dataSources}))
@@ -136,36 +141,51 @@ const handleDataSources = async ({dataSources}: Pick<BatchContentGenerateSchemaT
 
     return prompt.join("\n")
 }
-const processBrand = async (id: string) => {
+const processBrand = async (task: Task, id?: string) => {
     const scaleMap = ["price", "quality", "focus", "design", "positioning", "origin", "heritage", "recognition", "revenue"]
 
-    const [brand] = await db.select().from(brandWithScales).where(eq(brandWithScales.integrationId, id))
+    const [brand] = await db.select().from(brandWithScales).where(eq(brandWithScales.integrationId, id || task.entityId))
 
-    const brandHeaderInformation = `<BrandName>${brand.name}</BrandName><BrandMetaData>${JSON.stringify(brand.config)}</BrandMetaData>`
-    const brandScaleInformation = `<BrandScales>${scaleMap.map(s => `<Scale>${s}:${brand[s]}/5</Scale>`).join("\n")}</BrandScales>`
-    const brandCharacteristics = `<BrandCharacteristics>${brand.characteristic?.map(c => `<Characteristic>${c.value}</Characteristic>`).join("\n")}</BrandCharacteristics>`
+    const scales = scaleMap.map(s => `${s}:${brand[s]}/5`)
 
-    return `<Brand>${brandHeaderInformation}${brandScaleInformation}${brandCharacteristics}</Brand>`
+    const brandHeaderInformation = `<BrandName>${brand.name}</BrandName>`
+    const brandMetaData = brand.config ? `<BrandMetaData>${JSON.stringify(brand.config)}</BrandMetaData>` : ""
+    const brandScaleInformation = scales.length > 0 ? `<BrandScales>${scales.map(s => `<Scale>${s}</Scale>`).join("\n")}</BrandScales>` : ""
+    const brandCharacteristics = (brand.characteristic?.length || 0) > 0 ? `<BrandCharacteristics>${brand.characteristic?.map(c => `<Characteristic>${c.value}</Characteristic>`).join("\n")}</BrandCharacteristics>` : ""
+
+    const output = [brandHeaderInformation]
+    if (brand.config && task.specification?.useBrandContent) {
+        output.push(brandMetaData)
+        output.push(brandScaleInformation)
+        output.push(brandCharacteristics)
+    }
+
+    return `<Brand>${output.join("")}</Brand>`
 }
-const processCategory = async (id: string) => {
+const processCategory = async (task: Task, id?: string) => {
     const [category] = await db.select()
         .from(categories)
         .leftJoin(contents, and(eq(contents.entityId, categories.integrationId), eq(contents.entityType, "category")))
-        .where(eq(categories.integrationId, id))
+        .where(eq(categories.integrationId, id || task.entityId))
 
     const categoryHeaderInformation = `<CategoryName>${category.categories.name}</CategoryName>`
-    const categoryMetaData = category.contents ? `<CategoryMetaData>${JSON.stringify(category.contents.config)}</CategoryMetaData>` : undefined
+    const categoryMetaData = category.contents ? `<CategoryMetaData>${JSON.stringify(category.contents.config)}</CategoryMetaData>` : ""
+
+    const output = [categoryHeaderInformation]
+    if (category.contents?.config && task.specification?.useCategoryContent) {
+        output.push(categoryMetaData)
+    }
 
     return `<Category>${categoryHeaderInformation}${categoryMetaData}</Category>`
 }
-const processCombination = async (id: string) => {
+const processCombination = async (task: Task) => {
     const [combination] = await db.select()
         .from(combinations)
         .leftJoin(contents, and(eq(contents.entityId, combinations.integrationId), eq(contents.entityType, "combination")))
-        .where(eq(combinations.integrationId, id))
+        .where(eq(combinations.integrationId, task.entityId))
 
-    const brand = await processBrand(combination.combinations.brandId!)
-    const category = await processCategory(combination.combinations.categoryId!)
+    const brand = await processBrand(task, combination.combinations.brandId!)
+    const category = await processCategory(task, combination.combinations.categoryId!)
 
     return brand + category
 }

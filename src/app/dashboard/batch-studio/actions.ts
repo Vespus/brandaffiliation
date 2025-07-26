@@ -33,6 +33,11 @@ export const saveTask = actionClient
 
         const existingIdList = existingTasks.map(x => x.entityId)
         const insertTask = parsedInput.filter(x => !existingIdList.includes(x.entityId))
+
+        if (insertTask.length === 0) {
+            throw new Error("No new task to save, Selected entities may already have a task")
+        }
+
         await db.insert(tasks).values(insertTask)
     })
 
@@ -69,6 +74,8 @@ export const SaveReviewTaskToQSPay = actionClient
                     config: toMerged(remoteBrand.config, parsedInput.config)
                 })
             })
+
+            console.log(editResult)
         }
 
         if (entityType === "category") {
@@ -112,8 +119,6 @@ export const SaveReviewTaskToQSPay = actionClient
                     combinatioId: combination.integrationId!
                 }
             })
-
-            console.log('CEM',remoteCombination)
 
             const {result: editResult} = await QSPayClient<QSPayCombin[]>("CmsCombinPage/EditDescription", {
                 method: "POST",

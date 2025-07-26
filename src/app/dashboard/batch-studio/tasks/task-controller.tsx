@@ -80,7 +80,7 @@ export const TaskController = ({tasks}: { tasks: TaskJoin[] }) => {
                         <TableHead>Category Name</TableHead>
                         <TableHead>Brand Name</TableHead>
                         <TableHead className="w-xs">Status</TableHead>
-                        <TableHead>Actions</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>

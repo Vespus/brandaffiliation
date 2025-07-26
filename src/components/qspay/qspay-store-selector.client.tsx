@@ -4,18 +4,21 @@ import { changeStore } from "@/components/qspay/qspay-store-selector-action";
 import { ComboboxBase } from "@/components/ui/combobox-base";
 import { useCustomAction } from "@/hooks/use-custom-action";
 import { parseAsString, useQueryState } from "nuqs";
-import {api} from "@/lib/trpc/react";
-import {useCookie} from "@/hooks/use-cookie";
-import {useState} from "react";
-import {cn} from "@/lib/utils";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { QSPayStore } from "@/qspay-types";
+import { useRouter } from "next/navigation";
 
-export function QspayStoreSelectorClient() {
-    const {data} = api.qspayRoute.getUserStores.useQuery()
-    const [value] = useCookie("qs-pay-store-id")
+export function QspayStoreSelectorClient({storeList, currentValue}: { storeList: QSPayStore[], currentValue?: string }) {
+    const router = useRouter()
     const [error] = useQueryState("error", parseAsString)
-    const [optimisticValue, setOptimisticValue] = useState<string | undefined>(value ?? undefined)
+    const [optimisticValue, setOptimisticValue] = useState<string | undefined>(currentValue ?? undefined)
 
-    const changeStoreAction = useCustomAction(changeStore)
+    const changeStoreAction = useCustomAction(changeStore, {
+        onSuccess: (res) => {
+            router.refresh()
+        }
+    })
 
     return (
         <ComboboxBase
@@ -29,7 +32,7 @@ export function QspayStoreSelectorClient() {
             placeholder="Select a store"
             emptyPlaceholder="No store selected"
             searchPlaceholder="Search..."
-            data={data || []}
+            data={storeList || []}
             className={cn(error && "border-red-500 dark:border-red-700", "w-sm")}
         />
     )
