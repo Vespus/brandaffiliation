@@ -3,8 +3,7 @@ import { ReviewJoin } from "@/app/dashboard/batch-studio/tasks/type";
 import { Badge } from "@/components/ui/badge";
 import { Scroller } from "@/components/ui/scroller";
 import { ReviewSidebarItem } from "@/app/dashboard/batch-studio/review/review-sidebar-item";
-import { Button } from "@/components/ui/button";
-import { CheckIcon } from "lucide-react";
+import { ReviewSidebarHandler } from "@/app/dashboard/batch-studio/review/review-sidebar-handler";
 
 export const ReviewSidebar = ({contents}: { contents: ReviewJoin[] }) => {
     return (
@@ -14,7 +13,7 @@ export const ReviewSidebar = ({contents}: { contents: ReviewJoin[] }) => {
                     <h3 className="font-medium text-lg">Review Queue</h3>
                     <Badge>{contents.length} Pending</Badge>
                 </div>
-                <Button><CheckIcon />Accept All</Button>
+                <ReviewSidebarHandler contents={contents}/>
             </div>
             <Scroller className="min-h-0 flex-1">
                 <div className="space-y-2 px-4 py-2">

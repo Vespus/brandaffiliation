@@ -6,7 +6,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import * as React from "react";
 import { useMemo } from "react";
 import { ReviewJoin } from "@/app/dashboard/batch-studio/tasks/type";
-import { CheckIcon, EyeIcon, XIcon } from "lucide-react";
+import { EyeIcon, XIcon } from "lucide-react";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -29,9 +29,7 @@ export const ReviewHandlers = ({item}: { item: ReviewJoin }) => {
     const getStoreSlug = useMemo(() => {
         if (currentStore) {
             const url = new URL(currentStore?.storeUrl)
-            console.log(item)
             url.pathname = [item.category?.slug, item.brand?.slug].join("/").split("/").filter(Boolean).join("/")
-
             return url.toString()
         }
 
@@ -80,13 +78,7 @@ export const ReviewHandlers = ({item}: { item: ReviewJoin }) => {
                 </AlertDialogContent>
             </AlertDialog>
 
-            <Button
-                type="submit"
-                form="reviewForm"
-            >
-                <CheckIcon />
-                Approve
-            </Button>
+            <div id="review-form-portal-additional-handlers"></div>
         </div>
     )
 }

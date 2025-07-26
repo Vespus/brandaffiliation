@@ -11,12 +11,6 @@ const nextConfig: NextConfig = {
             fullUrl: true,
         },
     },
-    typescript: {
-        ignoreBuildErrors: true
-    },
-    eslint: {
-        ignoreDuringBuilds: true
-    },
     images: {
         unoptimized: true,
         remotePatterns: [

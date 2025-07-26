@@ -6,7 +6,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FacebookIcon, Globe, NewspaperIcon, TwitterIcon } from "lucide-react";
+import { CheckIcon, FacebookIcon, Globe, NewspaperIcon, TwitterIcon } from "lucide-react";
 import { ControllerProps, type FieldPath, type FieldValues, useForm } from "react-hook-form";
 import { useCustomAction } from "@/hooks/use-custom-action";
 import { SaveReviewTaskToQSPay } from "@/app/dashboard/batch-studio/actions";
@@ -16,8 +16,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { get } from "es-toolkit/compat";
 import * as React from "react";
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
+import { Button } from "@/components/ui/button";
 
 export const ReviewForm = ({item}: { item: ReviewJoin }) => {
+    const [domReady, setDomReady] = React.useState(false)
     const form = useForm<PartialMetaOutput>({
         resolver: zodResolver(PartialMetaOutputSchema),
         defaultValues: {
@@ -48,18 +52,19 @@ export const ReviewForm = ({item}: { item: ReviewJoin }) => {
             toast.success("Successfully saved")
         }
     })
-
     const handleSubmit = async (values: PartialMetaOutput) => {
-        singleSaveAction.execute({
-            config: values,
-            content: {
-                contentId: item.content.id,
-                entityType: item.content.entityType,
-                entityId: item.content.entityId
+        singleSaveAction.execute([
+            {
+                config: values,
+                contentId: item.content.id
             }
-        })
+        ])
     }
+
     const hasComparison = !!item.content.oldConfig
+    useEffect(() => {
+        setDomReady(true)
+    }, []);
 
     return (
         <div className="flex flex-col flex-1 p-6 bg-muted">
@@ -376,6 +381,19 @@ export const ReviewForm = ({item}: { item: ReviewJoin }) => {
                             />
                         </CardContent>
                     </Card>
+                    {
+                        domReady && createPortal(
+                            <Button
+                                type="submit"
+                                form="reviewForm"
+                                loading={singleSaveAction.isPending}
+                            >
+                                <CheckIcon/>
+                                Approve
+                            </Button>,
+                            document.getElementById("review-form-portal-additional-handlers")!
+                        )
+                    }
                 </form>
             </Form>
         </div>
@@ -429,7 +447,6 @@ export const ComparisonFormField = <
             />
         )
     }
-
 
     return (
         <FormField

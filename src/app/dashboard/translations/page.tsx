@@ -4,13 +4,15 @@ import { TranslationEditDialog } from "@/app/dashboard/translations/translation-
 import { TranslationPageHeader } from "@/app/dashboard/translations/translation-page-header";
 import { getTranslations, searchParamsCache } from "@/app/dashboard/translations/queries";
 import { Suspense } from "react";
+import { SearchParams } from "nuqs/server";
 
-interface TranslationsPageProps {
-    searchParams: Record<string, string | string[]>;
+interface TranslationPageProps {
+    searchParams: Promise<SearchParams>
 }
 
-export default async function TranslationsPage({ searchParams }: TranslationsPageProps) {
-    const parsedParams = await searchParamsCache.parse(searchParams);
+export default async function TranslationPage(props: TranslationPageProps) {
+    const searchParams = await props.searchParams;
+    const parsedParams = searchParamsCache.parse(searchParams);
     const translationsPromise = getTranslations(parsedParams);
 
     return (

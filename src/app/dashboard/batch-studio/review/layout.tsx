@@ -4,7 +4,7 @@ import { ReviewSidebar } from "@/app/dashboard/batch-studio/review/review-sideba
 
 export default async function Layout({children}: { children: ReactNode }) {
     const contents = await getReviewTasks()
-
+console.log(contents)
     return (
         <div
             className="flex-1 flex flex-col max-h-[calc(100svh_-_calc(var(--spacing)_*_16)_-_calc(var(--spacing)_*_4)))] -mx-8">

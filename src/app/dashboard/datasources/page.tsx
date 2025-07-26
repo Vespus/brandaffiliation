@@ -4,13 +4,15 @@ import { getDatasources, searchParamsCache } from "@/app/dashboard/datasources/q
 import { Suspense } from "react";
 import { DatasourceCreateForm } from './datasource-create-form';
 import { DatasourceTable } from './datasource-table';
+import { SearchParams } from "nuqs/server";
 
 interface DatasourcesPageProps {
-    searchParams: Record<string, string | string[]>;
+    searchParams: Promise<SearchParams>
 }
 
-export default async function DatasourcesPage({searchParams}: DatasourcesPageProps) {
-    const parsedParams = await searchParamsCache.parse(searchParams);
+export default async function DataSourcesPage(props: DatasourcesPageProps) {
+    const searchParams = await props.searchParams;
+    const parsedParams = searchParamsCache.parse(searchParams);
     const datasourcesPromise = getDatasources(parsedParams);
 
     return (

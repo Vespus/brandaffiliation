@@ -19,8 +19,8 @@ export const MetaOutputSchema = z.object({
         robot: z.string().describe("Robot meta tag content")
     }).describe("Meta information"),
     descriptions: z.object({
-        header: z.string().describe("Banner Hero Header description in html with *one h1* and at least *two p* tags. paragraphs should be minimum 50-100 words long"),
-        footer: z.string().describe("Bottom of the page Hero Footer description")
+        header: z.string().describe("Banner Hero Header description in html with *one h1* and at least *two p* tags without style. paragraphs should be minimum 50-100 words long"),
+        footer: z.string().describe("Bottom of the page Hero Footer description must use html without style")
     }).describe("Content descriptions")
 })
 
@@ -28,7 +28,7 @@ export type MetaOutput = z.infer<typeof MetaOutputSchema>
 
 export const PartialMetaOutputSchema = z.object({
     meta: z.object({
-        title: z.string().min(2),
+        title: z.string().optional().describe("Meta title"),
         description: z.string().optional().describe("Meta description, use ascii chars like ▶ between emphasis sentences"),
         category: z.string().optional().describe("Category name"),
         openGraph: z.object({

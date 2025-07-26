@@ -1,16 +1,17 @@
 "use server"
 
-import {MetaOutput, PartialMetaOutputSchema} from "@/app/dashboard/content-generation/types";
-import {db} from "@/db";
-import {brands, categories, combinations, contents, tasks} from "@/db/schema";
-import {actionClient} from "@/lib/action-client";
-import {QSPayClient} from "@/lib/qs-pay-client";
-import {QSPayBrand, QSPayCategory, QSPayCombin} from "@/qspay-types";
-import {and, eq, inArray} from "drizzle-orm";
+import { MetaOutput, PartialMetaOutput, PartialMetaOutputSchema } from "@/app/dashboard/content-generation/types";
+import { db } from "@/db";
+import { brands, categories, combinations, contents, tasks } from "@/db/schema";
+import { actionClient } from "@/lib/action-client";
+import { QSPayClient } from "@/lib/qs-pay-client";
+import { QSPayBrand, QSPayCategory, QSPayCombin } from "@/qspay-types";
+import { and, eq, inArray } from "drizzle-orm";
 import z from "zod";
-import {revalidatePath} from "next/cache";
-import {toMerged} from "es-toolkit";
-import {redirect} from "next/navigation";
+import { revalidatePath } from "next/cache";
+import { toMerged } from "es-toolkit";
+import { Content } from "@/db/types";
+import { redirect } from "next/navigation";
 
 export const saveTask = actionClient
     .inputSchema(
@@ -43,20 +44,36 @@ export const saveTask = actionClient
 
 export const SaveReviewTaskToQSPay = actionClient
     .inputSchema(
-        z.object({
-            config: PartialMetaOutputSchema,
-            content: z.object({
-                contentId: z.number(),
-                entityType: z.string(),
-                entityId: z.string(),
+        z.array(
+            z.object({
+                config: PartialMetaOutputSchema.optional(),
+                contentId: z.number()
             })
-        })
+        )
     )
     .action(async ({parsedInput}) => {
-        const {entityId, entityType, contentId} = parsedInput.content;
+        await db.transaction(async (tx) => {
+            await Promise.all(
+                parsedInput.map(async ({config, contentId}) => {
+                    const [content] = await tx.select().from(contents).where(eq(contents.id, contentId))
+                    await processQSPay({content, config})
+                    await tx.update(contents).set({
+                        oldConfig: null,
+                        config: config as MetaOutput,
+                        needsReview: false
+                    }).where(eq(contents.id, contentId))
+                })
+            )
+        })
 
-        if (entityType === "brand") {
-            const [brand] = await db.select().from(brands).where(eq(brands.integrationId, entityId))
+        revalidatePath('/', "layout")
+        redirect("/dashboard/batch-studio/review")
+    })
+
+const processQSPay = async ({content, config}: { content: Content, config?: PartialMetaOutput }) => {
+    try {
+        if (content.entityType === "brand") {
+            const [brand] = await db.select().from(brands).where(eq(brands.integrationId, content.entityId))
             if (!brand) {
                 throw new Error("Brand page not found. BrandAffiliation can't create a new one, please contact Administrators")
             }
@@ -67,17 +84,17 @@ export const SaveReviewTaskToQSPay = actionClient
                 }
             })
 
-            const {result: editResult} = await QSPayClient<QSPayBrand>("CmsBrand/EditDescription", {
+            await QSPayClient<QSPayBrand>("CmsBrand/EditDescription", {
                 method: "POST",
                 body: JSON.stringify({
                     brandName: brand.integrationName,
-                    config: toMerged(remoteBrand.config, parsedInput.config)
+                    config: toMerged(remoteBrand.config, config || content.config as MetaOutput || {})
                 })
             })
         }
 
-        if (entityType === "category") {
-            const [category] = await db.select().from(categories).where(eq(categories.integrationId, entityId))
+        if (content.entityType === "category") {
+            const [category] = await db.select().from(categories).where(eq(categories.integrationId, content.entityId))
             if (!category) {
                 throw new Error("Brand page not found. BrandAffiliation can't create a new one, please contact Administrators")
             }
@@ -88,17 +105,17 @@ export const SaveReviewTaskToQSPay = actionClient
                 }
             })
 
-            const {result: editResult} = await QSPayClient<QSPayCategory>("CmsBrand/EditDescription", {
+            await QSPayClient<QSPayCategory>("CmsBrand/EditDescription", {
                 method: "POST",
                 body: JSON.stringify({
                     brandName: category.integrationName,
-                    config: toMerged(remoteCategory.config, parsedInput.config)
+                    config: toMerged(remoteCategory.config, config || content.config as MetaOutput || {})
                 })
             })
         }
 
-        if (entityType === "combination") {
-            const [combination] = await db.select().from(combinations).where(eq(combinations.integrationId, entityId))
+        if (content.entityType === "combination") {
+            const [combination] = await db.select().from(combinations).where(eq(combinations.integrationId, content.entityId))
             if (!combination) {
                 throw new Error("Combination page not found. BrandAffiliation can't create a new one, please contact Administrators")
             }
@@ -118,22 +135,17 @@ export const SaveReviewTaskToQSPay = actionClient
                 }
             })
 
-            const {result: editResult} = await QSPayClient<QSPayCombin[]>("CmsCombinPage/EditDescription", {
+            await QSPayClient<QSPayCombin[]>("CmsCombinPage/EditDescription", {
                 method: "POST",
                 body: JSON.stringify({
                     categoryName: category.integrationName,
                     brandName: brand.integrationName,
-                    config: toMerged(remoteCombination, parsedInput.config)
+                    config: toMerged(remoteCombination.config, config || content.config as MetaOutput || {})
                 })
             })
         }
-
-        await db.update(contents).set({
-            oldConfig: null,
-            config: parsedInput.config as MetaOutput,
-            needsReview: false
-        }).where(eq(contents.id, contentId))
-
-        revalidatePath('/', "layout")
-        redirect("/dashboard/batch-studio/review")
-    })
+    } catch (e) {
+        console.error(e)
+        throw e
+    }
+}

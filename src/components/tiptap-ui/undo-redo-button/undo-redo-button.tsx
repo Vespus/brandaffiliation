@@ -2,11 +2,10 @@
 
 import * as React from "react"
 import {useTiptapEditor} from "@/hooks/use-tiptap-editor"
-import type {ButtonProps} from "@/components/tiptap-ui-primitive/button"
 import {useUndoRedo, UseUndoRedoConfig} from "@/components/tiptap-ui/undo-redo-button/use-undo-redo";
 import {ToolbarButton} from "@/components/tiptap/toolbar";
 
-export type UndoRedoButtonProps = Omit<ButtonProps, "type"> & UseUndoRedoConfig
+export type UndoRedoButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "type"> & UseUndoRedoConfig
 
 export const UndoRedoButton = (
     {

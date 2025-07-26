@@ -43,14 +43,10 @@ export const ReviewSidebarItem = ({item}: { item: ReviewJoin }) => {
         e.preventDefault()
         e.stopPropagation()
 
-        acceptReview.execute({
+        acceptReview.execute([{
             config: item.content.config!,
-            content: {
-                contentId: item.content.id,
-                entityType: item.content.entityType,
-                entityId: item.content.entityId
-            }
-        })
+            contentId: item.content.id
+        }])
     }
     const isSelected = Number(activeItemId) === item.content.id
     const Icon = ({type, ...props}: { type: string, className: string }) => {
