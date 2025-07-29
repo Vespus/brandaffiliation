@@ -62,6 +62,10 @@ export const ReviewForm = ({item}: { item: ReviewJoin }) => {
     }
 
     const hasComparison = !!item.content.oldConfig
+    const hasComparisonFields = (fields: string[]) => {
+        return fields.map(field => get(item.content.oldConfig, field)).some(field => field !== undefined)
+    }
+
     useEffect(() => {
         setDomReady(true)
     }, []);
@@ -77,7 +81,7 @@ export const ReviewForm = ({item}: { item: ReviewJoin }) => {
                                     <Globe className="h-5 w-5 text-blue-600"/>
                                     <CardTitle>Meta Contents</CardTitle>
                                 </div>
-                                {hasComparison && (
+                                {hasComparisonFields(["meta.title", "meta.description", "meta.category"]) && (
                                     <Badge variant="secondary" className="text-xs">
                                         Comparison Available
                                     </Badge>
@@ -158,7 +162,7 @@ export const ReviewForm = ({item}: { item: ReviewJoin }) => {
                                     <FacebookIcon className="h-5 w-5 text-blue-600"/>
                                     <CardTitle>Facebook OpenGraph Controls</CardTitle>
                                 </div>
-                                {hasComparison && (
+                                {hasComparisonFields(["meta.openGraph.type", "meta.openGraph.title", "meta.openGraph.type", "meta.openGraph.locale", "meta.openGraph.description"]) && (
                                     <Badge variant="secondary" className="text-xs">
                                         Comparison Available
                                     </Badge>
@@ -255,7 +259,7 @@ export const ReviewForm = ({item}: { item: ReviewJoin }) => {
                                     <TwitterIcon className="h-5 w-5 text-blue-600"/>
                                     <CardTitle>Twitter SharedLinkPreview Controls</CardTitle>
                                 </div>
-                                {hasComparison && (
+                                {hasComparisonFields(["meta.twitter.card", "meta.twitter.title", "meta.twitter.description"]) && (
                                     <Badge variant="secondary" className="text-xs">
                                         Comparison Available
                                     </Badge>
@@ -333,7 +337,7 @@ export const ReviewForm = ({item}: { item: ReviewJoin }) => {
                                     <NewspaperIcon className="h-5 w-5 text-blue-600"/>
                                     <CardTitle>In-Site Content</CardTitle>
                                 </div>
-                                {hasComparison && (
+                                {hasComparisonFields(["descriptions.header", "descriptions.footer"]) && (
                                     <Badge variant="secondary" className="text-xs">
                                         Comparison Available
                                     </Badge>
@@ -460,7 +464,7 @@ export const ComparisonFormField = <
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
                             <div className="text-xs font-medium text-muted-foreground flex items-center">
-                                <div className="w-2 h-2 bg-red-100 border border-red-300 rounded-full mr-2"></div>
+                                <div className="w-2 h-2 bg-gray-100 border border-gray-300 rounded-full mr-2"></div>
                                 Previous Version
                             </div>
                             {(() => {
@@ -470,7 +474,7 @@ export const ComparisonFormField = <
                                             <Textarea
                                                 value={oldValue || "No previous content"}
                                                 readOnly
-                                                className="bg-red-50 border-red-200 text-gray-700 resize-none"
+                                                className="bg-gray-50 border-gray-200 opacity-60 text-gray-700 resize-none"
                                                 rows={3}
                                             />
                                         )
@@ -479,12 +483,12 @@ export const ComparisonFormField = <
                                             <Input
                                                 value={oldValue || "No previous content"}
                                                 readOnly
-                                                className="bg-red-50 border-red-200 text-gray-700"
+                                                className="bg-gray-50 border-gray-200 opacity-60 text-gray-700"
                                             />
                                         )
                                     case "html":
                                         return (
-                                            <div className="prose prose-sm dark:prose-invert"
+                                            <div className="prose prose-sm dark:prose-invert opacity-60"
                                                  dangerouslySetInnerHTML={{__html: oldValue}}/>
                                         )
                                 }
