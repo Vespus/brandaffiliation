@@ -34,7 +34,7 @@ export const BatchStudioCategoryTable = ({promise}: CategoriesTableProps) => {
         rowCount: total,
         enableColumnPinning: true,
         initialState: {
-            sorting: [{id: "name", desc: false}],
+            sorting: [{id: "description", desc: false}],
         },
         getRowId: r => r.integrationId,
         shallow: false,

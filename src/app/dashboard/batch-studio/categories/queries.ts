@@ -1,26 +1,40 @@
 import { BatchStudioCategoryType } from "@/app/dashboard/batch-studio/categories/batch-studio-category-type";
 import { db } from "@/db";
-import { categories, contents } from "@/db/schema";
+import { brands, categories, combinations, contents } from "@/db/schema";
 import { Category } from "@/db/types";
 import { getSortingStateParser } from "@/lib/datatable/parsers";
-import { and, asc, count, desc, eq, ilike, isNotNull, isNull, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, isNotNull, isNull, or, sql } from "drizzle-orm";
 import { createSearchParamsCache, parseAsInteger, parseAsString } from "nuqs/server";
 
 export const searchParamsCache = createSearchParamsCache({
     page: parseAsInteger.withDefault(1),
     perPage: parseAsInteger.withDefault(10),
     sort: getSortingStateParser<Category>().withDefault([
-        {id: "name", desc: false},
+        {id: "description", desc: false},
     ]),
-    name: parseAsString.withDefault(""),
+    description: parseAsString.withDefault(""),
     content: parseAsString
 });
 
 export const getCategories = async (input: Awaited<ReturnType<typeof searchParamsCache.parse>>) => {
     const offset = (input.page - 1) * input.perPage;
 
+    const searchTerms = input.description
+        ? input.description
+            .split(/\s+/)                      // split by space
+            .filter(Boolean)                  // remove empty strings
+        : [];
+
+    const searchConditions = searchTerms.map((term) =>
+        or(
+            ilike(categories.name, `%${term}%`),
+            ilike(categories.description, `%${term}%`),
+        )
+    );
+
+
     const where = and(
-        input.name ? ilike(categories.name, `%${input.name}%`) : undefined,
+        searchConditions.length > 0 ? and(...searchConditions) : undefined,
         input.content === "yes" ? isNotNull(contents.config) : undefined,
         input.content === "no" ? isNull(contents.config) : undefined,
         isNotNull(categories.integrationId)
@@ -31,7 +45,7 @@ export const getCategories = async (input: Awaited<ReturnType<typeof searchParam
             ? input.sort.map((item) =>
                 item.desc ? desc(categories[item.id]) : asc(categories[item.id]),
             )
-            : [asc(categories.name)];
+            : [asc(categories.description)];
 
 
     const {data, total} = await db.transaction(async (tx) => {

@@ -60,7 +60,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           >
             {
                 loading && (
-                    <Loader data-loader={true} className="absolute animate-spin origin-center " aria-hidden="true"/>
+                    <Loader data-loader={true} className="absolute animate-spin origin-center" aria-hidden="true"/>
                 )
             }
             <div className="contents">
