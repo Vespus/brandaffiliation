@@ -1,8 +1,12 @@
-"use client"
+'use client'
 
-import { saveSettingsAction } from "@/app/dashboard/configure/[model]/actions";
-import { AISettingsSaveSchema } from "@/app/dashboard/configure/[model]/schema";
-import { HelpTooltip } from "@/components/help-tooltip";
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import { z } from 'zod'
+import { saveSettingsAction } from '@/app/dashboard/configure/[model]/actions'
+import { AISettingsSaveSchema } from '@/app/dashboard/configure/[model]/schema'
+import { HelpTooltip } from '@/components/help-tooltip'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -12,24 +16,24 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    AlertDialogTrigger
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Slider } from "@/components/ui/slider";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AIModel, AISetting } from "@/db/types";
-import { useCustomAction } from "@/hooks/use-custom-action";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { Slider } from '@/components/ui/slider'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AIModel, AISetting } from '@/db/types'
+import { useCustomAction } from '@/hooks/use-custom-action'
 
-export const ManageForm = ({data, defaultConfig, model}: {
-    data: AISetting,
-    defaultConfig: AISetting,
+export const ManageForm = ({
+    data,
+    defaultConfig,
+    model,
+}: {
+    data: AISetting
+    defaultConfig: AISetting
     model: AIModel
 }) => {
     const form = useForm<z.infer<typeof AISettingsSaveSchema>>({
@@ -42,13 +46,13 @@ export const ManageForm = ({data, defaultConfig, model}: {
             topP: data?.topP || 1,
             frequencyPenalty: data?.frequencyPenalty || 0,
             presencePenalty: data?.presencePenalty || 0,
-        }
+        },
     })
 
     const saveSettingsActionCall = useCustomAction(saveSettingsAction, {
         onSuccess: () => {
-            toast.success('Settings erfolgreich gespeichert');
-        }
+            toast.success('Settings erfolgreich gespeichert')
+        },
     })
 
     const onSubmit = (values: z.infer<typeof AISettingsSaveSchema>) => {
@@ -59,7 +63,7 @@ export const ManageForm = ({data, defaultConfig, model}: {
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
                 <Tabs defaultValue="general">
-                    <TabsList className="grid grid-cols-3 mb-4 w-full">
+                    <TabsList className="mb-4 grid w-full grid-cols-3">
                         <TabsTrigger value="general">General</TabsTrigger>
                         <TabsTrigger value="advanced">Advanced</TabsTrigger>
                     </TabsList>
@@ -68,19 +72,24 @@ export const ManageForm = ({data, defaultConfig, model}: {
                         <Card>
                             <CardHeader>
                                 <CardTitle>General Parameters</CardTitle>
-                                <CardDescription>Configure the basic parameters that control the model&#39;s
-                                    behavior.</CardDescription>
+                                <CardDescription>
+                                    Configure the basic parameters that control the model&#39;s behavior.
+                                </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
                                 <FormField
                                     control={form.control}
                                     name="temperature"
-                                    render={({field}) => (
+                                    render={({ field }) => (
                                         <FormItem className="space-y-4">
-                                            <FormLabel className="justify-between items-center">
+                                            <FormLabel className="items-center justify-between">
                                                 <span className="inline-flex space-x-2">
                                                     <span>Temperature</span>
-                                                    <HelpTooltip>Temperature is a value between 0 and 2. Higher values make the output more random, while lower values make the output more focused and deterministic.</HelpTooltip>
+                                                    <HelpTooltip>
+                                                        Temperature is a value between 0 and 2. Higher values make the
+                                                        output more random, while lower values make the output more
+                                                        focused and deterministic.
+                                                    </HelpTooltip>
                                                 </span>
                                                 <span>{field.value}</span>
                                             </FormLabel>
@@ -90,39 +99,37 @@ export const ManageForm = ({data, defaultConfig, model}: {
                                                     max={2}
                                                     step={0.1}
                                                     value={[field.value]}
-                                                    onValueChange={val => field.onChange(val[0])}
+                                                    onValueChange={(val) => field.onChange(val[0])}
                                                 />
                                             </FormControl>
-                                            <div className="flex justify-between text-xs text-muted-foreground">
+                                            <div className="text-muted-foreground flex justify-between text-xs">
                                                 <span>Precise (0.0)</span>
                                                 <span>Balanced (1.0)</span>
                                                 <span>Creative (2.0)</span>
                                             </div>
-                                            <FormMessage/>
+                                            <FormMessage />
                                         </FormItem>
                                     )}
                                 />
                                 <FormField
                                     control={form.control}
                                     name="maxTokens"
-                                    render={({field}) => (
+                                    render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="justify-between items-center">
-                                        <span className="inline-flex space-x-2">
-                                            <span>Max Tokens</span>
-                                            <HelpTooltip>The maximum number of tokens to generate in the response. One token is roughly 4 characters for English text.</HelpTooltip>
-                                        </span>
+                                            <FormLabel className="items-center justify-between">
+                                                <span className="inline-flex space-x-2">
+                                                    <span>Max Tokens</span>
+                                                    <HelpTooltip>
+                                                        The maximum number of tokens to generate in the response. One
+                                                        token is roughly 4 characters for English text.
+                                                    </HelpTooltip>
+                                                </span>
                                                 <span>{field.value}</span>
                                             </FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    min={1}
-                                                    max={32000}
-                                                    {...field}
-                                                />
+                                                <Input type="number" min={1} max={32000} {...field} />
                                             </FormControl>
-                                            <FormMessage/>
+                                            <FormMessage />
                                         </FormItem>
                                     )}
                                 />
@@ -133,19 +140,20 @@ export const ManageForm = ({data, defaultConfig, model}: {
                         <Card>
                             <CardHeader>
                                 <CardTitle>Advanced Parameters</CardTitle>
-                                <CardDescription>Fine-tune the model&#39;s behavior with advanced
-                                    parameters.</CardDescription>
+                                <CardDescription>
+                                    Fine-tune the model&#39;s behavior with advanced parameters.
+                                </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
                                 <FormField
                                     control={form.control}
                                     name="topP"
-                                    render={({field}) => (
+                                    render={({ field }) => (
                                         <FormItem className="space-y-4">
-                                            <FormLabel className="justify-between items-center">
-                                        <span className="inline-flex space-x-2">
-                                            <span>Top P</span>
-                                        </span>
+                                            <FormLabel className="items-center justify-between">
+                                                <span className="inline-flex space-x-2">
+                                                    <span>Top P</span>
+                                                </span>
                                                 <span>{field.value}</span>
                                             </FormLabel>
                                             <FormControl>
@@ -154,35 +162,33 @@ export const ManageForm = ({data, defaultConfig, model}: {
                                                     max={1}
                                                     step={0.1}
                                                     value={[field.value]}
-                                                    onValueChange={val => field.onChange(val[0])}
+                                                    onValueChange={(val) => field.onChange(val[0])}
                                                 />
                                             </FormControl>
-                                            <div className="flex justify-between text-xs text-muted-foreground">
+                                            <div className="text-muted-foreground flex justify-between text-xs">
                                                 <span>Focused (0)</span>
                                                 <span>Balanced (0.5)</span>
                                                 <span>Creative (1)</span>
                                             </div>
                                             <FormDescription>
                                                 Controls diversity via nucleus sampling: 0.1 means only tokens with the
-                                                top 10%
-                                                probability mass are considered. We recommend altering this or
-                                                temperature but
-                                                not both.
+                                                top 10% probability mass are considered. We recommend altering this or
+                                                temperature but not both.
                                             </FormDescription>
-                                            <FormMessage/>
+                                            <FormMessage />
                                         </FormItem>
                                     )}
                                 />
-                                <hr/>
+                                <hr />
                                 <FormField
                                     control={form.control}
                                     name="frequencyPenalty"
-                                    render={({field}) => (
+                                    render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="justify-between items-center">
-                                        <span className="inline-flex space-x-2">
-                                            <span>Frequency Penalty</span>
-                                        </span>
+                                            <FormLabel className="items-center justify-between">
+                                                <span className="inline-flex space-x-2">
+                                                    <span>Frequency Penalty</span>
+                                                </span>
                                                 <span>{field.value}</span>
                                             </FormLabel>
                                             <FormControl>
@@ -191,34 +197,32 @@ export const ManageForm = ({data, defaultConfig, model}: {
                                                     max={2}
                                                     step={0.1}
                                                     value={[field.value]}
-                                                    onValueChange={val => field.onChange(val[0])}
+                                                    onValueChange={(val) => field.onChange(val[0])}
                                                 />
                                             </FormControl>
-                                            <div className="flex justify-between text-xs text-muted-foreground">
+                                            <div className="text-muted-foreground flex justify-between text-xs">
                                                 <span>-2.0</span>
                                                 <span>0.0</span>
                                                 <span>2.0</span>
                                             </div>
                                             <FormDescription>
                                                 Reduces repetition by penalizing tokens based on their frequency in the
-                                                text so
-                                                far. Higher values decrease repetition of the same phrases.
+                                                text so far. Higher values decrease repetition of the same phrases.
                                             </FormDescription>
-                                            <FormMessage/>
+                                            <FormMessage />
                                         </FormItem>
                                     )}
                                 />
-                                <hr/>
+                                <hr />
                                 <FormField
                                     control={form.control}
                                     name="presencePenalty"
-                                    render={({field}) => (
+                                    render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="justify-between items-center">
-                                        <span className="inline-flex space-x-2">
-                                            <span>Presence Penalty</span>
-
-                                        </span>
+                                            <FormLabel className="items-center justify-between">
+                                                <span className="inline-flex space-x-2">
+                                                    <span>Presence Penalty</span>
+                                                </span>
                                                 <span>{field.value}</span>
                                             </FormLabel>
                                             <FormControl>
@@ -227,20 +231,19 @@ export const ManageForm = ({data, defaultConfig, model}: {
                                                     max={2}
                                                     step={0.1}
                                                     value={[field.value]}
-                                                    onValueChange={val => field.onChange(val[0])}
+                                                    onValueChange={(val) => field.onChange(val[0])}
                                                 />
                                             </FormControl>
-                                            <div className="flex justify-between text-xs text-muted-foreground">
+                                            <div className="text-muted-foreground flex justify-between text-xs">
                                                 <span>-2.0</span>
                                                 <span>0.0</span>
                                                 <span>2.0</span>
                                             </div>
                                             <FormDescription>
                                                 Reduces repetition by penalizing tokens that have appeared at all in the
-                                                text so
-                                                far. Higher values encourage the model to talk about new topics.
+                                                text so far. Higher values encourage the model to talk about new topics.
                                             </FormDescription>
-                                            <FormMessage/>
+                                            <FormMessage />
                                         </FormItem>
                                     )}
                                 />
@@ -248,19 +251,18 @@ export const ManageForm = ({data, defaultConfig, model}: {
                         </Card>
                     </TabsContent>
                 </Tabs>
-                <div className="flex justify-end gap-4 mt-4">
+                <div className="mt-4 flex justify-end gap-4">
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="outline">
-                                Reset to Defaults
-                            </Button>
+                            <Button variant="outline">Reset to Defaults</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Reset to Defaults?</AlertDialogTitle>
-                                <AlertDialogDescription>This will reset all settings to their default values. You can
-                                    still refresh page to restore your custom settings if you have
-                                    any.</AlertDialogDescription>
+                                <AlertDialogDescription>
+                                    This will reset all settings to their default values. You can still refresh page to
+                                    restore your custom settings if you have any.
+                                </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>

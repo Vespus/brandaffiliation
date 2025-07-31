@@ -1,44 +1,44 @@
-"use client"
+'use client'
 
-import { DataTable } from "@/components/datatable/data-table"
-import { DataTableSortList } from "@/components/datatable/data-table-sort-list"
-import { use, useEffect } from "react";
-import { useDataTable } from "@/hooks/use-data-table";
-import { DataTableToolbar } from "@/components/datatable/data-table-toolbar";
-import { Button } from "@/components/ui/button";
-import { api } from "@/lib/trpc/react";
-import { SquareDashedMousePointerIcon, SquareMousePointerIcon, XIcon } from "lucide-react";
-import { useDataTableSelectionStore } from "@/app/dashboard/batch-studio/store";
-import { BatchStudioCombinationType } from "@/app/dashboard/batch-studio/combinations/batch-studio-combination-type";
-import {
-    useGetBatchStudioCombinationTableColumns
-} from "@/app/dashboard/batch-studio/combinations/batch-studio-combination-table-columns";
-import { useTranslations } from "next-intl";
+import { use, useEffect } from 'react'
+
+import { useTranslations } from 'next-intl'
+
+import { SquareDashedMousePointerIcon, SquareMousePointerIcon, XIcon } from 'lucide-react'
+import { useGetBatchStudioCombinationTableColumns } from '@/app/dashboard/batch-studio/combinations/batch-studio-combination-table-columns'
+import { BatchStudioCombinationType } from '@/app/dashboard/batch-studio/combinations/batch-studio-combination-type'
+import { useDataTableSelectionStore } from '@/app/dashboard/batch-studio/store'
+import { DataTable } from '@/components/datatable/data-table'
+import { DataTableSortList } from '@/components/datatable/data-table-sort-list'
+import { DataTableToolbar } from '@/components/datatable/data-table-toolbar'
+import { Button } from '@/components/ui/button'
+import { useDataTable } from '@/hooks/use-data-table'
+import { api } from '@/lib/trpc/react'
 
 interface BrandsTableProps {
-    promise: Promise<{ data: BatchStudioCombinationType[], pageCount: number, total: number }>
+    promise: Promise<{ data: BatchStudioCombinationType[]; pageCount: number; total: number }>
 }
 
-export const BatchStudioCombinationTable = ({promise}: BrandsTableProps) => {
-    const {data, pageCount, total} = use(promise)
+export const BatchStudioCombinationTable = ({ promise }: BrandsTableProps) => {
+    const { data, pageCount, total } = use(promise)
     const columns = useGetBatchStudioCombinationTableColumns()
     const utils = api.useUtils()
     const t = useTranslations()
-    const {selected, setSelected} = useDataTableSelectionStore()
+    const { selected, setSelected } = useDataTableSelectionStore()
 
-    const {table} = useDataTable({
+    const { table } = useDataTable({
         data: data,
-        meta: {t},
+        meta: { t },
         columns,
         pageCount,
         rowCount: total,
         enableColumnPinning: true,
         initialState: {
-            sorting: [{id: "name", desc: false}],
+            sorting: [{ id: 'name', desc: false }],
         },
-        getRowId: r => r.integrationId,
+        getRowId: (r) => r.integrationId,
         shallow: false,
-        clearOnDefault: true
+        clearOnDefault: true,
     })
 
     const state = table.getState()
@@ -49,14 +49,18 @@ export const BatchStudioCombinationTable = ({promise}: BrandsTableProps) => {
 
     const selectAllHandler = async () => {
         const allBrands = await utils.client.batchStudioRoute.getAllCombinations.query()
-        const allRows = allBrands.filter(x => x.integrationId).reduce((acc, b) => (acc[b.integrationId!] = true, acc), {} as Record<string, boolean>)
+        const allRows = allBrands
+            .filter((x) => x.integrationId)
+            .reduce((acc, b) => ((acc[b.integrationId!] = true), acc), {} as Record<string, boolean>)
         table.setRowSelection(allRows)
         setSelected(allRows)
     }
 
     const selectAllWithoutContentHandler = async () => {
         const allBrands = await utils.client.batchStudioRoute.getAllCombinationsWithNoContent.query()
-        const allRows = allBrands.filter(x => x.integrationId).reduce((acc, b) => (acc[b.integrationId!] = true, acc), {} as Record<string, boolean>)
+        const allRows = allBrands
+            .filter((x) => x.integrationId)
+            .reduce((acc, b) => ((acc[b.integrationId!] = true), acc), {} as Record<string, boolean>)
         table.setRowSelection(allRows)
         setSelected(allRows)
     }
@@ -69,29 +73,26 @@ export const BatchStudioCombinationTable = ({promise}: BrandsTableProps) => {
     return (
         <DataTable table={table}>
             <DataTableToolbar table={table}>
-                <DataTableSortList table={table} align="end"/>
+                <DataTableSortList table={table} align="end" />
             </DataTableToolbar>
-            <div className="flex items-center h-9 gap-4">
+            <div className="flex h-9 items-center gap-4">
                 <span className="text-sm">You&apos;ve selected {Object.keys(selected).length} records</span>
-                <Button size="sm" variant="link" onClick={selectAllHandler}><SquareMousePointerIcon/>
+                <Button size="sm" variant="link" onClick={selectAllHandler}>
+                    <SquareMousePointerIcon />
                     Select All Records
                 </Button>
-                <Button
-                    size="sm"
-                    variant="link"
-                    onClick={selectAllWithoutContentHandler}
-                >
-                    <SquareDashedMousePointerIcon/>
+                <Button size="sm" variant="link" onClick={selectAllWithoutContentHandler}>
+                    <SquareDashedMousePointerIcon />
                     Select w/o Contents
                 </Button>
-                {
-                    Object.keys(selected).length > 0 && (
-                        <>
-                            <Button size="sm" variant="link" onClick={clearSelectionHandler}><XIcon/>Clear
-                                Selected</Button>
-                        </>
-                    )
-                }
+                {Object.keys(selected).length > 0 && (
+                    <>
+                        <Button size="sm" variant="link" onClick={clearSelectionHandler}>
+                            <XIcon />
+                            Clear Selected
+                        </Button>
+                    </>
+                )}
             </div>
         </DataTable>
     )

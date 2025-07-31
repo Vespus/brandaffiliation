@@ -1,7 +1,9 @@
-import { db } from '@/db';
-import { systemPrompts } from '@/db/schema';
-import { and, count, desc, ilike, type SQL } from 'drizzle-orm';
-import { createSearchParamsCache, parseAsInteger, parseAsString } from 'nuqs/server';
+import type { SQL } from 'drizzle-orm'
+
+import { and, count, desc, ilike } from 'drizzle-orm'
+import { createSearchParamsCache, parseAsInteger, parseAsString } from 'nuqs/server'
+import { db } from '@/db'
+import { systemPrompts } from '@/db/schema'
 
 export const searchParamsCache = createSearchParamsCache({
     page: parseAsInteger.withDefault(1),
@@ -9,19 +11,19 @@ export const searchParamsCache = createSearchParamsCache({
     name: parseAsString.withDefault(''),
     sort: parseAsString.withDefault(''),
     order: parseAsString.withDefault('asc'),
-});
+})
 
 export async function getPrompts(input: Awaited<ReturnType<typeof searchParamsCache.parse>>) {
-    const {page, size, name, sort, order} = input;
+    const { page, size, name, sort, order } = input
 
-    const offset = (page - 1) * size;
-    const where: SQL[] = [];
+    const offset = (page - 1) * size
+    const where: SQL[] = []
 
     if (name) {
-        where.push(ilike(systemPrompts.name, `%${name}%`));
+        where.push(ilike(systemPrompts.name, `%${name}%`))
     }
 
-    const whereClause = where.length > 0 ? and(...where) : undefined;
+    const whereClause = where.length > 0 ? and(...where) : undefined
 
     const [data, total] = await Promise.all([
         db
@@ -42,25 +44,25 @@ export async function getPrompts(input: Awaited<ReturnType<typeof searchParamsCa
                         ? desc(systemPrompts.name)
                         : systemPrompts.name
                     : sort === 'createdAt'
-                        ? order === 'desc'
-                            ? desc(systemPrompts.createdAt)
-                            : systemPrompts.createdAt
-                        : systemPrompts.name
+                      ? order === 'desc'
+                          ? desc(systemPrompts.createdAt)
+                          : systemPrompts.createdAt
+                      : systemPrompts.name
             ),
         db
-            .select({count: count()})
+            .select({ count: count() })
             .from(systemPrompts)
             .where(whereClause)
             .then((res) => res[0]?.count ?? 0),
-    ]);
+    ])
 
-    const pageCount = Math.ceil(total / size);
+    const pageCount = Math.ceil(total / size)
 
     return {
-        data: {prompts: data, total},
+        data: { prompts: data, total },
         pageCount,
-    };
+    }
 }
 
 export const getPromptById = (id: number) =>
-    db.query.systemPrompts.findFirst({where: (tbl, {eq}) => eq(tbl.id, id)});
+    db.query.systemPrompts.findFirst({ where: (tbl, { eq }) => eq(tbl.id, id) })

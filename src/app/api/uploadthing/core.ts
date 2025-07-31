@@ -1,18 +1,20 @@
-import { getUser } from "@/lib/get-user";
-import { type FileRouter, createUploadthing } from "uploadthing/next";
-import { UploadThingError, UTFiles } from "uploadthing/server";
+import type { FileRouter } from 'uploadthing/next'
 
-const f = createUploadthing();
+import { createUploadthing } from 'uploadthing/next'
+import { UTFiles, UploadThingError } from 'uploadthing/server'
+import { getUser } from '@/lib/get-user'
+
+const f = createUploadthing()
 
 // FileRouter for your app, can contain multiple FileRoutes
 export const ourFileRouter = {
     // Define as many FileRoutes as you like, each with a unique routeSlug
-    profilePictures: f({ image: { maxFileSize: "2MB", maxFileCount: 1 } })
+    profilePictures: f({ image: { maxFileSize: '2MB', maxFileCount: 1 } })
         // Set permissions and file types for this FileRoute
         .middleware(async ({ files }) => {
-            const {user} = await getUser();
-             
-            if (!user) throw new UploadThingError("Unauthorized");
+            const { user } = await getUser()
+
+            if (!user) throw new UploadThingError('Unauthorized')
 
             const newFiles = files.map((file) => {
                 return {
@@ -22,17 +24,17 @@ export const ourFileRouter = {
             })
 
             // Whatever is returned here is accessible in onUploadComplete as `metadata`
-            return { userId: user.id, [UTFiles]: newFiles };
+            return { userId: user.id, [UTFiles]: newFiles }
         })
         .onUploadComplete(async ({ metadata, file }) => {
             // This code RUNS ON YOUR SERVER after upload
-            console.log("Upload complete for userId:", metadata.userId);
+            console.log('Upload complete for userId:', metadata.userId)
 
-            console.log("file url", file.ufsUrl);
+            console.log('file url', file.ufsUrl)
 
             // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
-            return { uploadedBy: metadata.userId };
+            return { uploadedBy: metadata.userId }
         }),
-} satisfies FileRouter;
+} satisfies FileRouter
 
-export type OurFileRouter = typeof ourFileRouter;
+export type OurFileRouter = typeof ourFileRouter

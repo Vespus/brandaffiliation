@@ -1,5 +1,5 @@
-import { createEnv } from "@t3-oss/env-nextjs";
-import { z } from "zod";
+import { createEnv } from '@t3-oss/env-nextjs'
+import { z } from 'zod'
 
 export const env = createEnv({
     server: {
@@ -15,10 +15,10 @@ export const env = createEnv({
         NEXT_PUBLIC_HCAPTCHA_SITE_KEY: z.string().optional(),
     },
     shared: {
-        NODE_ENV: z.enum(["development", "test", "production"]),
+        NODE_ENV: z.enum(['development', 'test', 'production']),
     },
     runtimeEnv: {
-        NODE_ENV: process.env.NODE_ENV || "development",
+        NODE_ENV: process.env.NODE_ENV || 'development',
         HOSTNAME: process.env.HOSTNAME,
         HCAPTCHA_TOKEN: process.env.HCATPCHA_TOKEN,
         PORT: process.env.PORT,
@@ -26,8 +26,8 @@ export const env = createEnv({
         NEXT_PUBLIC_HCAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY,
         BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
         QSPAY_API_KEY: process.env.QSPAY_API_KEY,
-        QSPAY_URL: process.env.QSPAY_URL
+        QSPAY_URL: process.env.QSPAY_URL,
     },
     skipValidation: !!process.env.SKIP_ENV_VALIDATION,
     emptyStringAsUndefined: true,
-});
+})

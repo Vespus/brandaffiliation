@@ -1,18 +1,16 @@
-"use client"
+'use client'
 
-import { buttonVariants } from "@/components/ui/button";
-import { PlusIcon } from "lucide-react";
-import Link from "next/link";
+import Link from 'next/link'
+
+import { PlusIcon } from 'lucide-react'
+import { buttonVariants } from '@/components/ui/button'
 
 export const PromptPageHeader = () => {
     return (
-        <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold mb-6">Manage System Prompts</h1>
-            <Link
-                href="/dashboard/prompts/new"
-                className={buttonVariants({variant: "outline"})}
-            >
-                <PlusIcon/>
+        <div className="flex items-center justify-between">
+            <h1 className="mb-6 text-2xl font-bold">Manage System Prompts</h1>
+            <Link href="/dashboard/prompts/new" className={buttonVariants({ variant: 'outline' })}>
+                <PlusIcon />
                 Add New System Prompt
             </Link>
         </div>

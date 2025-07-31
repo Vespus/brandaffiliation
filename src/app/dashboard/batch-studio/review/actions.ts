@@ -1,26 +1,28 @@
-"use server";
+'use server'
 
-import { actionClient } from "@/lib/action-client";
-import z from "zod";
-import { contents } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { db } from "@/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath } from 'next/cache'
+
+import { eq } from 'drizzle-orm'
+import z from 'zod'
+import { db } from '@/db'
+import { contents } from '@/db/schema'
+import { actionClient } from '@/lib/action-client'
 
 export const removeReviewTask = actionClient
-    .inputSchema(z.object({contentId: z.number()}))
-    .action(async ({parsedInput}) => {
+    .inputSchema(z.object({ contentId: z.number() }))
+    .action(async ({ parsedInput }) => {
         if (!parsedInput.contentId) {
-            throw new Error("An error occurred while removing review task. ContentId is required")
+            throw new Error('An error occurred while removing review task. ContentId is required')
         }
 
         const [currentContent] = await db.select().from(contents).where(eq(contents.id, parsedInput.contentId))
         if (currentContent.oldConfig) {
-            await db.update(contents)
+            await db
+                .update(contents)
                 .set({
                     oldConfig: null,
                     needsReview: null,
-                    config: currentContent.oldConfig
+                    config: currentContent.oldConfig,
                 })
                 .where(eq(contents.id, parsedInput.contentId))
         }
@@ -28,5 +30,5 @@ export const removeReviewTask = actionClient
             await db.delete(contents).where(eq(contents.id, parsedInput.contentId))
         }
 
-        revalidatePath('/dashboard/batch-studio/review', "layout")
+        revalidatePath('/dashboard/batch-studio/review', 'layout')
     })

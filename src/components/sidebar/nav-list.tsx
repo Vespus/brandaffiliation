@@ -1,59 +1,60 @@
-"use client"
+'use client'
 
-import { SidebarGroup, SidebarGroupLabel, SidebarMenu, } from "@/components/ui/sidebar"
-import { CogIcon, Database, GalleryVerticalEnd, Languages, SparklesIcon, UsersIcon } from "lucide-react"
-import { Suspense } from "react";
-import { MenuItem } from "@/components/sidebar/type";
-import { SingleMenuItem } from "@/components/sidebar/single-menu-item";
-import { CollapsableMenuItem } from "@/components/sidebar/collapsible-menu-item";
+import { Suspense } from 'react'
+
+import { CogIcon, Database, GalleryVerticalEnd, Languages, SparklesIcon, UsersIcon } from 'lucide-react'
+import { CollapsableMenuItem } from '@/components/sidebar/collapsible-menu-item'
+import { SingleMenuItem } from '@/components/sidebar/single-menu-item'
+import { MenuItem } from '@/components/sidebar/type'
+import { SidebarGroup, SidebarGroupLabel, SidebarMenu } from '@/components/ui/sidebar'
 
 const data: MenuItem[] = [
     {
-        name: "Alle Marken",
-        url: "/dashboard/brands",
+        name: 'Alle Marken',
+        url: '/dashboard/brands',
         icon: GalleryVerticalEnd,
     },
     {
-        name: "Generators",
+        name: 'Generators',
         icon: SparklesIcon,
         children: [
             {
-                name: "SEO Generator",
-                url: "/dashboard/content-generation",
+                name: 'SEO Generator',
+                url: '/dashboard/content-generation',
             },
             {
-                name: "Batch Studio",
-                url: "/dashboard/batch-studio"
-            }
-        ]
+                name: 'Batch Studio',
+                url: '/dashboard/batch-studio',
+            },
+        ],
     },
     {
-        name: "Configure",
-        url: "/dashboard/configure",
+        name: 'Configure',
+        url: '/dashboard/configure',
         icon: CogIcon,
     },
     {
-        name: "Translations",
-        url: "/dashboard/translations",
+        name: 'Translations',
+        url: '/dashboard/translations',
         icon: Languages,
     },
     {
-        name: "Datasources",
-        url: "/dashboard/datasources",
+        name: 'Datasources',
+        url: '/dashboard/datasources',
         icon: Database,
     },
     {
         name: 'System Prompts',
         url: '/dashboard/prompts',
         icon: SparklesIcon,
-        permission: {role: 'admin', permission: {prompt: ['list']}},
+        permission: { role: 'admin', permission: { prompt: ['list'] } },
     },
     {
-        name: "Manage Users",
-        url: "/dashboard/users",
+        name: 'Manage Users',
+        url: '/dashboard/users',
         icon: UsersIcon,
-        permission: {role: "admin", permission: {users: ["list"]}}
-    }
+        permission: { role: 'admin', permission: { users: ['list'] } },
+    },
 ]
 
 export const NavList = () => {
@@ -63,7 +64,7 @@ export const NavList = () => {
             <SidebarMenu>
                 {data.map((item) => (
                     <Suspense key={item.name}>
-                        <Guard item={item}/>
+                        <Guard item={item} />
                     </Suspense>
                 ))}
             </SidebarMenu>
@@ -71,7 +72,7 @@ export const NavList = () => {
     )
 }
 
-const Guard = ({item}: { item: MenuItem }) => {
+const Guard = ({ item }: { item: MenuItem }) => {
     /*const perm = use(new Promise(async resolve =>  {
         if(item.permission){
             resolve(true)
@@ -86,10 +87,11 @@ const Guard = ({item}: { item: MenuItem }) => {
 
     return (
         <>
-            {item.children && item.children.length > 0
-                ? <CollapsableMenuItem item={item}/>
-                : <SingleMenuItem item={item}/>
-            }
+            {item.children && item.children.length > 0 ? (
+                <CollapsableMenuItem item={item} />
+            ) : (
+                <SingleMenuItem item={item} />
+            )}
         </>
     )
 }

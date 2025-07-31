@@ -1,23 +1,24 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { SimpleRating } from "@/components/ui/simple-rating";
-import { BrandWithCharacteristicAndScales, Scale } from "@/db/types";
-import { ChartAreaIcon } from "lucide-react";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from 'next-intl/server'
+
+import { ChartAreaIcon } from 'lucide-react'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { SimpleRating } from '@/components/ui/simple-rating'
+import { BrandWithCharacteristicAndScales, Scale } from '@/db/types'
 
 interface PerformanceRatingsCardProps {
-    brand: BrandWithCharacteristicAndScales;
-    scales: Scale[];
+    brand: BrandWithCharacteristicAndScales
+    scales: Scale[]
 }
 
-export const PerformanceRatingsCard = async ({brand, scales}: PerformanceRatingsCardProps) => {
-    const locale = await getLocale();
-    const t = await getTranslations({locale});
+export const PerformanceRatingsCard = async ({ brand, scales }: PerformanceRatingsCardProps) => {
+    const locale = await getLocale()
+    const t = await getTranslations({ locale })
 
     return (
         <Card className="flex-1">
             <CardContent className="flex flex-col gap-4">
-                <CardHeader className="flex items-center px-0 space-x-2">
-                    <ChartAreaIcon/>
+                <CardHeader className="flex items-center space-x-2 px-0">
+                    <ChartAreaIcon />
                     Performance Ratings
                 </CardHeader>
                 <div>
@@ -40,5 +41,5 @@ export const PerformanceRatingsCard = async ({brand, scales}: PerformanceRatings
                 </div>
             </CardContent>
         </Card>
-    );
-};
+    )
+}

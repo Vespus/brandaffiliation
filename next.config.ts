@@ -1,10 +1,11 @@
-import type { NextConfig } from "next";
-import createNextIntlPlugin from 'next-intl/plugin';
+import createNextIntlPlugin from 'next-intl/plugin'
+
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  /* config options here */
+    /* config options here */
     experimental: {
-        authInterrupts: true
+        authInterrupts: true,
     },
     logging: {
         fetches: {
@@ -16,12 +17,12 @@ const nextConfig: NextConfig = {
         remotePatterns: [
             {
                 protocol: 'https',
-                hostname: "0vnr1azfmv.ufs.sh",
-                pathname: "/f/*",
+                hostname: '0vnr1azfmv.ufs.sh',
+                pathname: '/f/*',
             },
-        ]
-    }
-};
+        ],
+    },
+}
 
-const withNextIntl = createNextIntlPlugin();
-export default withNextIntl(nextConfig);
+const withNextIntl = createNextIntlPlugin()
+export default withNextIntl(nextConfig)

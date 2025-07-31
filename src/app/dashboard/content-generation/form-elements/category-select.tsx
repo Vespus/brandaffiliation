@@ -1,35 +1,38 @@
-import { ComboboxBase } from "@/components/ui/combobox-base";
-import { api } from "@/lib/trpc/react";
-import { SelectProps } from "@radix-ui/react-select";
-import { ArrowRightIcon } from "lucide-react";
-import { categoryFlat } from "@/utils/category-flat";
+import { SelectProps } from '@radix-ui/react-select'
+import { ArrowRightIcon } from 'lucide-react'
+import { ComboboxBase } from '@/components/ui/combobox-base'
+import { api } from '@/lib/trpc/react'
+import { categoryFlat } from '@/utils/category-flat'
 
-type CategorySelectProps = Omit<SelectProps, "value" | "onValueChange"> & {
-    value?: number;
-    onValueChange?: (value?: string | number) => void;
+type CategorySelectProps = Omit<SelectProps, 'value' | 'onValueChange'> & {
+    value?: number
+    onValueChange?: (value?: string | number) => void
 }
 
-export const CategorySelect = ({value, onValueChange}: CategorySelectProps) => {
-    const {data} = api.qspayRoute.getAllCategories.useQuery()
-    const dataSet = categoryFlat(data || []);
+export const CategorySelect = ({ value, onValueChange }: CategorySelectProps) => {
+    const { data } = api.qspayRoute.getAllCategories.useQuery()
+    const dataSet = categoryFlat(data || [])
 
     return (
         <ComboboxBase
             labelKey="description"
             valueKey="id"
-            data={dataSet.map(x => ({...x, id: Number(x.id)})) || []}
+            data={dataSet.map((x) => ({ ...x, id: Number(x.id) })) || []}
             value={value}
             onValueChange={onValueChange}
             valueAs="number"
             placeholder="Select a Category"
             emptyPlaceholder="No category selected"
-            itemRenderer={item => {
-                const parent = data?.find(cat => cat.id === item.parentId);
+            itemRenderer={(item) => {
+                const parent = data?.find((cat) => cat.id === item.parentId)
                 return (
                     <div className="flex items-center gap-2">
-                        {parent && <span
-                            className="text-xs text-muted-foreground inline-flex items-center gap-1">{parent.description}
-                            <ArrowRightIcon size={12} className="size-auto"/></span>}
+                        {parent && (
+                            <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
+                                {parent.description}
+                                <ArrowRightIcon size={12} className="size-auto" />
+                            </span>
+                        )}
                         <span>{item.description}</span>
                     </div>
                 )

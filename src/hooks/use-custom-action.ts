@@ -1,6 +1,7 @@
-import {StandardSchemaV1} from "@standard-schema/spec";
-import {HookCallbacks, HookSafeActionFn, useAction, UseActionHookReturn} from "next-safe-action/hooks";
-import {toast} from "sonner";
+import { HookCallbacks, HookSafeActionFn, UseActionHookReturn, useAction } from 'next-safe-action/hooks'
+
+import { StandardSchemaV1 } from '@standard-schema/spec'
+import { toast } from 'sonner'
 
 export const useCustomAction = <ServerError, S extends StandardSchemaV1 | undefined, CVE, Data>(
     safeActionFn: HookSafeActionFn<ServerError, S, CVE, Data>,
@@ -11,11 +12,10 @@ export const useCustomAction = <ServerError, S extends StandardSchemaV1 | undefi
         onError: (errorShape) => {
             console.log(errorShape)
             if (errorShape.error.serverError && typeof errorShape.error.serverError === 'string') {
-                toast.error(errorShape.error.serverError);
+                toast.error(errorShape.error.serverError)
             }
 
-            utils?.onError?.(errorShape);
-        }
-    });
+            utils?.onError?.(errorShape)
+        },
+    })
 }
-

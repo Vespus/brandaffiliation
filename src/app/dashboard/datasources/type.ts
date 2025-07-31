@@ -1,6 +1,6 @@
-import { Datasource } from "@/db/types";
+import { Datasource } from '@/db/types'
 
 export type DatasourceDatatable = {
-    data: Datasource[],
+    data: Datasource[]
     pageCount: number
-};
+}

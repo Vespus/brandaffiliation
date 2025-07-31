@@ -1,6 +1,6 @@
-import { createSearchParamsCache, parseAsArrayOf, parseAsFloat } from "nuqs/server";
-import { DEFAULT_SCALE_WEIGHTS } from "@/app/dashboard/brands/[brand]/constant";
-import { z } from "zod";
+import { createSearchParamsCache, parseAsArrayOf, parseAsFloat } from 'nuqs/server'
+import { z } from 'zod'
+import { DEFAULT_SCALE_WEIGHTS } from '@/app/dashboard/brands/[brand]/constant'
 
 export const searchParams = {
     price: parseAsFloat.withDefault(DEFAULT_SCALE_WEIGHTS.price),
@@ -12,7 +12,7 @@ export const searchParams = {
     origin: parseAsFloat.withDefault(DEFAULT_SCALE_WEIGHTS.origin),
     recognition: parseAsFloat.withDefault(DEFAULT_SCALE_WEIGHTS.recognition),
     revenue: parseAsFloat.withDefault(DEFAULT_SCALE_WEIGHTS.revenue),
-    similarityWeight: parseAsArrayOf(z.coerce.number()).withDefault([0.4, 0.6])
-};
+    similarityWeight: parseAsArrayOf(z.coerce.number()).withDefault([0.4, 0.6]),
+}
 
 export const searchParamsCache = createSearchParamsCache(searchParams)

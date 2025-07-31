@@ -1,4 +1,4 @@
-import { StoreMissing } from "@/app/dashboard/session-errors/store-missing";
+import { StoreMissing } from '@/app/dashboard/session-errors/store-missing'
 
 export default function Page() {
     /*const handle = async () => {
@@ -13,7 +13,7 @@ export default function Page() {
 
     return (
         <div>
-            <StoreMissing/>
+            <StoreMissing />
         </div>
     )
 }

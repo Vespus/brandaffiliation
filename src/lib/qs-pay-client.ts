@@ -1,19 +1,20 @@
-import { env } from "@/env";
-import { ForbiddenError } from "@/lib/forbidden-error";
-import { SoftHttpError } from "@/lib/soft-http-error";
-import { cookies } from "next/headers";
+import { cookies } from 'next/headers'
+
+import { env } from '@/env'
+import { ForbiddenError } from '@/lib/forbidden-error'
+import { SoftHttpError } from '@/lib/soft-http-error'
 
 type ValidationError = {
-    field: string;
-    error: string;
+    field: string
+    error: string
 }
 
 type GenericResponse<T> = {
-    code: string;
-    succeeded: boolean;
-    message: string | null;
-    ticket: string | null;
-    result: T;
+    code: string
+    succeeded: boolean
+    message: string | null
+    ticket: string | null
+    result: T
     validationErrorList?: ValidationError[]
 }
 
@@ -26,9 +27,9 @@ export async function QSPayClient<T>(path: string, init?: Request): Promise<Gene
 
     init = init ?? {}
 
-    const {query, body, method} = init
-    const uri = new URL(env.QSPAY_URL as string);
-    uri.pathname = path;
+    const { query, body, method } = init
+    const uri = new URL(env.QSPAY_URL as string)
+    uri.pathname = path
 
     if (query) {
         Object.keys(query).forEach((key) => {
@@ -36,7 +37,7 @@ export async function QSPayClient<T>(path: string, init?: Request): Promise<Gene
         })
     }
 
-    if ((method === 'GET' || !method) && cookieStore.has('qs-pay-store-id') && !uri.searchParams.has("storeId")) {
+    if ((method === 'GET' || !method) && cookieStore.has('qs-pay-store-id') && !uri.searchParams.has('storeId')) {
         uri.searchParams.append('storeId', cookieStore.get('qs-pay-store-id')!.value)
     }
 
@@ -55,22 +56,22 @@ export async function QSPayClient<T>(path: string, init?: Request): Promise<Gene
     }
 
     customHeaders.append('Accept', 'application/json')
-    customHeaders.append("QsPayApi", env.QSPAY_API_KEY as string)
-    customHeaders.append('QsPay-Lang', "de")
-    customHeaders.append("X-User-Locale", "de")
-    customHeaders.append("X-UserAgent", "BrandAffiliation / 1.0")
+    customHeaders.append('QsPayApi', env.QSPAY_API_KEY as string)
+    customHeaders.append('QsPay-Lang', 'de')
+    customHeaders.append('X-User-Locale', 'de')
+    customHeaders.append('X-UserAgent', 'BrandAffiliation / 1.0')
 
     if (cookieStore.get('qs-pay-integration-key')?.value) {
         customHeaders.append('Authorization', `Bearer ${cookieStore.get('qs-pay-integration-key')!.value}`)
     }
 
     init.headers = customHeaders
-    const response = await fetch(uri.toString(), init);
+    const response = await fetch(uri.toString(), init)
 
     if (!response.ok) {
         console.error('Server-side fetch failed on URL', uri.toString())
-        if(response.status === 403) {
-            throw new ForbiddenError("Unauthorized, remove qs-pay integration auth keys")
+        if (response.status === 403) {
+            throw new ForbiddenError('Unauthorized, remove qs-pay integration auth keys')
         }
 
         if (response.headers.get('content-type')?.includes('application/json')) {
@@ -88,6 +89,6 @@ export async function QSPayClient<T>(path: string, init?: Request): Promise<Gene
         throw new Error('Uncatchable error: ' + response.statusText)
     }
 
-    const respo = await response.json() as GenericResponse<T>
-    return respo;
+    const respo = (await response.json()) as GenericResponse<T>
+    return respo
 }

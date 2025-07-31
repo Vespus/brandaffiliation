@@ -1,32 +1,30 @@
-"use client"
+'use client'
 
-import { DataTableColumnHeader } from "@/components/datatable/data-table-column-header";
-import { Checkbox } from "@/components/ui/checkbox";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
-import { ColumnDef } from "@tanstack/react-table";
-import Link from "next/link";
-import { format } from "date-fns";
+import Link from 'next/link'
+
+import { ColumnDef } from '@tanstack/react-table'
+import { format } from 'date-fns'
+import { Edit, MoreHorizontal, Trash2 } from 'lucide-react'
+import { DataTableColumnHeader } from '@/components/datatable/data-table-column-header'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
 type Prompt = {
-    id: number;
-    name: string;
-    description: string | null;
-    createdAt: string;
-    updatedAt: string | null;
-};
+    id: number
+    name: string
+    description: string | null
+    createdAt: string
+    updatedAt: string | null
+}
 
 export function getPromptsTableColumns(): ColumnDef<Prompt>[] {
     return [
         {
-            id: "select",
+            id: 'select',
             header: ({ table }) => (
                 <Checkbox
-                    checked={
-                        table.getIsAllPageRowsSelected() ||
-                        (table.getIsSomePageRowsSelected() && "indeterminate")
-                    }
+                    checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
                     onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
                     aria-label="Select all"
                 />
@@ -42,60 +40,45 @@ export function getPromptsTableColumns(): ColumnDef<Prompt>[] {
             enableHiding: false,
         },
         {
-            accessorKey: "name",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Name" />
-            ),
+            accessorKey: 'name',
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
             cell: ({ row }) => {
-                const prompt = row.original;
+                const prompt = row.original
                 return (
-                    <Link 
-                        href={`/dashboard/prompts/${prompt.id}`}
-                        className="font-medium hover:underline"
-                    >
+                    <Link href={`/dashboard/prompts/${prompt.id}`} className="font-medium hover:underline">
                         {prompt.name}
                     </Link>
-                );
+                )
             },
         },
         {
-            accessorKey: "description",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Description" />
-            ),
+            accessorKey: 'description',
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Description" />,
             cell: ({ row }) => {
-                const description = row.original.description;
-                return (
-                    <div className="max-w-[300px] truncate">
-                        {description || "No description"}
-                    </div>
-                );
+                const description = row.original.description
+                return <div className="max-w-[300px] truncate">{description || 'No description'}</div>
             },
         },
         {
-            accessorKey: "createdAt",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Created At" />
-            ),
+            accessorKey: 'createdAt',
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Created At" />,
             cell: ({ row }) => {
-                const date = row.original.createdAt;
-                return date ? format(new Date(date), "MMM dd, yyyy") : "—";
+                const date = row.original.createdAt
+                return date ? format(new Date(date), 'MMM dd, yyyy') : '—'
             },
         },
         {
-            accessorKey: "updatedAt",
-            header: ({ column }) => (
-                <DataTableColumnHeader column={column} title="Updated At" />
-            ),
+            accessorKey: 'updatedAt',
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Updated At" />,
             cell: ({ row }) => {
-                const date = row.original.updatedAt;
-                return date ? format(new Date(date), "MMM dd, yyyy") : "—";
+                const date = row.original.updatedAt
+                return date ? format(new Date(date), 'MMM dd, yyyy') : '—'
             },
         },
         {
-            id: "actions",
+            id: 'actions',
             cell: ({ row }) => {
-                const prompt = row.original;
+                const prompt = row.original
 
                 return (
                     <DropdownMenu>
@@ -116,7 +99,7 @@ export function getPromptsTableColumns(): ColumnDef<Prompt>[] {
                                 className="text-destructive"
                                 onClick={() => {
                                     // TODO: Implement delete functionality
-                                    console.log("Delete prompt", prompt.id);
+                                    console.log('Delete prompt', prompt.id)
                                 }}
                             >
                                 <Trash2 className="mr-2 h-4 w-4" />
@@ -124,8 +107,8 @@ export function getPromptsTableColumns(): ColumnDef<Prompt>[] {
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
-                );
+                )
             },
         },
-    ];
+    ]
 }

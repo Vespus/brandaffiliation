@@ -1,5 +1,5 @@
-import { Skeleton } from "@/components/ui/skeleton";
-import { TableCell, TableRow } from "@/components/ui/table";
+import { Skeleton } from '@/components/ui/skeleton'
+import { TableCell, TableRow } from '@/components/ui/table'
 
 export const ModelItemSkeleton = () => {
     return (
@@ -19,8 +19,8 @@ export const ModelItemSkeleton = () => {
                 <Skeleton className="h-4 w-12" />
             </TableCell>
             <TableCell className="text-right">
-                <Skeleton className="h-8 w-8 rounded-md ml-auto" />
+                <Skeleton className="ml-auto h-8 w-8 rounded-md" />
             </TableCell>
         </TableRow>
-    );
-};
+    )
+}

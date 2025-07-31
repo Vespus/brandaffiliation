@@ -1,21 +1,19 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { BrandWithCharacteristicAndScales } from "@/db/types";
-import { ArrowBigRightDash } from "lucide-react";
+import { ArrowBigRightDash } from 'lucide-react'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Card, CardContent } from '@/components/ui/card'
+import { BrandWithCharacteristicAndScales } from '@/db/types'
 
 interface BrandInfoCardProps {
-    brand: BrandWithCharacteristicAndScales;
+    brand: BrandWithCharacteristicAndScales
 }
 
-export const BrandInfoCard = ({brand}: BrandInfoCardProps) => {
+export const BrandInfoCard = ({ brand }: BrandInfoCardProps) => {
     return (
         <Card className="flex-none">
             <CardContent className="flex flex-col gap-4">
                 <div className="flex items-center gap-2">
                     <Avatar className="size-12">
-                        <AvatarFallback>
-                            {brand.name[0]}
-                        </AvatarFallback>
+                        <AvatarFallback>{brand.name[0]}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col text-2xl font-semibold">
                         <div>{brand.name}</div>
@@ -26,7 +24,7 @@ export const BrandInfoCard = ({brand}: BrandInfoCardProps) => {
                     <ul className="flex flex-col gap-2">
                         {brand.characteristic?.map((char) => (
                             <div key={char.id} className="flex items-center gap-2 text-xs">
-                                <ArrowBigRightDash size={12}/>
+                                <ArrowBigRightDash size={12} />
                                 <span>{char.value}</span>
                             </div>
                         ))}
@@ -34,5 +32,5 @@ export const BrandInfoCard = ({brand}: BrandInfoCardProps) => {
                 </div>
             </CardContent>
         </Card>
-    );
-};
+    )
+}

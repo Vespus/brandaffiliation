@@ -1,36 +1,38 @@
-import { notFound } from "next/navigation";
-import { getDatasourceById } from "@/app/dashboard/datasources/queries";
-import { getDatasourceValues } from "./queries";
-import { DatasourceDetailHeader } from "./datasource-detail-header";
-import { DatasourceValuesTable } from "./datasource-values-table";
-import { Suspense } from "react";
+import { Suspense } from 'react'
+
+import { notFound } from 'next/navigation'
+
+import { getDatasourceById } from '@/app/dashboard/datasources/queries'
+import { DatasourceDetailHeader } from './datasource-detail-header'
+import { DatasourceValuesTable } from './datasource-values-table'
+import { getDatasourceValues } from './queries'
 
 interface DatasourceDetailPageProps {
-    params: Promise<{id: string}>;
+    params: Promise<{ id: string }>
 }
 
 export default async function DatasourceDetailPage(props: DatasourceDetailPageProps) {
     const params = await props.params
-    const id = parseInt(params.id);
+    const id = parseInt(params.id)
 
     if (isNaN(id)) {
-        return notFound();
+        return notFound()
     }
 
-    const datasource = await getDatasourceById(id);
+    const datasource = await getDatasourceById(id)
 
     if (!datasource) {
-        return notFound();
+        return notFound()
     }
 
-    const valuesPromise = getDatasourceValues(id);
+    const valuesPromise = getDatasourceValues(id)
 
     return (
         <div className="max-w-7xl">
-            <DatasourceDetailHeader datasource={datasource}/>
+            <DatasourceDetailHeader datasource={datasource} />
             <Suspense fallback={<div>Loading values...</div>}>
-                <DatasourceValuesTable promise={valuesPromise} datasource={datasource}/>
+                <DatasourceValuesTable promise={valuesPromise} datasource={datasource} />
             </Suspense>
         </div>
-    );
+    )
 }

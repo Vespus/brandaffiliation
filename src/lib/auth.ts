@@ -1,16 +1,17 @@
-import { db } from "@/db";
-import * as schema from "@/db/schema";
-import { env } from "@/env";
-import { VerificationEmail } from "@/lib/emails/verification-email";
-import { ac, admin, user } from "@/lib/permissions";
-import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { nextCookies } from "better-auth/next-js";
-import { admin as adminPlugin } from "better-auth/plugins"
-import React from "react";
-import { Resend } from 'resend';
+import React from 'react'
 
-const resend = new Resend("re_SFCA4zkL_DoScwtVxwMBajhkn1P6r4BEw");
+import { betterAuth } from 'better-auth'
+import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import { nextCookies } from 'better-auth/next-js'
+import { admin as adminPlugin } from 'better-auth/plugins'
+import { Resend } from 'resend'
+import { db } from '@/db'
+import * as schema from '@/db/schema'
+import { env } from '@/env'
+import { VerificationEmail } from '@/lib/emails/verification-email'
+import { ac, admin, user } from '@/lib/permissions'
+
+const resend = new Resend('re_SFCA4zkL_DoScwtVxwMBajhkn1P6r4BEw')
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
@@ -22,13 +23,13 @@ export const auth = betterAuth({
     }),
     session: {
         cookieCache: {
-            enabled: true
-        }
+            enabled: true,
+        },
     },
     trustedOrigins: [
         'http://localhost:3000',
         'https://brandaffiliation.vercel.app',
-        "https://brandaffiliation-git-cem-adepauli-depaulicoms-projects.vercel.app",
+        'https://brandaffiliation-git-cem-adepauli-depaulicoms-projects.vercel.app',
     ],
     secret: env.BETTER_AUTH_SECRET,
     emailAndPassword: {
@@ -38,16 +39,16 @@ export const auth = betterAuth({
     },
     emailVerification: {
         sendOnSignUp: true,
-        sendVerificationEmail: async ({user, url}) => {
+        sendVerificationEmail: async ({ user, url }) => {
             await resend.emails.send({
                 from: 'Acme <onboarding@resend.dev>',
                 to: user.email,
-                subject: "BrandAffiliation Verification Email",
-                react: VerificationEmail({url}) as React.ReactElement,
-            });
+                subject: 'BrandAffiliation Verification Email',
+                react: VerificationEmail({ url }) as React.ReactElement,
+            })
         },
         autoSignInAfterVerification: true,
-        expiresIn: 3600
+        expiresIn: 3600,
     },
     plugins: [
         nextCookies(),
@@ -56,7 +57,7 @@ export const auth = betterAuth({
             roles: {
                 admin,
                 user,
-            }
-        })
-    ]
+            },
+        }),
+    ],
 })

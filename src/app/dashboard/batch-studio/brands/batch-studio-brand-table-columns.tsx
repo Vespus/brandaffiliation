@@ -1,35 +1,36 @@
-"use client";
+'use client'
 
-import { DataTableColumnHeader } from "@/components/datatable/data-table-column-header";
-import { ColumnDef, RowData } from "@tanstack/react-table";
-import { CheckIcon, StarIcon, Text, XIcon, } from "lucide-react";
-import Link from "next/link";
-import * as React from "react";
-import { BatchStudioBrandType } from "@/app/dashboard/batch-studio/brands/batch-studio-brand-type";
-import { Checkbox } from "@/components/ui/checkbox";
-import { MetaOutput } from "@/app/dashboard/content-generation/types";
-import { Badge } from "@/components/ui/badge";
-import { useQSPayContext } from "@/hooks/contexts/use-qspay-context";
+import * as React from 'react'
+
+import Link from 'next/link'
+
+import { ColumnDef, RowData } from '@tanstack/react-table'
+import { CheckIcon, StarIcon, Text, XIcon } from 'lucide-react'
+import { BatchStudioBrandType } from '@/app/dashboard/batch-studio/brands/batch-studio-brand-type'
+import { MetaOutput } from '@/app/dashboard/content-generation/types'
+import { DataTableColumnHeader } from '@/components/datatable/data-table-column-header'
+import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
+import { useQSPayContext } from '@/hooks/contexts/use-qspay-context'
 
 declare module '@tanstack/react-table' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface TableMeta<TData extends RowData> {
-        t: (id: string) => string;
+        t: (id: string) => string
     }
 }
 
 export function useGetBatchStudioBrandTableColumns(): ColumnDef<BatchStudioBrandType>[] {
-    const {currentStore} = useQSPayContext()
+    const { currentStore } = useQSPayContext()
 
     return [
         {
-            id: "select",
-            header: ({table}) => (
+            id: 'select',
+            header: ({ table }) => (
                 <div className="flex gap-2">
                     <Checkbox
                         checked={
-                            table.getIsAllPageRowsSelected() ||
-                            (table.getIsSomePageRowsSelected() && "indeterminate")
+                            table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')
                         }
                         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
                         aria-label="Select all"
@@ -37,7 +38,7 @@ export function useGetBatchStudioBrandTableColumns(): ColumnDef<BatchStudioBrand
                     />
                 </div>
             ),
-            cell: ({row}) => (
+            cell: ({ row }) => (
                 <Checkbox
                     checked={row.getIsSelected()}
                     onCheckedChange={(value) => row.toggleSelected(!!value)}
@@ -51,36 +52,38 @@ export function useGetBatchStudioBrandTableColumns(): ColumnDef<BatchStudioBrand
             size: 40,
         },
         {
-            id: "name",
-            accessorKey: "name",
-            header: ({column, table: {options: {meta}}}) => (
-                <DataTableColumnHeader column={column} title={meta!.t("brand.label")!}/>
-            ),
-            cell: ({row}) => <div>{row.getValue("name")}</div>,
+            id: 'name',
+            accessorKey: 'name',
+            header: ({
+                column,
+                table: {
+                    options: { meta },
+                },
+            }) => <DataTableColumnHeader column={column} title={meta!.t('brand.label')!} />,
+            cell: ({ row }) => <div>{row.getValue('name')}</div>,
             enableSorting: true,
             enableHiding: false,
             meta: {
-                label: "Brand Title",
-                placeholder: "Search brands...",
-                variant: "text",
+                label: 'Brand Title',
+                placeholder: 'Search brands...',
+                variant: 'text',
                 icon: Text,
             },
-            enableColumnFilter: true
+            enableColumnFilter: true,
         },
         {
-            id: "slug",
-            accessorKey: "slug",
-            header: ({column}) => (
-                <DataTableColumnHeader column={column} title="Slug"/>
-            ),
-            cell: ({row}) => {
+            id: 'slug',
+            accessorKey: 'slug',
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Slug" />,
+            cell: ({ row }) => {
                 if (currentStore) {
                     const url = new URL(currentStore?.storeUrl)
-                    url.pathname = row.original.slug.split("/").filter(Boolean).join("/")
+                    url.pathname = row.original.slug.split('/').filter(Boolean).join('/')
 
                     return (
-                        <Link href={url.toString()} target="_blank"
-                              className="text-xs underline">{url.toString()}</Link>
+                        <Link href={url.toString()} target="_blank" className="text-xs underline">
+                            {url.toString()}
+                        </Link>
                     )
                 }
                 return <span className="text-xs">N/A</span>
@@ -89,39 +92,39 @@ export function useGetBatchStudioBrandTableColumns(): ColumnDef<BatchStudioBrand
             enableColumnFilter: false,
         },
         {
-            id: "integrationId",
-            accessorKey: "integrationId",
-            header: ({column}) => (
-                <DataTableColumnHeader column={column} title="QSPay Identifier"/>
-            ),
-            cell: ({row}) => <div>{row.getValue("integrationId")}</div>,
+            id: 'integrationId',
+            accessorKey: 'integrationId',
+            header: ({ column }) => <DataTableColumnHeader column={column} title="QSPay Identifier" />,
+            cell: ({ row }) => <div>{row.getValue('integrationId')}</div>,
             enableSorting: false,
             enableColumnFilter: false,
         },
         {
-            id: "content",
-            accessorKey: "content",
-            header: ({column}) => (
-                <DataTableColumnHeader column={column} title="Content"/>
-            ),
-            cell: ({row}) => {
-                const value = row.getValue("content") as MetaOutput
+            id: 'content',
+            accessorKey: 'content',
+            header: ({ column }) => <DataTableColumnHeader column={column} title="Content" />,
+            cell: ({ row }) => {
+                const value = row.getValue('content') as MetaOutput
                 const hasHeader = value?.descriptions?.header
                 const hasFooter = value?.descriptions?.footer
                 const hasMetaTitle = value?.meta?.title
 
                 return (
-                    <div className="flex gap-2 items-center">
-                        <Badge variant={hasMetaTitle ? "outline" : "destructive"} className="gap-1">
-                            {hasMetaTitle ? <CheckIcon className="text-emerald-500"/> : <XIcon className="text-white"/>}
+                    <div className="flex items-center gap-2">
+                        <Badge variant={hasMetaTitle ? 'outline' : 'destructive'} className="gap-1">
+                            {hasMetaTitle ? (
+                                <CheckIcon className="text-emerald-500" />
+                            ) : (
+                                <XIcon className="text-white" />
+                            )}
                             Meta Title
                         </Badge>
-                        <Badge variant={hasHeader ? "outline" : "destructive"} className="gap-1">
-                            {hasHeader ? <CheckIcon className="text-emerald-500"/> : <XIcon className="text-white"/>}
+                        <Badge variant={hasHeader ? 'outline' : 'destructive'} className="gap-1">
+                            {hasHeader ? <CheckIcon className="text-emerald-500" /> : <XIcon className="text-white" />}
                             Top Text
                         </Badge>
-                        <Badge variant={hasFooter ? "outline" : "destructive"} className="gap-1">
-                            {hasFooter ? <CheckIcon className="text-emerald-500"/> : <XIcon className="text-white"/>}
+                        <Badge variant={hasFooter ? 'outline' : 'destructive'} className="gap-1">
+                            {hasFooter ? <CheckIcon className="text-emerald-500" /> : <XIcon className="text-white" />}
                             Footer Text
                         </Badge>
                     </div>
@@ -130,21 +133,20 @@ export function useGetBatchStudioBrandTableColumns(): ColumnDef<BatchStudioBrand
             enableSorting: false,
             enableColumnFilter: true,
             meta: {
-                label: "Has Content",
-                variant: "select",
+                label: 'Has Content',
+                variant: 'select',
                 options: [
                     {
-                        label: "Yes",
-                        value: "yes",
+                        label: 'Yes',
+                        value: 'yes',
                     },
                     {
-                        label: "No",
-                        value: "no"
-                    }
+                        label: 'No',
+                        value: 'no',
+                    },
                 ],
                 icon: StarIcon,
             },
-        }
-    ];
+        },
+    ]
 }
-

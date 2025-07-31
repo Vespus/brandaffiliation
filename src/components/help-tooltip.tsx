@@ -1,22 +1,15 @@
-import {
-    TooltipProvider,
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger
-} from "@/components/ui/tooltip";
-import {HelpCircle} from "lucide-react";
+import { HelpCircle } from 'lucide-react'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
-export const HelpTooltip = ({children}: Readonly<{ children: React.ReactNode; }>) => {
+export const HelpTooltip = ({ children }: Readonly<{ children: React.ReactNode }>) => {
     return (
         <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                    <HelpCircle className="text-muted-foreground h-4 w-4" />
                 </TooltipTrigger>
                 <TooltipContent>
-                    <p className="max-w-xs">
-                        {children}
-                    </p>
+                    <p className="max-w-xs">{children}</p>
                 </TooltipContent>
             </Tooltip>
         </TooltipProvider>

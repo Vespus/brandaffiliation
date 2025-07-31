@@ -5,8 +5,8 @@ export type BatchStudioCombinationType = {
     integrationId: string
     brand: string
     category: string
-    hasContent?:boolean
-    id: number,
-    categorySlug: string,
-    brandSlug: string,
+    hasContent?: boolean
+    id: number
+    categorySlug: string
+    brandSlug: string
 }

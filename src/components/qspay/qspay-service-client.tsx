@@ -1,28 +1,29 @@
-"use client"
+'use client'
 
-import { connect } from "@/components/qspay/qspay-service-action";
-import { Button } from "@/components/ui/button";
+import * as React from 'react'
+
+import { zodResolver } from '@hookform/resolvers/zod'
+import { UnplugIcon } from 'lucide-react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import { z } from 'zod'
+import { connect } from '@/components/qspay/qspay-service-action'
+import { Button } from '@/components/ui/button'
 import {
     Dialog,
     DialogContent,
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger
-} from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useCustomAction } from "@/hooks/use-custom-action";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { UnplugIcon } from "lucide-react";
-import * as React from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { useCustomAction } from '@/hooks/use-custom-action'
 
 export const formSchema = z.object({
-    email: z.string().email().min(1, "Email is required"),
-    password: z.string().min(1, "Password is required"),
+    email: z.string().email().min(1, 'Email is required'),
+    password: z.string().min(1, 'Password is required'),
 })
 
 export const QSPayServiceClient = () => {
@@ -30,15 +31,15 @@ export const QSPayServiceClient = () => {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            email: "",
-            password: "",
+            email: '',
+            password: '',
         },
     })
 
     const connectAction = useCustomAction(connect, {
         onSuccess: () => {
-            toast.success("Successfully connected to the server");
-        }
+            toast.success('Successfully connected to the server')
+        },
     })
 
     const onSubmit = (data: z.infer<typeof formSchema>) => {
@@ -48,13 +49,8 @@ export const QSPayServiceClient = () => {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button
-                    variant="outline"
-                    type="button"
-                    size="sm"
-                    className="h-6 hover:bg-transparent"
-                >
-                    <UnplugIcon size={12}/> Connect
+                <Button variant="outline" type="button" size="sm" className="h-6 hover:bg-transparent">
+                    <UnplugIcon size={12} /> Connect
                 </Button>
             </DialogTrigger>
             <DialogContent>
@@ -67,30 +63,32 @@ export const QSPayServiceClient = () => {
                         <FormField
                             control={form.control}
                             name="email"
-                            render={({field}) => (
+                            render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Email</FormLabel>
                                     <FormControl>
                                         <Input type="email" placeholder="Email" {...field} />
                                     </FormControl>
-                                    <FormMessage/>
+                                    <FormMessage />
                                 </FormItem>
                             )}
                         />
                         <FormField
                             control={form.control}
                             name="password"
-                            render={({field}) => (
+                            render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Password</FormLabel>
                                     <FormControl>
                                         <Input type="password" placeholder="password" {...field} />
                                     </FormControl>
-                                    <FormMessage/>
+                                    <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit" loading={connectAction.isPending}>Submit</Button>
+                        <Button type="submit" loading={connectAction.isPending}>
+                            Submit
+                        </Button>
                     </form>
                 </Form>
             </DialogContent>

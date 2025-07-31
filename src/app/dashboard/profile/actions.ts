@@ -1,25 +1,24 @@
-"use server"
+'use server'
 
-import { actionClient } from "@/lib/action-client";
-import { ProfileUpdateSchema } from "@/app/dashboard/profile/schema";
-import { db } from "@/db";
-import { users } from "@/db/schema";
-import { revalidatePath } from "next/cache";
-import { getUser } from "@/lib/get-user";
-import { eq } from "drizzle-orm";
+import { revalidatePath } from 'next/cache'
 
-export const updateProfileAction = actionClient
-  .inputSchema(ProfileUpdateSchema)
-  .action(async ({ parsedInput }) => {
-    const { user } = await getUser();
+import { eq } from 'drizzle-orm'
+import { ProfileUpdateSchema } from '@/app/dashboard/profile/schema'
+import { db } from '@/db'
+import { users } from '@/db/schema'
+import { actionClient } from '@/lib/action-client'
+import { getUser } from '@/lib/get-user'
+
+export const updateProfileAction = actionClient.inputSchema(ProfileUpdateSchema).action(async ({ parsedInput }) => {
+    const { user } = await getUser()
 
     await db
-      .update(users)
-      .set({
-        name: parsedInput.name,
-        image: parsedInput.image,
-      })
-      .where(eq(users.id, user.id));
+        .update(users)
+        .set({
+            name: parsedInput.name,
+            image: parsedInput.image,
+        })
+        .where(eq(users.id, user.id))
 
-    revalidatePath('/dashboard/profile', 'layout');
-  });
+    revalidatePath('/dashboard/profile', 'layout')
+})

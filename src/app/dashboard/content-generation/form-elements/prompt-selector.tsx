@@ -1,38 +1,32 @@
-import { Button } from "@/components/ui/button";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { api } from "@/lib/trpc/react";
-import { cn } from "@/lib/utils";
-import { Check, ChevronsUpDown } from "lucide-react";
-import * as React from "react";
+import * as React from 'react'
+
+import { Check, ChevronsUpDown } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { api } from '@/lib/trpc/react'
+import { cn } from '@/lib/utils'
 
 type PromptSelectorType = {
     value: number | undefined
     onChange: (val: number) => void
 }
 
-export const PromptSelector = ({value, onChange}: PromptSelectorType) => {
+export const PromptSelector = ({ value, onChange }: PromptSelectorType) => {
     const [open, setOpen] = React.useState(false)
-    const {data} = api.genericRoute.getSystemPrompts.useQuery()
+    const { data } = api.genericRoute.getSystemPrompts.useQuery()
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className="flex-1 justify-between"
-                >
-                    {value
-                        ? data?.find((prompt) => prompt.id === value)?.name
-                        : "System prompts..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
+                <Button variant="outline" role="combobox" aria-expanded={open} className="flex-1 justify-between">
+                    {value ? data?.find((prompt) => prompt.id === value)?.name : 'System prompts...'}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-(--radix-popover-trigger-width) p-0">
                 <Command>
-                    <CommandInput placeholder="Search prompts..."/>
+                    <CommandInput placeholder="Search prompts..." />
                     <CommandList>
                         <CommandEmpty>No prompt found.</CommandEmpty>
                         <CommandGroup>
@@ -48,13 +42,13 @@ export const PromptSelector = ({value, onChange}: PromptSelectorType) => {
                                 >
                                     <Check
                                         className={cn(
-                                            "mr-2 h-4 w-4",
-                                            value === prompt.id ? "opacity-100" : "opacity-0"
+                                            'mr-2 h-4 w-4',
+                                            value === prompt.id ? 'opacity-100' : 'opacity-0'
                                         )}
                                     />
-                                    <div className="flex flex-col min-w-0">
+                                    <div className="flex min-w-0 flex-col">
                                         <span className="font-semibold">{prompt.name}</span>
-                                        <span className="truncate min-w-0">{prompt.description}</span>
+                                        <span className="min-w-0 truncate">{prompt.description}</span>
                                     </div>
                                 </CommandItem>
                             ))}

@@ -1,21 +1,24 @@
-"use server"
+'use server'
 
-import { actionClient } from "@/lib/action-client";
-import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
-import { z } from "zod";
+import { revalidatePath } from 'next/cache'
+import { cookies } from 'next/headers'
+
+import { z } from 'zod'
+import { actionClient } from '@/lib/action-client'
 
 export const changeStore = actionClient
-    .inputSchema(z.object({
-        storeId: z.string().optional(),
-    }))
-    .action(async ({parsedInput: {storeId}}) => {
+    .inputSchema(
+        z.object({
+            storeId: z.string().optional(),
+        })
+    )
+    .action(async ({ parsedInput: { storeId } }) => {
         const cookieList = await cookies()
-        if(!storeId){
+        if (!storeId) {
             cookieList.delete('qs-pay-store-id')
-        }else {
+        } else {
             cookieList.set('qs-pay-store-id', storeId, {
-                expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365)
+                expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
             })
         }
 

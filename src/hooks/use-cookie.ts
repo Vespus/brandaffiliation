@@ -1,11 +1,8 @@
-import { useCallback, useState } from "react";
-import Cookies from "js-cookie";
+import { useCallback, useState } from 'react'
 
-type CookiesReturn = [
-        string | null,
-    (newValue: string, options?: Cookies.CookieAttributes) => void,
-    () => void,
-];
+import Cookies from 'js-cookie'
+
+type CookiesReturn = [string | null, (newValue: string, options?: Cookies.CookieAttributes) => void, () => void]
 
 /**
  * A hook that allows to manage cookies.
@@ -17,22 +14,20 @@ type CookiesReturn = [
  * 3. A function to delete the cookie.
  */
 export function useCookie(cookieName: string): CookiesReturn {
-    const [value, setValue] = useState<string | null>(
-        () => Cookies.get(cookieName) || null,
-    );
+    const [value, setValue] = useState<string | null>(() => Cookies.get(cookieName) || null)
 
     const updateCookie = useCallback(
         (newValue: string, options?: Cookies.CookieAttributes) => {
-            Cookies.set(cookieName, newValue, options);
-            setValue(newValue);
+            Cookies.set(cookieName, newValue, options)
+            setValue(newValue)
         },
-        [cookieName],
-    );
+        [cookieName]
+    )
 
     const deleteCookie = useCallback(() => {
-        Cookies.remove(cookieName);
-        setValue(null);
-    }, [cookieName]);
+        Cookies.remove(cookieName)
+        setValue(null)
+    }, [cookieName])
 
-    return [value, updateCookie, deleteCookie];
+    return [value, updateCookie, deleteCookie]
 }

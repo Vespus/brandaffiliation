@@ -3,6 +3,6 @@ export type BatchStudioCategoryType = {
     description: string
     slug: string
     content: string
-    integrationId: string,
-    hasContent: boolean,
+    integrationId: string
+    hasContent: boolean
 }

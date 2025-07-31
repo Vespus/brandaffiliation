@@ -1,17 +1,18 @@
-import { QSPayClient } from "@/lib/qs-pay-client";
-import { QSPayStore } from "@/qspay-types";
-import { cookies } from "next/headers";
+import { cookies } from 'next/headers'
+
+import { QSPayClient } from '@/lib/qs-pay-client'
+import { QSPayStore } from '@/qspay-types'
 
 export const getStore = async () => {
-    const cookieList = await cookies();
+    const cookieList = await cookies()
 
-    if (cookieList.has("qs-pay-integration-key")) {
+    if (cookieList.has('qs-pay-integration-key')) {
         try {
-            if (cookieList.has("qs-pay-store-id")) {
-                const {result: store} = await QSPayClient<QSPayStore>("Store/Get", {
+            if (cookieList.has('qs-pay-store-id')) {
+                const { result: store } = await QSPayClient<QSPayStore>('Store/Get', {
                     query: {
-                        storeId: cookieList.get("qs-pay-store-id")?.value
-                    }
+                        storeId: cookieList.get('qs-pay-store-id')?.value,
+                    },
                 })
 
                 return store

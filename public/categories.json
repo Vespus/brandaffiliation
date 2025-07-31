@@ -3,122 +3,312 @@
     {
       "id": "accessoires",
       "name": "Accessoires",
-      "seoKeywords": ["Herren Accessoires", "Männer Accessoires", "Mode Accessoires Herren"],
-      "subcategories": ["Taschen", "Geldbörsen", "Handschuhe", "Schals", "Mützen"]
+      "seoKeywords": [
+        "Herren Accessoires",
+        "Männer Accessoires",
+        "Mode Accessoires Herren"
+      ],
+      "subcategories": [
+        "Taschen",
+        "Geldbörsen",
+        "Handschuhe",
+        "Schals",
+        "Mützen"
+      ]
     },
     {
       "id": "anzuege",
       "name": "Anzüge",
-      "seoKeywords": ["Herrenanzüge", "Business Anzüge", "Anzüge für Männer"],
-      "subcategories": ["Business Anzüge", "Hochzeitsanzüge", "Smoking", "Gehrock", "Anzug-Kombinationen"]
+      "seoKeywords": [
+        "Herrenanzüge",
+        "Business Anzüge",
+        "Anzüge für Männer"
+      ],
+      "subcategories": [
+        "Business Anzüge",
+        "Hochzeitsanzüge",
+        "Smoking",
+        "Gehrock",
+        "Anzug-Kombinationen"
+      ]
     },
     {
       "id": "bad-home",
       "name": "Bad & Home",
-      "seoKeywords": ["Bademode Herren", "Bademäntel", "Handtücher"],
-      "subcategories": ["Bademäntel", "Handtücher", "Kosmetiktaschen", "Wellnessartikel"]
+      "seoKeywords": [
+        "Bademode Herren",
+        "Bademäntel",
+        "Handtücher"
+      ],
+      "subcategories": [
+        "Bademäntel",
+        "Handtücher",
+        "Kosmetiktaschen",
+        "Wellnessartikel"
+      ]
     },
     {
       "id": "bademoden",
       "name": "Bademoden",
-      "seoKeywords": ["Herren Bademode", "Badehosen", "Schwimmshorts"],
-      "subcategories": ["Badeshorts", "Badehosen", "Schwimmshorts", "Strandmode"]
+      "seoKeywords": [
+        "Herren Bademode",
+        "Badehosen",
+        "Schwimmshorts"
+      ],
+      "subcategories": [
+        "Badeshorts",
+        "Badehosen",
+        "Schwimmshorts",
+        "Strandmode"
+      ]
     },
     {
       "id": "guertel",
       "name": "Gürtel & Co",
-      "seoKeywords": ["Herrengürtel", "Hosenträger", "Ledergürtel Herren"],
-      "subcategories": ["Ledergürtel", "Stoffgürtel", "Hosenträger", "Schnallen"]
+      "seoKeywords": [
+        "Herrengürtel",
+        "Hosenträger",
+        "Ledergürtel Herren"
+      ],
+      "subcategories": [
+        "Ledergürtel",
+        "Stoffgürtel",
+        "Hosenträger",
+        "Schnallen"
+      ]
     },
     {
       "id": "hemden",
       "name": "Hemden",
-      "seoKeywords": ["Herrenhemden", "Business Hemden", "Freizeithemden"],
-      "subcategories": ["Business Hemden", "Casual Hemden", "Kurzarm Hemden", "Langarm Hemden", "Leinenhemd"]
+      "seoKeywords": [
+        "Herrenhemden",
+        "Business Hemden",
+        "Freizeithemden"
+      ],
+      "subcategories": [
+        "Business Hemden",
+        "Casual Hemden",
+        "Kurzarm Hemden",
+        "Langarm Hemden",
+        "Leinenhemd"
+      ]
     },
     {
       "id": "hosen",
       "name": "Hosen",
-      "seoKeywords": ["Herrenhosen", "Stoffhosen", "Anzughosen"],
-      "subcategories": ["Stoffhosen", "Chinohosen", "Anzughosen", "Cargohosen", "Cordhosen"]
+      "seoKeywords": [
+        "Herrenhosen",
+        "Stoffhosen",
+        "Anzughosen"
+      ],
+      "subcategories": [
+        "Stoffhosen",
+        "Chinohosen",
+        "Anzughosen",
+        "Cargohosen",
+        "Cordhosen"
+      ]
     },
     {
       "id": "jacken",
       "name": "Jacken",
-      "seoKeywords": ["Herrenjacken", "Jacken für Männer", "Outdoor Jacken"],
-      "subcategories": ["Lederjacken", "Bomberjacken", "Winterjacken", "Übergangsjacken", "Blazer"]
+      "seoKeywords": [
+        "Herrenjacken",
+        "Jacken für Männer",
+        "Outdoor Jacken"
+      ],
+      "subcategories": [
+        "Lederjacken",
+        "Bomberjacken",
+        "Winterjacken",
+        "Übergangsjacken",
+        "Blazer"
+      ]
     },
     {
       "id": "jeans",
       "name": "Jeans",
-      "seoKeywords": ["Herrenjeans", "Jeans für Männer", "Denim Hosen"],
-      "subcategories": ["Regular Fit", "Slim Fit", "Straight Fit", "Loose Fit", "Tapered Fit"]
+      "seoKeywords": [
+        "Herrenjeans",
+        "Jeans für Männer",
+        "Denim Hosen"
+      ],
+      "subcategories": [
+        "Regular Fit",
+        "Slim Fit",
+        "Straight Fit",
+        "Loose Fit",
+        "Tapered Fit"
+      ]
     },
     {
       "id": "krawatten",
       "name": "Krawatten",
-      "seoKeywords": ["Krawatten", "Fliegen", "Herrenkrawatten"],
-      "subcategories": ["Seidenkrawatten", "Fliegen", "Einstecktücher", "Krawattennadeln"]
+      "seoKeywords": [
+        "Krawatten",
+        "Fliegen",
+        "Herrenkrawatten"
+      ],
+      "subcategories": [
+        "Seidenkrawatten",
+        "Fliegen",
+        "Einstecktücher",
+        "Krawattennadeln"
+      ]
     },
     {
       "id": "maentel",
       "name": "Mäntel",
-      "seoKeywords": ["Herrenmäntel", "Wintermäntel", "Mäntel für Männer"],
-      "subcategories": ["Wollmäntel", "Trenchcoats", "Dufflecoats", "Wintermäntel"]
+      "seoKeywords": [
+        "Herrenmäntel",
+        "Wintermäntel",
+        "Mäntel für Männer"
+      ],
+      "subcategories": [
+        "Wollmäntel",
+        "Trenchcoats",
+        "Dufflecoats",
+        "Wintermäntel"
+      ]
     },
     {
       "id": "nachtwasche",
       "name": "Nachtwäsche",
-      "seoKeywords": ["Herren Nachtwäsche", "Pyjamas", "Schlafanzüge"],
-      "subcategories": ["Pyjamas", "Morgenmäntel", "Nachthemden", "Hausanzüge"]
+      "seoKeywords": [
+        "Herren Nachtwäsche",
+        "Pyjamas",
+        "Schlafanzüge"
+      ],
+      "subcategories": [
+        "Pyjamas",
+        "Morgenmäntel",
+        "Nachthemden",
+        "Hausanzüge"
+      ]
     },
     {
       "id": "poloshirts",
       "name": "Poloshirts",
-      "seoKeywords": ["Herren Poloshirts", "Polo Shirts", "Polohemden"],
-      "subcategories": ["Kurzarm Polos", "Langarm Polos", "Piqué Polos", "Business Polos"]
+      "seoKeywords": [
+        "Herren Poloshirts",
+        "Polo Shirts",
+        "Polohemden"
+      ],
+      "subcategories": [
+        "Kurzarm Polos",
+        "Langarm Polos",
+        "Piqué Polos",
+        "Business Polos"
+      ]
     },
     {
       "id": "pullover",
       "name": "Pullover & Strickjacken",
-      "seoKeywords": ["Herrenpullover", "Strickjacken", "Pullover für Männer"],
-      "subcategories": ["Wollpullover", "Strickjacken", "Cardigans", "Rollkragenpullover", "Sweater"]
+      "seoKeywords": [
+        "Herrenpullover",
+        "Strickjacken",
+        "Pullover für Männer"
+      ],
+      "subcategories": [
+        "Wollpullover",
+        "Strickjacken",
+        "Cardigans",
+        "Rollkragenpullover",
+        "Sweater"
+      ]
     },
     {
       "id": "sakkos",
       "name": "Sakkos",
-      "seoKeywords": ["Herrensakkos", "Blazer", "Business Sakkos"],
-      "subcategories": ["Business Sakkos", "Casual Blazer", "Wolle Sakkos", "Leinen Sakkos"]
+      "seoKeywords": [
+        "Herrensakkos",
+        "Blazer",
+        "Business Sakkos"
+      ],
+      "subcategories": [
+        "Business Sakkos",
+        "Casual Blazer",
+        "Wolle Sakkos",
+        "Leinen Sakkos"
+      ]
     },
     {
       "id": "schuhe",
       "name": "Schuhe",
-      "seoKeywords": ["Herrenschuhe", "Business Schuhe", "Sneaker für Herren"],
-      "subcategories": ["Business Schuhe", "Sneaker", "Boots", "Loafer", "Sandalen"]
+      "seoKeywords": [
+        "Herrenschuhe",
+        "Business Schuhe",
+        "Sneaker für Herren"
+      ],
+      "subcategories": [
+        "Business Schuhe",
+        "Sneaker",
+        "Boots",
+        "Loafer",
+        "Sandalen"
+      ]
     },
     {
       "id": "socken",
       "name": "Socken",
-      "seoKeywords": ["Herrensocken", "Business Socken", "Sportsocken"],
-      "subcategories": ["Business Socken", "Freizeitsocken", "Sportsocken", "Sneakersocken"]
+      "seoKeywords": [
+        "Herrensocken",
+        "Business Socken",
+        "Sportsocken"
+      ],
+      "subcategories": [
+        "Business Socken",
+        "Freizeitsocken",
+        "Sportsocken",
+        "Sneakersocken"
+      ]
     },
     {
       "id": "sport",
       "name": "Sport",
-      "seoKeywords": ["Sportbekleidung Herren", "Fitness Mode", "Trainingskleidung"],
-      "subcategories": ["Trainingsanzüge", "Sportshirts", "Sporthosen", "Funktionswäsche", "Sportjacken"]
+      "seoKeywords": [
+        "Sportbekleidung Herren",
+        "Fitness Mode",
+        "Trainingskleidung"
+      ],
+      "subcategories": [
+        "Trainingsanzüge",
+        "Sportshirts",
+        "Sporthosen",
+        "Funktionswäsche",
+        "Sportjacken"
+      ]
     },
     {
       "id": "t-shirts",
       "name": "T-Shirts",
-      "seoKeywords": ["Herren T-Shirts", "T-Shirts für Männer", "Basic Shirts"],
-      "subcategories": ["Basic T-Shirts", "Print Shirts", "V-Neck Shirts", "Longsleeves", "Tank Tops"]
+      "seoKeywords": [
+        "Herren T-Shirts",
+        "T-Shirts für Männer",
+        "Basic Shirts"
+      ],
+      "subcategories": [
+        "Basic T-Shirts",
+        "Print Shirts",
+        "V-Neck Shirts",
+        "Longsleeves",
+        "Tank Tops"
+      ]
     },
     {
       "id": "waesche",
       "name": "Wäsche",
-      "seoKeywords": ["Herrenwäsche", "Unterwäsche", "Unterhemden"],
-      "subcategories": ["Boxershorts", "Unterhemden", "Slips", "Funktionswäsche"]
+      "seoKeywords": [
+        "Herrenwäsche",
+        "Unterwäsche",
+        "Unterhemden"
+      ],
+      "subcategories": [
+        "Boxershorts",
+        "Unterhemden",
+        "Slips",
+        "Funktionswäsche"
+      ]
     }
   ]
 } 

@@ -1,12 +1,14 @@
-"use client"
+'use client'
 
-import { useQSPayContext } from "@/hooks/contexts/use-qspay-context";
-import Link from "next/link";
-import { Button, buttonVariants } from "@/components/ui/button";
-import * as React from "react";
-import { useMemo } from "react";
-import { ReviewJoin } from "@/app/dashboard/batch-studio/tasks/type";
-import { EyeIcon, XIcon } from "lucide-react";
+import * as React from 'react'
+import { useMemo } from 'react'
+
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+
+import { EyeIcon, XIcon } from 'lucide-react'
+import { removeReviewTask } from '@/app/dashboard/batch-studio/review/actions'
+import { ReviewJoin } from '@/app/dashboard/batch-studio/tasks/type'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -16,20 +18,20 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    AlertDialogTrigger
-} from "@/components/ui/alert-dialog";
-import { useCustomAction } from "@/hooks/use-custom-action";
-import { removeReviewTask } from "@/app/dashboard/batch-studio/review/actions";
-import { useRouter } from "next/navigation";
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import { Button, buttonVariants } from '@/components/ui/button'
+import { useQSPayContext } from '@/hooks/contexts/use-qspay-context'
+import { useCustomAction } from '@/hooks/use-custom-action'
 
-export const ReviewHandlers = ({item}: { item: ReviewJoin }) => {
-    const {currentStore} = useQSPayContext()
+export const ReviewHandlers = ({ item }: { item: ReviewJoin }) => {
+    const { currentStore } = useQSPayContext()
     const router = useRouter()
 
     const getStoreSlug = useMemo(() => {
         if (currentStore) {
             const url = new URL(currentStore?.storeUrl)
-            url.pathname = [item.category?.slug, item.brand?.slug].join("/").split("/").filter(Boolean).join("/")
+            url.pathname = [item.category?.slug, item.brand?.slug].join('/').split('/').filter(Boolean).join('/')
             return url.toString()
         }
 
@@ -39,17 +41,17 @@ export const ReviewHandlers = ({item}: { item: ReviewJoin }) => {
     const removeReview = useCustomAction(removeReviewTask, {
         onSuccess: () => {
             router.refresh()
-        }
+        },
     })
 
     return (
         <div className="flex gap-2">
-            {getStoreSlug &&
-                <Link target="_blank" className={buttonVariants({variant: "outline"})} href={getStoreSlug}>
-                    <EyeIcon/>
+            {getStoreSlug && (
+                <Link target="_blank" className={buttonVariants({ variant: 'outline' })} href={getStoreSlug}>
+                    <EyeIcon />
                     Preview
                 </Link>
-            }
+            )}
 
             <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -58,7 +60,7 @@ export const ReviewHandlers = ({item}: { item: ReviewJoin }) => {
                         loading={removeReview.isPending}
                         variant="outline"
                     >
-                        <XIcon/>
+                        <XIcon />
                         Reject
                     </Button>
                 </AlertDialogTrigger>
@@ -66,14 +68,15 @@ export const ReviewHandlers = ({item}: { item: ReviewJoin }) => {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Every AI request requires using a paid service. This action cannot be undone. You
-                            will lose the generated content.
+                            Every AI request requires using a paid service. This action cannot be undone. You will lose
+                            the generated content.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={() => removeReview.executeAsync({contentId: item.content.id})}>Continue</AlertDialogAction>
+                        <AlertDialogAction onClick={() => removeReview.executeAsync({ contentId: item.content.id })}>
+                            Continue
+                        </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

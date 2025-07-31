@@ -1,15 +1,15 @@
-import {create} from 'zustand'
+import { create } from 'zustand'
 
 interface DataTableSelectionStoreType {
-    selected: Record<string, boolean>,
+    selected: Record<string, boolean>
     setSelected: (row: Record<string, boolean>) => void
 }
 
 const initialState = {
-    selected: {}
+    selected: {},
 }
 
 export const useDataTableSelectionStore = create<DataTableSelectionStoreType>((set) => ({
     ...initialState,
-    setSelected: (row: Record<string, boolean>) => set({selected: row}),
+    setSelected: (row: Record<string, boolean>) => set({ selected: row }),
 }))

@@ -1,34 +1,36 @@
-"use client"
+'use client'
 
-import { DataTable } from "@/components/datatable/data-table"
-import { DataTableSortList } from "@/components/datatable/data-table-sort-list"
-import { BrandTableActionBar } from "@/app/dashboard/brands/brand-table-action-bar";
-import { getBrands } from "@/app/dashboard/brands/queries";
-import { use } from "react";
-import { useDataTable } from "@/hooks/use-data-table";
-import { getBranchTableColumns } from "@/app/dashboard/brands/brand-table-columns";
-import { DataTableToolbar } from "@/components/datatable/data-table-toolbar";
-import { useTranslations } from "next-intl";
+import { use } from 'react'
+
+import { useTranslations } from 'next-intl'
+
+import { BrandTableActionBar } from '@/app/dashboard/brands/brand-table-action-bar'
+import { getBranchTableColumns } from '@/app/dashboard/brands/brand-table-columns'
+import { getBrands } from '@/app/dashboard/brands/queries'
+import { DataTable } from '@/components/datatable/data-table'
+import { DataTableSortList } from '@/components/datatable/data-table-sort-list'
+import { DataTableToolbar } from '@/components/datatable/data-table-toolbar'
+import { useDataTable } from '@/hooks/use-data-table'
 
 interface BrandsTableProps {
     promise: Promise<Awaited<ReturnType<typeof getBrands>>>
 }
 
-export const BrandTable = ({promise}: BrandsTableProps) => {
-    const {data, pageCount} = use(promise)
+export const BrandTable = ({ promise }: BrandsTableProps) => {
+    const { data, pageCount } = use(promise)
     const t = useTranslations()
 
     const columns = getBranchTableColumns()
 
-    const {table} = useDataTable({
+    const { table } = useDataTable({
         data: data.brands,
-        meta: {t},
+        meta: { t },
         columns,
         pageCount,
         enableColumnPinning: true,
         initialState: {
-            sorting: [{id: "name", desc: false}],
-            columnPinning: {left: ["link", "name"]},
+            sorting: [{ id: 'name', desc: false }],
+            columnPinning: { left: ['link', 'name'] },
         },
         shallow: false,
         clearOnDefault: true,
@@ -36,12 +38,9 @@ export const BrandTable = ({promise}: BrandsTableProps) => {
 
     return (
         <>
-            <DataTable
-                table={table}
-                actionBar={<BrandTableActionBar table={table}/>}
-            >
+            <DataTable table={table} actionBar={<BrandTableActionBar table={table} />}>
                 <DataTableToolbar table={table}>
-                    <DataTableSortList table={table} align="end"/>
+                    <DataTableSortList table={table} align="end" />
                 </DataTableToolbar>
             </DataTable>
         </>

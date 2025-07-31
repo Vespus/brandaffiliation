@@ -9,21 +9,22 @@ const config = {
     singleQuote: true,
     printWidth: 120,
     plugins: ['@ianvs/prettier-plugin-sort-imports', 'prettier-plugin-tailwindcss'],
-    // This plugin's options
     importOrder: [
+        '^react$',
+        '',
+        '^(next|next-.*)(.*)$',
+        '',
         '<TYPES>^(node:)',
         '<TYPES>',
-        '<TYPES>^[.]',
-        '^react$',
-        '^next',
+        '',
         '<BUILTIN_MODULES>', // Node.js built-in modules
         '<THIRD_PARTY_MODULES>', // Imports not matched by other special words or groups.,
         '^@/(.*)$',
-        '^[./]',
+        '<TYPES>^[.]',
+        '^[.]',
     ],
     importOrderParserPlugins: ['typescript', 'jsx', 'decorators-legacy'],
-    importOrderTypeScriptVersion: '5.0.0',
-    importOrderCaseSensitive: false,
+    importOrderCaseSensitive: true,
 }
 
 export default config

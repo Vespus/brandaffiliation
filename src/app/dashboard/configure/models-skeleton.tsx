@@ -1,9 +1,9 @@
-import { ModelItemSkeleton } from "@/app/dashboard/configure/model-item-skeleton";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ModelItemSkeleton } from '@/app/dashboard/configure/model-item-skeleton'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 export const ModelsSkeleton = () => {
-    const skeletonItems = Array.from({length: 5}, (_, i) => i);
+    const skeletonItems = Array.from({ length: 5 }, (_, i) => i)
 
     return (
         <Card>
@@ -24,11 +24,11 @@ export const ModelsSkeleton = () => {
                     </TableHeader>
                     <TableBody>
                         {skeletonItems.map((i) => (
-                            <ModelItemSkeleton key={i}/>
+                            <ModelItemSkeleton key={i} />
                         ))}
                     </TableBody>
                 </Table>
             </CardContent>
         </Card>
-    );
-};
+    )
+}

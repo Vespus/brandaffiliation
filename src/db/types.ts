@@ -2,23 +2,27 @@ import {
     aiModels,
     aiProviders,
     aiSettingsDefault,
-    brands,
     brandScales,
-    brandWithScales, categories,
-    characteristics, combinations, contents,
-    datasources,
+    brandWithScales,
+    brands,
+    categories,
+    characteristics,
+    combinations,
+    contents,
     datasourceValues,
-    scales, tasks,
-    translations
-} from "@/db/schema";
+    datasources,
+    scales,
+    tasks,
+    translations,
+} from '@/db/schema'
 
-export type Brand = typeof brands.$inferSelect;
+export type Brand = typeof brands.$inferSelect
 export type BrandWithCharacteristicAndScales = typeof brandWithScales.$inferSelect
 
 export type Scale = typeof scales.$inferSelect
 export type BrandScale = typeof brandScales.$inferSelect
 
-export type Characteristic = typeof characteristics.$inferSelect;
+export type Characteristic = typeof characteristics.$inferSelect
 
 export type AIProvider = typeof aiProviders.$inferSelect
 export type AISetting = typeof aiSettingsDefault.$inferSelect

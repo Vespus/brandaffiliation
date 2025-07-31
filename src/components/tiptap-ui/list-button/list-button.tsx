@@ -1,32 +1,24 @@
-"use client"
+'use client'
 
-import * as React from "react"
+import * as React from 'react'
 
-import {useTiptapEditor} from "@/hooks/use-tiptap-editor"
-import {useList, UseListConfig} from "@/components/tiptap-ui/list-button/use-list";
-import {ToolbarButton} from "@/components/tiptap/toolbar";
+import { UseListConfig, useList } from '@/components/tiptap-ui/list-button/use-list'
+import { ToolbarButton } from '@/components/tiptap/toolbar'
+import { useTiptapEditor } from '@/hooks/use-tiptap-editor'
 
-export type ListButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "type"> & UseListConfig
+export type ListButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type'> & UseListConfig
 
-export const ListButton = (
-    {
-        editor: providedEditor,
-        type,
-        hideWhenUnavailable = false,
-        onToggled,
-        onClick,
-        children,
-        ...buttonProps
-    }: ListButtonProps
-) => {
-    const {editor} = useTiptapEditor(providedEditor)
-    const {
-        isVisible,
-        canToggle,
-        isActive,
-        handleToggle,
-        label,
-    } = useList({
+export const ListButton = ({
+    editor: providedEditor,
+    type,
+    hideWhenUnavailable = false,
+    onToggled,
+    onClick,
+    children,
+    ...buttonProps
+}: ListButtonProps) => {
+    const { editor } = useTiptapEditor(providedEditor)
+    const { isVisible, canToggle, isActive, handleToggle, label } = useList({
         editor,
         type,
         hideWhenUnavailable,
@@ -50,7 +42,7 @@ export const ListButton = (
         <ToolbarButton
             type="button"
             data-style="ghost"
-            data-active-state={isActive ? "on" : "off"}
+            data-active-state={isActive ? 'on' : 'off'}
             role="button"
             tabIndex={-1}
             disabled={!canToggle}
@@ -67,4 +59,4 @@ export const ListButton = (
     )
 }
 
-ListButton.displayName = "ListButton"
+ListButton.displayName = 'ListButton'

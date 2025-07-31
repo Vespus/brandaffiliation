@@ -1,25 +1,26 @@
-import React from "react";
-import { ReviewJoin } from "@/app/dashboard/batch-studio/tasks/type";
-import { Badge } from "@/components/ui/badge";
-import { Scroller } from "@/components/ui/scroller";
-import { ReviewSidebarItem } from "@/app/dashboard/batch-studio/review/review-sidebar-item";
-import { ReviewSidebarHandler } from "@/app/dashboard/batch-studio/review/review-sidebar-handler";
+import React from 'react'
 
-export const ReviewSidebar = ({contents}: { contents: ReviewJoin[] }) => {
+import { ReviewSidebarHandler } from '@/app/dashboard/batch-studio/review/review-sidebar-handler'
+import { ReviewSidebarItem } from '@/app/dashboard/batch-studio/review/review-sidebar-item'
+import { ReviewJoin } from '@/app/dashboard/batch-studio/tasks/type'
+import { Badge } from '@/components/ui/badge'
+import { Scroller } from '@/components/ui/scroller'
+
+export const ReviewSidebar = ({ contents }: { contents: ReviewJoin[] }) => {
     return (
-        <div className="w-full max-w-xs border-r flex-none flex flex-col">
-            <div className="flex flex-col gap-8 pt-4 pb-6 mb-6 px-4 border-b">
-                <div className="flex gap-8 items-center justify-between">
-                    <h3 className="font-medium text-lg">Review Queue</h3>
+        <div className="flex w-full max-w-xs flex-none flex-col border-r">
+            <div className="mb-6 flex flex-col gap-8 border-b px-4 pt-4 pb-6">
+                <div className="flex items-center justify-between gap-8">
+                    <h3 className="text-lg font-medium">Review Queue</h3>
                     <Badge>{contents.length} Pending</Badge>
                 </div>
-                <ReviewSidebarHandler contents={contents}/>
+                <ReviewSidebarHandler contents={contents} />
             </div>
             <Scroller className="min-h-0 flex-1">
                 <div className="space-y-2 px-4 py-2">
                     {contents.length <= 0 && <span className="text-xs">No Review Queue</span>}
                     {contents.map((item: ReviewJoin) => (
-                        <ReviewSidebarItem key={item.content.id} item={item}/>
+                        <ReviewSidebarItem key={item.content.id} item={item} />
                     ))}
                 </div>
             </Scroller>

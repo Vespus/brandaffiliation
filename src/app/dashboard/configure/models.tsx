@@ -1,19 +1,19 @@
-"use client"
+'use client'
 
-import {ModelItem} from "@/app/dashboard/configure/model-item";
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
-import {Table, TableBody, TableHead, TableHeader, TableRow} from "@/components/ui/table"
-import {AIModel, AIProvider, AISetting} from "@/db/types";
+import { ModelItem } from '@/app/dashboard/configure/model-item'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { AIModel, AIProvider, AISetting } from '@/db/types'
 
 type ModelProps = {
     aiModels: (AIModel & {
-        aiProvider: Pick<AIProvider, "name" | "code">
-    })[],
+        aiProvider: Pick<AIProvider, 'name' | 'code'>
+    })[]
     aiSettings: AISetting[]
 }
 
-export const Models = ({aiModels, aiSettings}: ModelProps) => {
-    const settingsMap = new Map((aiSettings).map(setting => [setting.model, setting]))
+export const Models = ({ aiModels, aiSettings }: ModelProps) => {
+    const settingsMap = new Map(aiSettings.map((setting) => [setting.model, setting]))
 
     return (
         <Card>
@@ -33,15 +33,13 @@ export const Models = ({aiModels, aiSettings}: ModelProps) => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {
-                            aiModels.map((model) => (
-                                <ModelItem
-                                    key={model.id}
-                                    model={model}
-                                    settings={settingsMap.get(model.modelName)!}
-                                ></ModelItem>
-                            ))
-                        }
+                        {aiModels.map((model) => (
+                            <ModelItem
+                                key={model.id}
+                                model={model}
+                                settings={settingsMap.get(model.modelName)!}
+                            ></ModelItem>
+                        ))}
                     </TableBody>
                 </Table>
             </CardContent>
