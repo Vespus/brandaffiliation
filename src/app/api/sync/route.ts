@@ -6,9 +6,9 @@ import {
     brands as localBrandsTable,
     categories as localCategoriesTable,
     combinations as localCombinationsTable,
-    contents
+    contents, tasks
 } from "@/db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { categoryFlat } from "@/utils/category-flat";
 import { isEmpty } from "@/utils/is-empty";
 
@@ -18,6 +18,9 @@ export const GET = async () => {
         QSPayClient<QSPayCategory[]>("CmsCategory/GetAll"),
         QSPayClient<QSPayCombin[]>("CmsCombinPage/GetAllWithConfig")
     ])
+
+    await db.execute(sql.raw(`TRUNCATE TABLE tasks RESTART IDENTITY`))
+    await db.execute(sql.raw(`TRUNCATE TABLE contents RESTART IDENTITY`))
 
     await processBrands(remoteBrands)
     await processCategories(categories)
@@ -35,7 +38,7 @@ const processBrands = async (brands: QSPayBrand[]) => {
         }).then(x => x.result)
     }))
 
-    await db.delete(contents).where(eq(contents.entityType, "brand"))
+    // await db.delete(contents).where(eq(contents.entityType, "brand"))
     await db.insert(contents).values(remoteBrandContents.filter(c => !isEmpty(c.config)).map(brandContent => ({
         entityType: "brand",
         entityId: brandContent.id,
@@ -87,7 +90,7 @@ const processCategories = async (categories: QSPayCategory[]) => {
         }).then(x => x.result)
     }))
 
-    await db.delete(contents).where(eq(contents.entityType, "category"))
+    // await db.delete(contents).where(eq(contents.entityType, "category"))
     await db.insert(contents).values(remoteCategoryContents.filter(c => !isEmpty(c.config)).map(categoryContent => ({
         entityType: "category",
         entityId: categoryContent.id,
@@ -131,45 +134,21 @@ const processCategories = async (categories: QSPayCategory[]) => {
 }
 
 const processCombinations = async (combinations: QSPayCombin[]) => {
-    await db.delete(contents).where(eq(contents.entityType, "combination"))
-    await db.insert(contents).values(combinations.filter(c => !isEmpty(c.config)).map(combination => ({
-        entityType: "combination",
-        entityId: combination.id,
-        config: combination.config,
-    })))
+    const filteredCombinations = combinations.filter(combination => combination.category && !combination.catalog)
+    return await db.transaction(async (tx) => {
+        await tx.insert(localCombinationsTable).values(filteredCombinations.map(combination => ({
+            name: combination.name,
+            description: combination.description,
+            integrationId: combination.id,
+            brandId: combination.brand.id,
+            categoryId: combination.category.id,
+        })))
 
-    const localCombinations = await db.select().from(localCombinationsTable)
-
-    const insertDiff: QSPayCombin[] = []
-    const updateDiff: QSPayCombin[] = []
-    for (const remoteCombination of combinations.filter(x => x.category && x.brand && !x.catalog)) {
-        const isExists = localCombinations.find(x => x.brandId === remoteCombination.brand.id && x.categoryId === remoteCombination.category.id)
-        if (!isExists) {
-            insertDiff.push(remoteCombination)
-        } else if (isExists.integrationId !== remoteCombination.id) {
-            updateDiff.push(remoteCombination)
-        }
-    }
-
-    await db.transaction(async (tx) => {
-        if (insertDiff.length > 0) {
-            await tx.insert(localCombinationsTable).values(insertDiff.map(combination => ({
-                name: combination.name,
-                description: combination.description,
-                integrationId: combination.id,
-                brandId: combination.brand.id,
-                categoryId: combination.category.id,
-            })))
-        }
-
-        if (updateDiff.length > 0) {
-            await Promise.all(updateDiff.map(async (combination) => await tx
-                .update(localCombinationsTable)
-                .set({
-                    integrationId: combination.id
-                })
-                .where(and(eq(localCombinationsTable.brandId, combination.brand.id), eq(localCombinationsTable.categoryId, combination.category.id)))
-            ))
-        }
+        // await tx.delete(contents).where(eq(contents.entityType, "combination"))
+        await tx.insert(contents).values(filteredCombinations.filter(c => !isEmpty(c.config)).map(combination => ({
+            entityType: "combination",
+            entityId: combination.id,
+            config: combination.config,
+        })))
     })
 }

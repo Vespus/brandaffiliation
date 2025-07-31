@@ -11,6 +11,7 @@ import {
     userPrompts
 } from "@/db/schema";
 import { getUser } from "@/lib/get-user";
+import { SoftHttpError } from "@/lib/soft-http-error";
 import { createTRPCRouter, publicProcedure } from "@/lib/trpc/trpc";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
@@ -57,7 +58,7 @@ export const genericRoute = createTRPCRouter({
                 .where(eq(brandTable.id, input.brand))
 
             if (!brand) {
-                throw new Error("Brand not found")
+                throw new SoftHttpError("Brand not found")
             }
 
             return formatPrompt({
@@ -72,7 +73,7 @@ export const genericRoute = createTRPCRouter({
             const {user} = await getUser()
 
             if (!user) {
-                throw Error("User not found")
+                throw new SoftHttpError("User not found")
             }
 
             return db.query.userPrompts.findMany({where: eq(userPrompts.userId, user!.id)});
@@ -88,7 +89,7 @@ export const genericRoute = createTRPCRouter({
             const [brand] = await db.select().from(brandWithScales).where(eq(brandWithScales.id, input))
 
             if (!brand) {
-                throw new Error("Brand not found")
+                throw new SoftHttpError("Brand not found")
             }
 
             return brand

@@ -1,4 +1,6 @@
 import { env } from "@/env";
+import { ForbiddenError } from "@/lib/forbidden-error";
+import { SoftHttpError } from "@/lib/soft-http-error";
 import { cookies } from "next/headers";
 
 type ValidationError = {
@@ -66,10 +68,26 @@ export async function QSPayClient<T>(path: string, init?: Request): Promise<Gene
     const response = await fetch(uri.toString(), init);
 
     if (!response.ok) {
-        console.error(await response.text());
-        console.error(uri.toString())
-        throw new Error(response.statusText);
+        console.error('Server-side fetch failed on URL', uri.toString())
+        if(response.status === 403) {
+            throw new ForbiddenError("Unauthorized, remove qs-pay integration auth keys")
+        }
+
+        if (response.headers.get('content-type')?.includes('application/json')) {
+            const errorResponse = await response.json()
+            console.error('Server-side fetch thrown an error. Full output of the response is:', errorResponse)
+            throw new SoftHttpError(errorResponse.message)
+        }
+
+        const errorTextResponse = await response.text()
+        console.error(
+            'Server-side fetch thrown an error that is not **JSON**. Full output of the response is',
+            errorTextResponse
+        )
+
+        throw new Error('Uncatchable error: ' + response.statusText)
     }
+
     const respo = await response.json() as GenericResponse<T>
     return respo;
 }

@@ -1,4 +1,5 @@
 import { QSPayClient } from "@/lib/qs-pay-client";
+import { SoftHttpError } from "@/lib/soft-http-error";
 import { createTRPCRouter, publicProcedure } from "@/lib/trpc/trpc";
 import { QSPayBrand, QSPayCategory, QSPayCombin, QSPayUser } from "@/qspay-types";
 import { z } from "zod";
@@ -45,7 +46,7 @@ export const qspayRoute = createTRPCRouter({
                 const foundCombinationPage = allCombinationPages.find(cp => Number(cp.category?.id || 0) === categoryId && Number(cp.brand?.id || 0) === brandId)
 
                 if (!foundCombinationPage) {
-                    throw new Error("Combination page not found. BrandAffiliation can't create a new one, please create one manually then try again.")
+                    throw new SoftHttpError("Combination page not found. BrandAffiliation can't create a new one, please create one manually then try again.")
                 }
 
                 const {result} = await QSPayClient<QSPayCombin>("CmsCombinPage/Get", {
@@ -62,7 +63,7 @@ export const qspayRoute = createTRPCRouter({
                 const foundBrandPage = allBrandPages.find(cp => Number(cp.id) === brandId)
 
                 if (!foundBrandPage) {
-                    throw new Error("Brand page not found. BrandAffiliation can't create a new one, please create one manually then try again.")
+                    throw new SoftHttpError("Brand page not found. BrandAffiliation can't create a new one, please create one manually then try again.")
                 }
 
                 const {result} = await QSPayClient<QSPayBrand>("CmsBrand/Get", {
@@ -80,7 +81,7 @@ export const qspayRoute = createTRPCRouter({
                 const foundCategoryPage = allCategoryPages.find(cp => Number(cp.id) === categoryId)
 
                 if (!foundCategoryPage) {
-                    throw new Error("Category page not found. BrandAffiliation can't create a new one, please create one manually then try again.")
+                    throw new SoftHttpError("Category page not found. BrandAffiliation can't create a new one, please create one manually then try again.")
                 }
 
                 const {result} = await QSPayClient<QSPayCategory>("CmsCategory/Get", {
@@ -92,6 +93,6 @@ export const qspayRoute = createTRPCRouter({
                 return {type: 'category', ...result}
             }
 
-            throw new Error("Something went wrong. Please try again. If the problem persists, please contact support.")
+            throw new SoftHttpError("Something went wrong. Please try again. If the problem persists, please contact support.")
         })
 })

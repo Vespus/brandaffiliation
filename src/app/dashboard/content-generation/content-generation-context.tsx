@@ -4,7 +4,7 @@ import { QSPayStore } from "@/qspay-types";
 import React, { ReactNode } from "react";
 
 export type ContentGenerationProps = {
-    store: QSPayStore
+    store?: QSPayStore | null
 }
 export type UserProviderProps = ContentGenerationProps & {
     children: ReactNode | ReactNode[]
