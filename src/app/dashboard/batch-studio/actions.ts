@@ -159,7 +159,7 @@ const processQSPay = async ({ content, config }: { content: Content; config?: Pa
                 body: JSON.stringify({
                     categoryName: category.integrationName,
                     brandName: brand.integrationName,
-                    config: toMerged(remoteCombination.config, config || (content.config as MetaOutput) || {}),
+                    config: toMerged(remoteCombination?.config || {}, config || (content.config as MetaOutput) || {}),
                 }),
             })
         }

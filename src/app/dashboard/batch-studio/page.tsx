@@ -28,11 +28,10 @@ export default async function Page() {
         db
             .select({
                 task: tasks,
-                entityName: sql`COALESCE(
-                ${brands.name},
-                ${categories.name},
-                ${combinations.name}
-                )`.as('entityName'),
+                entityName: sql`COALESCE
+                ( ${brands.name},
+                    ${categories.name},
+                    ${combinations.name})`.as('entityName'),
                 brand: brands,
                 category: categories,
                 combination: combinations,
@@ -60,11 +59,7 @@ export default async function Page() {
             .select({
                 content: contents,
                 entityName: sql`COALESCE
-                (
-                ${brands.name},
-                ${categories.name},
-                ${combinations.name}
-                )`.as('entityName'),
+                    (${brands.name},${categories.name},${combinations.name})`.as('entityName'),
                 brand: brands,
                 category: categories,
                 combination: combinations,
@@ -87,7 +82,7 @@ export default async function Page() {
             )
             .leftJoin(
                 brands,
-                and(or(eq(contents.entityId, brands.integrationId), eq(contents.entityId, combinations.brandId)))
+                and(or(eq(contents.entityId, brands.integrationId), eq(brands.integrationId, combinations.brandId)))
             ),
     ])
 
