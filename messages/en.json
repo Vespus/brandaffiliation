@@ -1,0 +1,19 @@
+{
+  "app": {
+    "title": "Brand Affiliation",
+    "description": "Manage your brand affiliations"
+  },
+  "common": {
+    "welcome": "Welcome",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "email": "Email",
+    "password": "Password"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "src/app/**/*": {
+      "maxDuration": 60
+    },
+    "src/app/api/**/*.ts": {
+      "maxDuration": 60
+    }
+  }
+}

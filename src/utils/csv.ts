@@ -1,49 +1,49 @@
-import Papa from 'papaparse';
+import Papa from 'papaparse'
 
 export type CSVParseOptions = {
-  header?: boolean;
-  skipEmptyLines?: boolean;
-  dynamicTyping?: boolean;
-};
+    header?: boolean
+    skipEmptyLines?: boolean
+    dynamicTyping?: boolean
+}
 
 export const parseCSV = async (file: File, options: CSVParseOptions = {}) => {
-  const defaultOptions = {
-    header: true,
-    skipEmptyLines: true,
-    dynamicTyping: true,
-    ...options,
-  };
+    const defaultOptions = {
+        header: true,
+        skipEmptyLines: true,
+        dynamicTyping: true,
+        ...options,
+    }
 
-  return new Promise((resolve, reject) => {
-    Papa.parse(file, {
-      ...defaultOptions,
-      complete: (results) => {
-        resolve(results.data);
-      },
-      error: (error) => {
-        reject(error);
-      },
-    });
-  });
-};
+    return new Promise((resolve, reject) => {
+        Papa.parse(file, {
+            ...defaultOptions,
+            complete: (results) => {
+                resolve(results.data)
+            },
+            error: (error) => {
+                reject(error)
+            },
+        })
+    })
+}
 
 export const parseCSVString = (csvString: string, options: CSVParseOptions = {}) => {
-  const defaultOptions = {
-    header: true,
-    skipEmptyLines: true,
-    dynamicTyping: true,
-    ...options,
-  };
+    const defaultOptions = {
+        header: true,
+        skipEmptyLines: true,
+        dynamicTyping: true,
+        ...options,
+    }
 
-  return Papa.parse(csvString, defaultOptions).data;
-};
+    return Papa.parse(csvString, defaultOptions).data
+}
 
-export const convertToCSV = (data: any[], options: CSVParseOptions = {}) => {
-  const defaultOptions = {
-    header: true,
-    skipEmptyLines: true,
-    ...options,
-  };
+export const convertToCSV = (data: unknown[], options: CSVParseOptions = {}) => {
+    const defaultOptions = {
+        header: true,
+        skipEmptyLines: true,
+        ...options,
+    }
 
-  return Papa.unparse(data, defaultOptions);
-}; 
+    return Papa.unparse(data, defaultOptions)
+}
