@@ -74,7 +74,7 @@ export const ReviewHandlers = ({ item }: { item: ReviewJoin }) => {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => removeReview.executeAsync({ contentId: item.content.id })}>
+                        <AlertDialogAction onClick={() => removeReview.executeAsync({ reviewId: item.review.id })}>
                             Continue
                         </AlertDialogAction>
                     </AlertDialogFooter>

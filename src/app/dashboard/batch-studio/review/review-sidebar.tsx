@@ -20,7 +20,7 @@ export const ReviewSidebar = ({ contents }: { contents: ReviewJoin[] }) => {
                 <div className="space-y-2 px-4 py-2">
                     {contents.length <= 0 && <span className="text-xs">No Review Queue</span>}
                     {contents.map((item: ReviewJoin) => (
-                        <ReviewSidebarItem key={item.content.id} item={item} />
+                        <ReviewSidebarItem key={item.review.id} item={item} />
                     ))}
                 </div>
             </Scroller>

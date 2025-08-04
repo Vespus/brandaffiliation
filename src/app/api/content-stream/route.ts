@@ -11,11 +11,14 @@ import { db } from '@/db'
 import { getAIModelsWithProviderAndSettings } from '@/db/presets'
 import {
     brandWithScales,
+    brandsStores,
     categories,
+    categoriesStores,
     combinations,
     contents,
     datasourceValues,
     datasources,
+    reviews,
     systemPrompts,
     tasks,
 } from '@/db/schema'
@@ -63,8 +66,8 @@ export const POST = async (req: NextRequest) => {
     }
 
     userPrompt.push(await handleDataSources({ dataSources: specifications.dataSources }))
-    await db.update(tasks).set({ status: 'inProgress' }).where(eq(tasks.id, task.id))
 
+    await db.update(tasks).set({ status: 'inProgress' }).where(eq(tasks.id, task.id))
     try {
         const driver = getDriver(model)
         const { object } = await generateObject({
@@ -76,31 +79,16 @@ export const POST = async (req: NextRequest) => {
             presencePenalty: model.settings.presencePenalty,
             system: prompt!.prompt,
             schema: MetaOutputSchema,
-            prompt: userPrompt.join('\n'),
+            prompt: userPrompt.filter(Boolean).join('\n'),
         })
 
-        const [currentConfig] = await db
-            .select()
-            .from(contents)
-            .where(and(eq(contents.entityId, task.entityId), eq(contents.entityType, task.entityType)))
-        if (currentConfig) {
-            await db
-                .update(contents)
-                .set({
-                    config: object,
-                    oldConfig: currentConfig.config,
-                    needsReview: true,
-                })
-                .where(and(eq(contents.entityId, task.entityId), eq(contents.entityType, task.entityType)))
-        } else {
-            await db.insert(contents).values({
-                entityId: task.entityId,
-                entityType: task.entityType,
-                config: object,
-                oldConfig: null,
-                needsReview: true,
-            })
-        }
+        await db.insert(reviews).values({
+            entityId: task.entityId,
+            entityType: task.entityType,
+            config: object,
+            approved: false,
+            storeId: task.storeId
+        })
     } catch (e) {
         await db.update(tasks).set({ status: 'failed' }).where(eq(tasks.id, task.id))
         throw e
@@ -121,17 +109,8 @@ const handleDataSources = async ({ dataSources }: Pick<BatchContentGenerateSchem
                 .select({
                     name: datasources.name,
                     description: datasources.description,
-                    data: sql<string[]>`array_agg
-                ((
-                ${datasourceValues.data}
-                -
-                >>
-                ${datasources.valueColumn}
-                )
-                :
-                :
-                text
-                )`,
+                    // prettier-ignore
+                    data: sql<string[]>`array_agg((${datasourceValues.data}->>${datasources.valueColumn})::text)`,
                 })
                 .from(datasources)
                 .leftJoin(
@@ -164,19 +143,26 @@ const processBrand = async (task: Task, id?: string) => {
     ]
 
     const [brand] = await db
-        .select()
+        .select({
+            brand: brandWithScales,
+            config: contents.config,
+        })
         .from(brandWithScales)
-        .where(eq(brandWithScales.integrationId, id || task.entityId))
+        .leftJoin(brandsStores, eq(brandsStores.brandId, brandWithScales.id))
+        .leftJoin(contents, and(eq(contents.entityId, brandsStores.integrationId), eq(contents.entityType, 'brand')))
+        .where(eq(brandsStores.integrationId, id || task.entityId))
 
-    const scales = scaleMap.map((s) => `${s}:${brand[s]}/5`)
+    const scales = scaleMap.filter((s) => brand.brand[s]).map((s) => `${s}:${brand.brand[s]}/5`)
 
-    const brandHeaderInformation = `<BrandName>${brand.name}</BrandName>`
-    const brandMetaData = brand.config ? `<BrandMetaData>${JSON.stringify(brand.config)}</BrandMetaData>` : ''
+    const brandHeaderInformation = `<BrandName>${brand.brand.name}</BrandName>`
+    const brandMetaData = brand.config
+        ? `<BrandExistingMetaData>${JSON.stringify(brand.config)}</BrandExistingMetaData>`
+        : ''
     const brandScaleInformation =
-        scales.length > 0 ? `<BrandScales>${scales.map((s) => `<Scale>${s}</Scale>`).join('\n')}</BrandScales>` : ''
+        scales.length > 0 ? `<BrandScales>${scales.map((s) => `<Scale>${s}</Scale>`).join('')}</BrandScales>` : ''
     const brandCharacteristics =
-        (brand.characteristic?.length || 0) > 0
-            ? `<BrandCharacteristics>${brand.characteristic?.map((c) => `<Characteristic>${c.value}</Characteristic>`).join('\n')}</BrandCharacteristics>`
+        (brand.brand.characteristic?.length || 0) > 0
+            ? `<BrandCharacteristics>${brand.brand.characteristic?.map((c) => `<Characteristic>${c.value}</Characteristic>`).join('\n')}</BrandCharacteristics>`
             : ''
 
     const output = [brandHeaderInformation]
@@ -186,18 +172,22 @@ const processBrand = async (task: Task, id?: string) => {
         output.push(brandCharacteristics)
     }
 
-    return `<Brand>${output.join('')}</Brand>`
+    return `<Brand>${output.filter(Boolean).join('')}</Brand>`
 }
 const processCategory = async (task: Task, id?: string) => {
     const [category] = await db
         .select()
-        .from(categories)
-        .leftJoin(contents, and(eq(contents.entityId, categories.integrationId), eq(contents.entityType, 'category')))
-        .where(eq(categories.integrationId, id || task.entityId))
+        .from(categoriesStores)
+        .innerJoin(categories, eq(categories.id, categoriesStores.categoryId))
+        .leftJoin(
+            contents,
+            and(eq(contents.entityId, categoriesStores.integrationId), eq(contents.entityType, 'category'))
+        )
+        .where(eq(categoriesStores.integrationId, id || task.entityId))
 
-    const categoryHeaderInformation = `<CategoryName>${category.categories.name}</CategoryName>`
+    const categoryHeaderInformation = `<CategoryName>${category.categories.description}</CategoryName>`
     const categoryMetaData = category.contents
-        ? `<CategoryMetaData>${JSON.stringify(category.contents.config)}</CategoryMetaData>`
+        ? `<CategoryExistingMetaData>${JSON.stringify(category.contents.config)}</CategoryExistingMetaData>`
         : ''
 
     const output = [categoryHeaderInformation]
@@ -205,7 +195,7 @@ const processCategory = async (task: Task, id?: string) => {
         output.push(categoryMetaData)
     }
 
-    return `<Category>${categoryHeaderInformation}${categoryMetaData}</Category>`
+    return `<Category>${output.filter(Boolean).join('')}</Category>`
 }
 const processCombination = async (task: Task) => {
     const [combination] = await db

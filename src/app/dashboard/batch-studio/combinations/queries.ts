@@ -2,9 +2,10 @@ import { and, asc, count, desc, eq, ilike, isNotNull, isNull, or, sql } from 'dr
 import { createSearchParamsCache, parseAsInteger, parseAsString } from 'nuqs/server'
 import { BatchStudioCombinationType } from '@/app/dashboard/batch-studio/combinations/batch-studio-combination-type'
 import { db } from '@/db'
-import { brands, categories, combinations, contents } from '@/db/schema'
+import { brands, brandsStores, categories, categoriesStores, combinations, contents } from '@/db/schema'
 import { BrandWithCharacteristicAndScales } from '@/db/types'
 import { getSortingStateParser } from '@/lib/datatable/parsers'
+import { cookies } from "next/headers";
 
 export const searchParamsCache = createSearchParamsCache({
     page: parseAsInteger.withDefault(1),
@@ -15,6 +16,8 @@ export const searchParamsCache = createSearchParamsCache({
 })
 
 export const getCombinations = async (input: Awaited<ReturnType<typeof searchParamsCache.parse>>) => {
+    const cookie = await cookies()
+    const storeId = cookie.get('qs-pay-store-id')?.value!
     const offset = (input.page - 1) * input.perPage
 
     const searchTerms = input.name
@@ -35,7 +38,8 @@ export const getCombinations = async (input: Awaited<ReturnType<typeof searchPar
         searchConditions.length > 0 ? and(...searchConditions) : undefined,
         input.content === 'yes' ? isNotNull(contents.config) : undefined,
         input.content === 'no' ? isNull(contents.config) : undefined,
-        isNotNull(combinations.integrationId)
+        isNotNull(combinations.integrationId),
+        eq(combinations.storeId, storeId),
     )
 
     const orderBy =
@@ -52,17 +56,19 @@ export const getCombinations = async (input: Awaited<ReturnType<typeof searchPar
             integrationId: combinations.integrationId,
             hasContent: sql<boolean>`(${contents.config} IS NOT NULL)`.as('hasContent'),
             brand: brands.name,
-            brandSlug: brands.slug,
+            brandSlug: brandsStores.slug,
             category: categories.description,
-            categorySlug: categories.slug,
+            categorySlug: categoriesStores.slug,
         })
         .from(combinations)
         .leftJoin(
             contents,
             and(eq(contents.entityId, combinations.integrationId), eq(contents.entityType, 'combination'))
         )
-        .leftJoin(brands, and(eq(combinations.brandId, brands.integrationId)))
-        .leftJoin(categories, and(eq(combinations.categoryId, categories.integrationId)))
+        .leftJoin(brandsStores, eq(combinations.brandId, brandsStores.integrationId))
+        .leftJoin(categoriesStores, eq(combinations.categoryId, categoriesStores.integrationId))
+        .leftJoin(brands, eq(brandsStores.brandId, brands.id))
+        .leftJoin(categories, eq(categoriesStores.categoryId, categories.id))
         .where(where)
         .orderBy(...orderBy)
         .offset(offset)
@@ -77,8 +83,10 @@ export const getCombinations = async (input: Awaited<ReturnType<typeof searchPar
             contents,
             and(eq(contents.entityId, combinations.integrationId), eq(contents.entityType, 'combination'))
         )
-        .leftJoin(brands, and(eq(combinations.brandId, brands.integrationId)))
-        .leftJoin(categories, and(eq(combinations.categoryId, categories.integrationId)))
+        .leftJoin(brandsStores, eq(combinations.brandId, brandsStores.integrationId))
+        .leftJoin(categoriesStores, eq(combinations.categoryId, categoriesStores.integrationId))
+        .leftJoin(brands, eq(brandsStores.brandId, brands.id))
+        .leftJoin(categories, eq(categoriesStores.categoryId, categories.id))
         .where(where)
         .execute()
         .then((res) => res[0]?.count ?? 0)

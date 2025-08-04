@@ -13,14 +13,14 @@ export const MetaOutputSchema = z.object({
                     description: z.string().describe('Open Graph description'),
                     locale: z.string().describe('Content locale'),
                 })
-                .describe('Open Graph metadata'),
+                .describe('Facebook OpenGraph metadata'),
             twitter: z
                 .object({
                     card: z.string().describe('Twitter card type'),
                     title: z.string().describe('Twitter title'),
                     description: z.string().describe('Twitter description'),
                 })
-                .describe('Twitter metadata'),
+                .describe('Twitter shareable link metadata'),
             robot: z.string().describe('Robot meta tag content'),
         })
         .describe('Meta information'),
@@ -31,7 +31,7 @@ export const MetaOutputSchema = z.object({
                 .describe(
                     'Banner Hero Header description in html with *one h1* and at least *two p* tags without style. paragraphs should be minimum 50-100 words long'
                 ),
-            footer: z.string().describe('Bottom of the page Hero Footer description must use html without style'),
+            footer: z.string().describe('Bottom of the page Hero Footer description must use *html* without style, usually h2, h3, h4 and p tags'),
         })
         .describe('Content descriptions'),
 })

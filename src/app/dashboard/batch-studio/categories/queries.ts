@@ -1,8 +1,10 @@
+import { cookies } from 'next/headers'
+
 import { and, asc, count, desc, eq, ilike, isNotNull, isNull, or, sql } from 'drizzle-orm'
 import { createSearchParamsCache, parseAsInteger, parseAsString } from 'nuqs/server'
 import { BatchStudioCategoryType } from '@/app/dashboard/batch-studio/categories/batch-studio-category-type'
 import { db } from '@/db'
-import { categories, contents } from '@/db/schema'
+import { categories, categoriesStores, contents } from '@/db/schema'
 import { Category } from '@/db/types'
 import { getSortingStateParser } from '@/lib/datatable/parsers'
 
@@ -15,6 +17,8 @@ export const searchParamsCache = createSearchParamsCache({
 })
 
 export const getCategories = async (input: Awaited<ReturnType<typeof searchParamsCache.parse>>) => {
+    const cookie = await cookies()
+    const storeId = cookie.get('qs-pay-store-id')?.value!
     const offset = (input.page - 1) * input.perPage
 
     const searchTerms = input.description
@@ -31,7 +35,7 @@ export const getCategories = async (input: Awaited<ReturnType<typeof searchParam
         searchConditions.length > 0 ? and(...searchConditions) : undefined,
         input.content === 'yes' ? isNotNull(contents.config) : undefined,
         input.content === 'no' ? isNull(contents.config) : undefined,
-        isNotNull(categories.integrationId)
+        eq(categoriesStores.storeId, storeId)
     )
 
     const orderBy =
@@ -46,13 +50,14 @@ export const getCategories = async (input: Awaited<ReturnType<typeof searchParam
                 description: categories.description,
                 slug: categories.slug,
                 content: contents.config,
-                integrationId: categories.integrationId,
+                integrationId: categoriesStores.integrationId,
                 hasContent: sql<boolean>`(${contents.config} IS NOT NULL)`.as('hasContent'),
             })
-            .from(categories)
+            .from(categoriesStores)
+            .leftJoin(categories, eq(categories.id, categoriesStores.categoryId))
             .leftJoin(
                 contents,
-                and(eq(contents.entityId, categories.integrationId), eq(contents.entityType, 'category'))
+                and(eq(contents.entityId, categoriesStores.integrationId), eq(contents.entityType, 'category'))
             )
             .where(where)
             .orderBy(...orderBy)
@@ -63,10 +68,11 @@ export const getCategories = async (input: Awaited<ReturnType<typeof searchParam
             .select({
                 count: count(),
             })
-            .from(categories)
+            .from(categoriesStores)
+            .leftJoin(categories, eq(categories.id, categoriesStores.categoryId))
             .leftJoin(
                 contents,
-                and(eq(contents.entityId, categories.integrationId), eq(contents.entityType, 'category'))
+                and(eq(contents.entityId, categoriesStores.integrationId), eq(contents.entityType, 'category'))
             )
             .where(where)
             .execute()

@@ -150,6 +150,19 @@ export const QSPayCategorySchema = z.object({
 
 export type QSPayCategory = z.infer<typeof QSPayCategorySchema>
 
+export const QSPaySingleStoreBasedCategorySchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    mainType: z.number(),
+    parentId: z.string(),
+    slug: z.string(),
+    storeId: z.string(),
+    config: MetaOutputSchema,
+})
+
+export type QSPaySingleStoreBasedCategory = z.infer<typeof QSPaySingleStoreBasedCategorySchema>
+
 export const QSPayCombinSchema = z.object({
     id: z.string(),
     name: z.string(),
@@ -158,6 +171,7 @@ export const QSPayCombinSchema = z.object({
     parentId: z.string(),
     slug: z.string(),
     catalog: z.string(), //todo
+    storeId: z.string(),
     category: QSPayCategorySchema,
     brand: QSPayBrandSchema,
     config: MetaOutputSchema,

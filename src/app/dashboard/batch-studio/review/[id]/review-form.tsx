@@ -11,8 +11,7 @@ import { CheckIcon, FacebookIcon, Globe, NewspaperIcon, TwitterIcon } from 'luci
 import { createPortal } from 'react-dom'
 import { ControllerProps, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { SaveReviewTaskToQSPay } from '@/app/dashboard/batch-studio/actions'
-import { ReviewJoin } from '@/app/dashboard/batch-studio/tasks/type'
+import { ReviewJoinWithContent } from '@/app/dashboard/batch-studio/tasks/type'
 import { MetaOutput, PartialMetaOutput, PartialMetaOutputSchema } from '@/app/dashboard/content-generation/types'
 import { TipTapEditor } from '@/components/tiptap/editor'
 import { Badge } from '@/components/ui/badge'
@@ -22,31 +21,32 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useCustomAction } from '@/hooks/use-custom-action'
+import { SaveReviewTaskToQSPay } from '@/app/dashboard/batch-studio/review/actions'
 
-export const ReviewForm = ({ item }: { item: ReviewJoin }) => {
+export const ReviewForm = ({ item }: { item: ReviewJoinWithContent }) => {
     const [domReady, setDomReady] = React.useState(false)
     const form = useForm<PartialMetaOutput>({
         resolver: zodResolver(PartialMetaOutputSchema),
         defaultValues: {
             meta: {
-                title: item.content.config?.meta?.title || '',
-                description: item.content.config?.meta?.description || '',
-                category: item.content.config?.meta?.category || '',
+                title: item.review.config?.meta?.title || '',
+                description: item.review.config?.meta?.description || '',
+                category: item.review.config?.meta?.category || '',
                 openGraph: {
-                    type: item.content.config?.meta?.openGraph?.type || '',
-                    title: item.content.config?.meta?.openGraph?.title || '',
-                    description: item.content.config?.meta?.openGraph?.description || '',
-                    locale: item.content.config?.meta?.openGraph?.locale || '',
+                    type: item.review.config?.meta?.openGraph?.type || '',
+                    title: item.review.config?.meta?.openGraph?.title || '',
+                    description: item.review.config?.meta?.openGraph?.description || '',
+                    locale: item.review.config?.meta?.openGraph?.locale || '',
                 },
                 twitter: {
-                    card: item.content.config?.meta?.twitter?.card || '',
-                    title: item.content.config?.meta?.twitter?.title || '',
-                    description: item.content.config?.meta?.twitter?.description || '',
+                    card: item.review.config?.meta?.twitter?.card || '',
+                    title: item.review.config?.meta?.twitter?.title || '',
+                    description: item.review.config?.meta?.twitter?.description || '',
                 },
             },
             descriptions: {
-                header: item.content.config?.descriptions?.header || '<p></p>',
-                footer: item.content.config?.descriptions?.footer || '<p></p>',
+                header: item.review.config?.descriptions?.header || '<p></p>',
+                footer: item.review.config?.descriptions?.footer || '<p></p>',
             },
         },
     })
@@ -59,13 +59,13 @@ export const ReviewForm = ({ item }: { item: ReviewJoin }) => {
         singleSaveAction.execute([
             {
                 config: values,
-                contentId: item.content.id,
+                reviewId: item.review.id,
             },
         ])
     }
 
     const hasComparisonFields = (fields: string[]) => {
-        return fields.map((field) => get(item.content.oldConfig, field)).some((field) => field !== undefined)
+        return fields.map((field) => get(item.content?.config, field)).some((field) => field !== undefined)
     }
 
     useEffect(() => {
@@ -94,7 +94,7 @@ export const ReviewForm = ({ item }: { item: ReviewJoin }) => {
                         <CardContent className="space-y-4">
                             <ComparisonFormField
                                 control={form.control}
-                                oldConfig={item.content.oldConfig}
+                                oldConfig={item.content?.config}
                                 name="meta.title"
                                 type="input"
                                 path="meta.title"
@@ -115,7 +115,7 @@ export const ReviewForm = ({ item }: { item: ReviewJoin }) => {
                             />
                             <ComparisonFormField
                                 control={form.control}
-                                oldConfig={item.content.oldConfig}
+                                oldConfig={item.content?.config}
                                 name="meta.description"
                                 type="textarea"
                                 path="meta.description"
@@ -138,7 +138,7 @@ export const ReviewForm = ({ item }: { item: ReviewJoin }) => {
                             />
                             <ComparisonFormField
                                 control={form.control}
-                                oldConfig={item.content.oldConfig}
+                                oldConfig={item.content?.config}
                                 name="meta.category"
                                 type="input"
                                 path="meta.category"
@@ -187,7 +187,7 @@ export const ReviewForm = ({ item }: { item: ReviewJoin }) => {
                         <CardContent className="space-y-4">
                             <ComparisonFormField
                                 control={form.control}
-                                oldConfig={item.content.oldConfig}
+                                oldConfig={item.content?.config}
                                 name="meta.openGraph.type"
                                 type="input"
                                 label="OpenGraph Type"
@@ -208,7 +208,7 @@ export const ReviewForm = ({ item }: { item: ReviewJoin }) => {
                             />
                             <ComparisonFormField
                                 control={form.control}
-                                oldConfig={item.content.oldConfig}
+                                oldConfig={item.content?.config}
                                 name="meta.openGraph.title"
                                 type="input"
                                 label="OpenGraph Title"
@@ -224,7 +224,7 @@ export const ReviewForm = ({ item }: { item: ReviewJoin }) => {
                             />
                             <ComparisonFormField
                                 control={form.control}
-                                oldConfig={item.content.oldConfig}
+                                oldConfig={item.content?.config}
                                 name="meta.openGraph.description"
                                 type="textarea"
                                 label="OpenGraph Description"
@@ -240,7 +240,7 @@ export const ReviewForm = ({ item }: { item: ReviewJoin }) => {
                             />
                             <ComparisonFormField
                                 control={form.control}
-                                oldConfig={item.content.oldConfig}
+                                oldConfig={item.content?.config}
                                 name="meta.openGraph.locale"
                                 type="input"
                                 label="OpenGraph Locale"
@@ -281,7 +281,7 @@ export const ReviewForm = ({ item }: { item: ReviewJoin }) => {
                         <CardContent className="space-y-4">
                             <ComparisonFormField
                                 control={form.control}
-                                oldConfig={item.content.oldConfig}
+                                oldConfig={item.content?.config}
                                 name="meta.twitter.card"
                                 type="input"
                                 label="Twitter Card Type"
@@ -302,7 +302,7 @@ export const ReviewForm = ({ item }: { item: ReviewJoin }) => {
                             />
                             <ComparisonFormField
                                 control={form.control}
-                                oldConfig={item.content.oldConfig}
+                                oldConfig={item.content?.config}
                                 name="meta.twitter.title"
                                 type="input"
                                 label="Twitter Card Title"
@@ -318,7 +318,7 @@ export const ReviewForm = ({ item }: { item: ReviewJoin }) => {
                             />
                             <ComparisonFormField
                                 control={form.control}
-                                oldConfig={item.content.oldConfig}
+                                oldConfig={item.content?.config}
                                 name="meta.twitter.description"
                                 type="textarea"
                                 label="Twitter Card Description"
@@ -355,7 +355,7 @@ export const ReviewForm = ({ item }: { item: ReviewJoin }) => {
                         <CardContent className="space-y-4">
                             <ComparisonFormField
                                 control={form.control}
-                                oldConfig={item.content.oldConfig}
+                                oldConfig={item.content?.config}
                                 name="descriptions.header"
                                 type="html"
                                 label="Page Header"
@@ -370,7 +370,7 @@ export const ReviewForm = ({ item }: { item: ReviewJoin }) => {
                             />
                             <ComparisonFormField
                                 control={form.control}
-                                oldConfig={item.content.oldConfig}
+                                oldConfig={item.content?.config}
                                 name="descriptions.footer"
                                 type="html"
                                 label="Page Footer"

@@ -2,10 +2,10 @@
 
 import { CheckIcon } from 'lucide-react'
 import { toast } from 'sonner'
-import { SaveReviewTaskToQSPay } from '@/app/dashboard/batch-studio/actions'
 import { ReviewJoin } from '@/app/dashboard/batch-studio/tasks/type'
 import { Button } from '@/components/ui/button'
 import { useCustomAction } from '@/hooks/use-custom-action'
+import { SaveReviewTaskToQSPay } from '@/app/dashboard/batch-studio/review/actions'
 
 export const ReviewSidebarHandler = ({ contents }: { contents: ReviewJoin[] }) => {
     const singleSaveAction = useCustomAction(SaveReviewTaskToQSPay, {

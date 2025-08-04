@@ -13,7 +13,7 @@ import {
     datasources,
     scales,
     tasks,
-    translations,
+    translations, reviews,
 } from '@/db/schema'
 
 export type Brand = typeof brands.$inferSelect
@@ -40,3 +40,4 @@ export type Category = typeof categories.$inferSelect
 export type Combination = typeof combinations.$inferSelect
 export type Task = typeof tasks.$inferSelect
 export type Content = typeof contents.$inferSelect
+export type Review = typeof reviews.$inferSelect

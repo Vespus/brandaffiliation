@@ -3,15 +3,21 @@ import { ZapIcon } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { db } from '@/db'
-import { combinations as combinationsTable, contents as contentsTable } from '@/db/schema'
+import { combinations as combinationsTable, contents } from '@/db/schema'
 
-export const CombinationsWidget = async () => {
+export const CombinationsWidget = async ({ storeId }: { storeId: string }) => {
     const [combinations, [totalCombinations]] = await Promise.all([
         db
             .select()
             .from(combinationsTable)
-            .innerJoin(contentsTable, eq(combinationsTable.integrationId, contentsTable.entityId))
-            .where(and(eq(contentsTable.entityType, 'combination'), isNotNull(combinationsTable.integrationId))),
+            .innerJoin(contents, eq(combinationsTable.integrationId, contents.entityId))
+            .where(
+                and(
+                    eq(contents.entityType, 'combination'),
+                    eq(combinationsTable.storeId, storeId),
+                    isNotNull(combinationsTable.integrationId)
+                )
+            ),
         db.select({ count: count() }).from(combinationsTable).where(isNotNull(combinationsTable.integrationId)),
     ])
 

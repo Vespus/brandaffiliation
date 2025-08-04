@@ -3,17 +3,23 @@ import { Database } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { db } from '@/db'
-import { brands as brandsTable, contents as contentsTable } from '@/db/schema'
+import { brandsStores, brands as brandsTable, contents as contentsTable } from '@/db/schema'
 
-export const BrandsWidget = async () => {
+export const BrandsWidget = async ({ storeId }: { storeId: string }) => {
     const [brands, [totalBrands]] = await Promise.all([
         db
             .select()
-            .from(brandsTable)
-            .innerJoin(contentsTable, eq(brandsTable.integrationId, contentsTable.entityId))
-            .where(and(eq(contentsTable.entityType, 'brand'), isNotNull(brandsTable.integrationId))),
+            .from(brandsStores)
+            .innerJoin(contentsTable, eq(brandsStores.integrationId, contentsTable.entityId))
+            .where(
+                and(
+                    eq(contentsTable.entityType, 'brand'),
+                    eq(brandsStores.storeId, storeId),
+                    isNotNull(brandsStores.integrationId)
+                )
+            ),
 
-        db.select({ count: count() }).from(brandsTable).where(isNotNull(brandsTable.integrationId)),
+        db.select({ count: count() }).from(brandsStores),
     ])
 
     const missingContentCount = totalBrands.count - brands.length

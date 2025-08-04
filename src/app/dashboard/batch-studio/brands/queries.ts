@@ -2,9 +2,10 @@ import { and, asc, count, desc, eq, ilike, isNotNull, isNull, sql } from 'drizzl
 import { createSearchParamsCache, parseAsInteger, parseAsString } from 'nuqs/server'
 import { BatchStudioBrandType } from '@/app/dashboard/batch-studio/brands/batch-studio-brand-type'
 import { db } from '@/db'
-import { brands, contents } from '@/db/schema'
+import { brands, brandsStores, contents } from '@/db/schema'
 import { BrandWithCharacteristicAndScales } from '@/db/types'
 import { getSortingStateParser } from '@/lib/datatable/parsers'
+import { cookies } from 'next/headers'
 
 export const searchParamsCache = createSearchParamsCache({
     page: parseAsInteger.withDefault(1),
@@ -15,13 +16,16 @@ export const searchParamsCache = createSearchParamsCache({
 })
 
 export const getBrands = async (input: Awaited<ReturnType<typeof searchParamsCache.parse>>) => {
+    const cookie = await cookies()
+    const storeId = cookie.get('qs-pay-store-id')?.value!
     const offset = (input.page - 1) * input.perPage
 
     const where = and(
         input.name ? ilike(brands.name, `%${input.name}%`) : undefined,
         input.content === 'yes' ? isNotNull(contents.config) : undefined,
         input.content === 'no' ? isNull(contents.config) : undefined,
-        isNotNull(brands.integrationId)
+        isNotNull(brandsStores.integrationId),
+        eq(brandsStores.storeId, storeId)
     )
 
     const orderBy =
@@ -35,11 +39,12 @@ export const getBrands = async (input: Awaited<ReturnType<typeof searchParamsCac
                 name: brands.name,
                 slug: brands.slug,
                 content: contents.config,
-                integrationId: brands.integrationId,
+                integrationId: brandsStores.integrationId,
                 hasContent: sql<boolean>`(${contents.config} IS NOT NULL)`.as('hasContent'),
             })
-            .from(brands)
-            .leftJoin(contents, and(eq(contents.entityId, brands.integrationId), eq(contents.entityType, 'brand')))
+            .from(brandsStores)
+            .leftJoin(brands, eq(brands.id, brandsStores.brandId))
+            .leftJoin(contents, and(eq(contents.entityId, brandsStores.integrationId), eq(contents.entityType, 'brand')))
             .where(where)
             .orderBy(...orderBy)
             .offset(offset)
@@ -49,8 +54,9 @@ export const getBrands = async (input: Awaited<ReturnType<typeof searchParamsCac
             .select({
                 count: count(),
             })
-            .from(brands)
-            .leftJoin(contents, and(eq(contents.entityId, brands.integrationId), eq(contents.entityType, 'brand')))
+            .from(brandsStores)
+            .leftJoin(brands, eq(brands.id, brandsStores.brandId))
+            .leftJoin(contents, and(eq(contents.entityId, brandsStores.integrationId), eq(contents.entityType, 'brand')))
             .where(where)
             .execute()
             .then((res) => res[0]?.count ?? 0)

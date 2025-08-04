@@ -7,8 +7,7 @@ import { useParams, useRouter } from 'next/navigation'
 
 import { Check, ChevronRightIcon, DatabaseIcon, LayersIcon, XIcon, ZapIcon } from 'lucide-react'
 import { toast } from 'sonner'
-import { SaveReviewTaskToQSPay } from '@/app/dashboard/batch-studio/actions'
-import { removeReviewTask } from '@/app/dashboard/batch-studio/review/actions'
+import { removeReviewTask, SaveReviewTaskToQSPay } from '@/app/dashboard/batch-studio/review/actions'
 import { ReviewJoin } from '@/app/dashboard/batch-studio/tasks/type'
 import {
     AlertDialog,
@@ -47,12 +46,12 @@ export const ReviewSidebarItem = ({ item }: { item: ReviewJoin }) => {
 
         acceptReview.execute([
             {
-                config: item.content.config!,
-                contentId: item.content.id,
+                config: item.review.config!,
+                contentId: item.review.id,
             },
         ])
     }
-    const isSelected = Number(activeItemId) === item.content.id
+    const isSelected = Number(activeItemId) === item.review.id
     const Icon = ({ type, ...props }: { type: string; className: string }) => {
         return type === 'brand' ? (
             <DatabaseIcon {...props} />
@@ -66,7 +65,7 @@ export const ReviewSidebarItem = ({ item }: { item: ReviewJoin }) => {
 
     return (
         <Link
-            href={`/dashboard/batch-studio/review/${item.content.id}`}
+            href={`/dashboard/batch-studio/review/${item.review.id}`}
             className={cn(
                 'flex items-center justify-between rounded-lg border p-3 transition-all',
                 isSelected && 'border-blue-200 bg-blue-50 ring-2 ring-blue-500'
@@ -74,7 +73,7 @@ export const ReviewSidebarItem = ({ item }: { item: ReviewJoin }) => {
         >
             <div className="flex flex-col space-y-1">
                 <span className="text-muted-foreground flex items-center gap-1 text-xs capitalize">
-                    <Icon type={item.content.entityType} className="size-3" /> {item.content.entityType}
+                    <Icon type={item.review.entityType} className="size-3" /> {item.review.entityType}
                 </span>
                 <div className="flex flex-col gap-0.5 text-xs">
                     <span className="font-bold capitalize">{entityName}</span>
@@ -112,7 +111,7 @@ export const ReviewSidebarItem = ({ item }: { item: ReviewJoin }) => {
                         <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
                             <AlertDialogAction
-                                onClick={() => removeReview.executeAsync({ contentId: item.content.id })}
+                                onClick={() => removeReview.executeAsync({ reviewId: item.review.id })}
                             >
                                 Continue
                             </AlertDialogAction>

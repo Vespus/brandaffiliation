@@ -197,6 +197,22 @@ export const brands = pgTable('brands', {
     id: serial().primaryKey().notNull(),
     name: text().notNull(),
     slug: varchar(),
+})
+
+export const brandsStores = pgTable('brands_stores', {
+    id: bigserial({ mode: 'number' }).primaryKey().notNull(),
+    brandId: bigserial('brand_id', { mode: 'number' }),
+    storeId: text('store_id'),
+    slug: varchar(),
+    integrationId: text('integration_id'),
+    integrationName: text('integration_name'),
+})
+
+export const categoriesStores = pgTable('categories_stores', {
+    id: bigserial({ mode: 'number' }).primaryKey().notNull(),
+    categoryId: bigserial('category_id', { mode: 'number' }),
+    storeId: text('store_id'),
+    slug: varchar(),
     integrationId: text('integration_id'),
     integrationName: text('integration_name'),
 })
@@ -206,8 +222,6 @@ export const categories = pgTable('categories', {
     name: text().notNull(),
     description: text(),
     slug: varchar(),
-    integrationId: text('integration_id'),
-    integrationName: text('integration_name'),
     createdAt: timestamp('created_at'),
 })
 
@@ -219,6 +233,7 @@ export const combinations = pgTable('combinations', {
     categoryId: text('category_id'),
     integrationId: text('integration_id'),
     createdAt: timestamp('created_at'),
+    storeId: text('store_id')
 })
 
 export const contents = pgTable('contents', {
@@ -226,9 +241,20 @@ export const contents = pgTable('contents', {
     entityType: text('entity_type').notNull(),
     entityId: text('entity_id').notNull(),
     config: jsonb().$type<MetaOutput>(),
-    oldConfig: jsonb('old_config').$type<MetaOutput>(),
-    needsReview: boolean('needs_review').default(false),
+    storeId: text('store_id'),
     createdAt: timestamp('created_at'),
+})
+
+export const reviews = pgTable('reviews', {
+    id: bigserial({ mode: 'number' }).primaryKey().notNull(),
+    entityType: text('entity_type').notNull(),
+    entityId: text('entity_id').notNull(),
+    config: jsonb().$type<MetaOutput>(),
+    previousConfig: jsonb('previous_config').$type<MetaOutput>(),
+    createdAt: timestamp('created_at'),
+    storeId: text('store_id'),
+    approved: boolean(),
+    approvedAt: timestamp('approved_at', {withTimezone: true})
 })
 
 export const tasks = pgTable('tasks', {
@@ -237,6 +263,7 @@ export const tasks = pgTable('tasks', {
     entityId: text('entity_id').notNull(),
     status: text('status'),
     specification: jsonb().$type<BatchContentGenerateSchemaType>(),
+    storeId: text('store_id'),
     createdAt: timestamp('created_at'),
 })
 
@@ -306,7 +333,6 @@ export const verification = pgTable('verification', {
 
 export const brandWithScales = pgTable('brand_with_scales', {
     id: integer('id').notNull(),
-    integrationId: text('integration_id'),
     name: text('name').notNull(),
     price: real('price').notNull(),
     quality: real('quality').notNull(),
@@ -319,7 +345,6 @@ export const brandWithScales = pgTable('brand_with_scales', {
     revenue: real('revenue').notNull(),
     characteristic: jsonb('characteristic').$type<{ id: number; value: string }[]>(),
     slug: varchar(),
-    config: jsonb().$type<MetaOutput>(),
 })
 
 export const datasources = pgTable('datasources', {

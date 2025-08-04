@@ -1,8 +1,9 @@
 import React, { Suspense } from 'react'
 
+import { cookies } from 'next/headers'
 import Link from 'next/link'
 
-import { and, eq, or, sql } from 'drizzle-orm'
+import { and, desc, eq, or, sql } from 'drizzle-orm'
 import { AlertCircle, CheckCircle2, Clock, TrendingUp, Zap } from 'lucide-react'
 import { BrandsWidget } from '@/app/dashboard/batch-studio/widgets/brands-widget'
 import { CategoriesWidget } from '@/app/dashboard/batch-studio/widgets/categories-widget'
@@ -20,79 +21,22 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { db } from '@/db'
-import { brands, categories, combinations, contents, tasks } from '@/db/schema'
+import { brands, brandsStores, categories, categoriesStores, combinations, contents, reviews, tasks } from '@/db/schema'
 import { cn } from '@/lib/utils'
 
 export default async function Page() {
-    const [awaitingTasks, awaitingReviews] = await Promise.all([
-        db
-            .select({
-                task: tasks,
-                entityName: sql`COALESCE
-                ( ${brands.name},
-                    ${categories.name},
-                    ${combinations.name})`.as('entityName'),
-                brand: brands,
-                category: categories,
-                combination: combinations,
-            })
-            .from(tasks)
-            .leftJoin(
-                combinations,
-                and(eq(tasks.entityType, 'combination'), eq(tasks.entityId, combinations.integrationId))
-            )
-            .leftJoin(
-                categories,
-                and(
-                    or(eq(tasks.entityType, 'combination'), eq(tasks.entityType, 'category')),
-                    or(
-                        eq(tasks.entityId, categories.integrationId),
-                        eq(categories.integrationId, combinations.categoryId)
-                    )
-                )
-            )
-            .leftJoin(
-                brands,
-                and(or(eq(tasks.entityId, brands.integrationId), eq(brands.integrationId, combinations.brandId)))
-            ),
-        db
-            .select({
-                content: contents,
-                entityName: sql`COALESCE
-                    (${brands.name},${categories.name},${combinations.name})`.as('entityName'),
-                brand: brands,
-                category: categories,
-                combination: combinations,
-            })
-            .from(contents)
-            .where(eq(contents.needsReview, true) /*isNull(contents.needsReview)*/)
-            .leftJoin(
-                combinations,
-                and(eq(contents.entityType, 'combination'), eq(contents.entityId, combinations.integrationId))
-            )
-            .leftJoin(
-                categories,
-                and(
-                    or(eq(contents.entityType, 'combination'), eq(contents.entityType, 'category')),
-                    or(
-                        eq(contents.entityId, categories.integrationId),
-                        eq(categories.integrationId, combinations.categoryId)
-                    )
-                )
-            )
-            .leftJoin(
-                brands,
-                and(or(eq(contents.entityId, brands.integrationId), eq(brands.integrationId, combinations.brandId)))
-            ),
-    ])
+    const cookie = await cookies()
+    const storeId = cookie.get('qs-pay-store-id')?.value!
+
+    const [awaitingTasks, awaitingReviews] = await Promise.all([getTasks(storeId), getReviews(storeId)])
 
     return (
         <div className="mx-auto h-full min-h-0 w-7xl max-w-full flex-1 justify-center p-6">
             <div className="mb-4 grid grid-cols-3 gap-4">
                 <Suspense fallback={<WidgetSkeletons />}>
-                    <BrandsWidget />
-                    <CategoriesWidget />
-                    <CombinationsWidget />
+                    <BrandsWidget storeId={storeId} />
+                    <CategoriesWidget storeId={storeId} />
+                    <CombinationsWidget storeId={storeId} />
                 </Suspense>
             </div>
 
@@ -220,10 +164,10 @@ export default async function Page() {
                                 </TableHeader>
                                 <TableBody>
                                     {awaitingReviews.slice(0, 5).map((task) => (
-                                        <TableRow key={task.content.id}>
-                                            <TableCell>{task.content.id}</TableCell>
+                                        <TableRow key={task.review.id}>
+                                            <TableCell>{task.review.id}</TableCell>
                                             <TableCell>{task.entityName as string}</TableCell>
-                                            <TableCell>{task.content.entityType}</TableCell>
+                                            <TableCell>{task.review.entityType}</TableCell>
                                             <TableCell>{task.combination?.description || 'N/A'}</TableCell>
                                             <TableCell>{task.category?.description || 'N/A'}</TableCell>
                                             <TableCell>{task.brand?.name || 'N/A'}</TableCell>
@@ -289,4 +233,84 @@ const WidgetSkeletons = () => {
             </Card>
         </>
     )
+}
+
+const getTasks = async (storeId: string) => {
+    return db
+        .select({
+            task: tasks,
+            // prettier-ignore
+            entityName: sql`COALESCE(${brands.name},${categories.name},${combinations.name})`.as('entityName'),
+            brand: brands,
+            category: categories,
+            combination: combinations,
+        })
+        .from(tasks)
+        .leftJoin(
+            combinations,
+            and(eq(tasks.entityType, 'combination'), eq(tasks.entityId, combinations.integrationId))
+        )
+        .leftJoin(
+            categoriesStores,
+            and(
+                or(eq(tasks.entityType, 'combination'), eq(tasks.entityType, 'category')),
+                or(
+                    eq(categoriesStores.integrationId, tasks.entityId),
+                    eq(categoriesStores.integrationId, combinations.categoryId)
+                )
+            )
+        )
+        .leftJoin(
+            brandsStores,
+            and(
+                or(eq(tasks.entityType, 'combination'), eq(tasks.entityType, 'brand')),
+                or(eq(brandsStores.integrationId, tasks.entityId), eq(brandsStores.integrationId, combinations.brandId))
+            )
+        )
+        .leftJoin(brands, eq(brands.id, brandsStores.brandId))
+        .leftJoin(categories, eq(categories.id, categoriesStores.categoryId))
+        .where(eq(tasks.storeId, storeId))
+        .limit(5)
+        .orderBy(desc(tasks.createdAt))
+}
+const getReviews = async (storeId: string) => {
+    return db
+        .select({
+            //prettier-ignore
+            entityName: sql`COALESCE(${brands.name},${categories.name},${combinations.name})`.as('entityName'),
+            review: reviews,
+            brand: brands,
+            category: categories,
+            combination: combinations,
+        })
+        .from(reviews)
+        .leftJoin(
+            combinations,
+            and(eq(reviews.entityType, 'combination'), eq(reviews.entityId, combinations.integrationId))
+        )
+        .leftJoin(
+            categoriesStores,
+            and(
+                or(eq(reviews.entityType, 'combination'), eq(reviews.entityType, 'category')),
+                or(
+                    eq(categoriesStores.integrationId, reviews.entityId),
+                    eq(categoriesStores.integrationId, combinations.categoryId)
+                )
+            )
+        )
+        .leftJoin(
+            brandsStores,
+            and(
+                or(eq(reviews.entityType, 'combination'), eq(reviews.entityType, 'brand')),
+                or(
+                    eq(brandsStores.integrationId, reviews.entityId),
+                    eq(brandsStores.integrationId, combinations.brandId)
+                )
+            )
+        )
+        .leftJoin(brands, eq(brands.id, brandsStores.brandId))
+        .leftJoin(categories, eq(categories.id, categoriesStores.categoryId))
+        .where(and(eq(reviews.approved, false), eq(reviews.storeId, storeId)))
+        .orderBy(desc(reviews.createdAt))
+        .limit(5)
 }

@@ -13,13 +13,13 @@ type ReviewPageProps = {
 
 export default async function ReviewPage(props: ReviewPageProps) {
     const { id } = await props.params
-    const content = await getReviewTask(id)
+    const review = await getReviewTask(id)
 
-    if (!content) {
+    if (!review) {
         redirect('/dashboard/batch-studio/review')
     }
 
-    const entityName = [content.brand?.name, content.category?.name].filter(Boolean).join(' - ')
+    const entityName = [review.brand?.name, review.category?.name].filter(Boolean).join(' - ')
 
     return (
         <div className="flex min-h-0 flex-col">
@@ -32,10 +32,10 @@ export default async function ReviewPage(props: ReviewPageProps) {
                         Review and approve SEO content for this category
                     </span>
                 </div>
-                <ReviewHandlers item={content} />
+                <ReviewHandlers item={review} />
             </div>
             <Scroller className="min-h-0 flex-1">
-                <ReviewForm item={content} />
+                <ReviewForm item={review} />
             </Scroller>
         </div>
     )

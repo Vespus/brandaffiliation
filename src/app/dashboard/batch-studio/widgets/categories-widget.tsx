@@ -3,16 +3,22 @@ import { LayersIcon } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { db } from '@/db'
-import { categories as categoriesTable, contents as contentsTable } from '@/db/schema'
+import { categoriesStores, contents } from '@/db/schema'
 
-export const CategoriesWidget = async () => {
+export const CategoriesWidget = async ({ storeId }: { storeId: string }) => {
     const [categories, [totalCategories]] = await Promise.all([
         db
             .select()
-            .from(categoriesTable)
-            .innerJoin(contentsTable, eq(categoriesTable.integrationId, contentsTable.entityId))
-            .where(and(eq(contentsTable.entityType, 'category'), isNotNull(categoriesTable.integrationId))),
-        db.select({ count: count() }).from(categoriesTable).where(isNotNull(categoriesTable.integrationId)),
+            .from(categoriesStores)
+            .innerJoin(contents, eq(categoriesStores.integrationId, contents.entityId))
+            .where(
+                and(
+                    eq(contents.entityType, 'brand'),
+                    eq(categoriesStores.storeId, storeId),
+                    isNotNull(categoriesStores.integrationId)
+                )
+            ),
+        db.select({ count: count() }).from(categoriesStores).where(isNotNull(categoriesStores.integrationId)),
     ])
 
     const missingContentCount = totalCategories.count - categories.length
