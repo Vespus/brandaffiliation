@@ -6,6 +6,7 @@ import { QspayStoreSelectorClient } from '@/components/qspay/qspay-store-selecto
 import { Badge } from '@/components/ui/badge'
 import { getQspayUser } from '@/lib/get-qspay-user'
 import { cn } from '@/lib/utils'
+import { QsPaySync } from '@/components/qspay/qspay-sync'
 
 export const QSPayService = async () => {
     const cookie = await cookies()
@@ -23,6 +24,7 @@ export const QSPayService = async () => {
                 {result ? <CheckIcon className="text-emerald-500" size={12} /> : <XIcon className="text-white" />}
                 {result ? 'Connected' : 'Disconnected'}
             </Badge>
+            {result && <QsPaySync />}
         </div>
     )
 }

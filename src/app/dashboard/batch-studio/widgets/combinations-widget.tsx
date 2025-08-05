@@ -15,10 +15,9 @@ export const CombinationsWidget = async ({ storeId }: { storeId: string }) => {
                 and(
                     eq(contents.entityType, 'combination'),
                     eq(combinationsTable.storeId, storeId),
-                    isNotNull(combinationsTable.integrationId)
                 )
             ),
-        db.select({ count: count() }).from(combinationsTable).where(isNotNull(combinationsTable.integrationId)),
+        db.select({ count: count() }).from(combinationsTable).where(eq(combinationsTable.storeId, storeId))
     ])
 
     const missingContentCount = totalCombinations.count - combinations.length

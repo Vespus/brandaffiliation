@@ -14,12 +14,11 @@ export const BrandsWidget = async ({ storeId }: { storeId: string }) => {
             .where(
                 and(
                     eq(contentsTable.entityType, 'brand'),
-                    eq(brandsStores.storeId, storeId),
-                    isNotNull(brandsStores.integrationId)
+                    eq(brandsStores.storeId, storeId)
                 )
             ),
 
-        db.select({ count: count() }).from(brandsStores),
+        db.select({ count: count() }).from(brandsStores).where(eq(brandsStores.storeId, storeId)),
     ])
 
     const missingContentCount = totalBrands.count - brands.length
