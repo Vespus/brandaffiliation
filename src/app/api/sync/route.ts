@@ -22,7 +22,7 @@ import { isEmpty } from '@/utils/is-empty';
 import { PgTableWithColumns } from 'drizzle-orm/pg-core'
 
 
-export const searchParamsLoader = createLoader({
+const searchParamsLoader = createLoader({
     storeId: parseAsString,
 })
 
