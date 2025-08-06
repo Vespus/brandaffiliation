@@ -1,4 +1,4 @@
-import { and, count, eq, isNotNull } from 'drizzle-orm'
+import { and, count, eq } from 'drizzle-orm'
 import { LayersIcon } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -11,12 +11,7 @@ export const CategoriesWidget = async ({ storeId }: { storeId: string }) => {
             .select()
             .from(categoriesStores)
             .innerJoin(contents, eq(categoriesStores.integrationId, contents.entityId))
-            .where(
-                and(
-                    eq(contents.entityType, 'brand'),
-                    eq(categoriesStores.storeId, storeId),
-                )
-            ),
+            .where(and(eq(contents.entityType, 'brand'), eq(categoriesStores.storeId, storeId))),
         db.select({ count: count() }).from(categoriesStores).where(eq(categoriesStores.storeId, storeId)),
     ])
 

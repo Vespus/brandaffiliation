@@ -1,3 +1,5 @@
+import { cookies } from 'next/headers'
+
 import { and, asc, count, desc, eq, ilike, isNotNull, isNull, or, sql } from 'drizzle-orm'
 import { createSearchParamsCache, parseAsInteger, parseAsString } from 'nuqs/server'
 import { BatchStudioCombinationType } from '@/app/dashboard/batch-studio/combinations/batch-studio-combination-type'
@@ -5,7 +7,6 @@ import { db } from '@/db'
 import { brands, brandsStores, categories, categoriesStores, combinations, contents } from '@/db/schema'
 import { BrandWithCharacteristicAndScales } from '@/db/types'
 import { getSortingStateParser } from '@/lib/datatable/parsers'
-import { cookies } from "next/headers";
 
 export const searchParamsCache = createSearchParamsCache({
     page: parseAsInteger.withDefault(1),
@@ -39,7 +40,7 @@ export const getCombinations = async (input: Awaited<ReturnType<typeof searchPar
         input.content === 'yes' ? isNotNull(contents.config) : undefined,
         input.content === 'no' ? isNull(contents.config) : undefined,
         isNotNull(combinations.integrationId),
-        eq(combinations.storeId, storeId),
+        eq(combinations.storeId, storeId)
     )
 
     const orderBy =

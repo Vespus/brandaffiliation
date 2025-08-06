@@ -5,7 +5,7 @@ import { cookies } from 'next/headers'
 import { and, eq, or, sql } from 'drizzle-orm'
 import { ReviewJoin, ReviewJoinWithContent } from '@/app/dashboard/batch-studio/tasks/type'
 import { db } from '@/db'
-import { brands, brandsStores, categories, categoriesStores, combinations, contents, reviews, tasks } from '@/db/schema'
+import { brands, brandsStores, categories, categoriesStores, combinations, contents, reviews } from '@/db/schema'
 
 export const getReviewTasks = cache(async () => {
     const cookie = await cookies()

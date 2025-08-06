@@ -1,9 +1,9 @@
-import { and, count, eq, isNotNull } from 'drizzle-orm'
+import { and, count, eq } from 'drizzle-orm'
 import { Database } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { db } from '@/db'
-import { brandsStores, brands as brandsTable, contents as contentsTable } from '@/db/schema'
+import { brandsStores, contents as contentsTable } from '@/db/schema'
 
 export const BrandsWidget = async ({ storeId }: { storeId: string }) => {
     const [brands, [totalBrands]] = await Promise.all([
@@ -11,12 +11,7 @@ export const BrandsWidget = async ({ storeId }: { storeId: string }) => {
             .select()
             .from(brandsStores)
             .innerJoin(contentsTable, eq(brandsStores.integrationId, contentsTable.entityId))
-            .where(
-                and(
-                    eq(contentsTable.entityType, 'brand'),
-                    eq(brandsStores.storeId, storeId)
-                )
-            ),
+            .where(and(eq(contentsTable.entityType, 'brand'), eq(brandsStores.storeId, storeId))),
 
         db.select({ count: count() }).from(brandsStores).where(eq(brandsStores.storeId, storeId)),
     ])

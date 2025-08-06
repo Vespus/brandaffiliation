@@ -9,7 +9,7 @@ import z from 'zod'
 import { MetaOutput, PartialMetaOutput, PartialMetaOutputSchema } from '@/app/dashboard/content-generation/types'
 import { db } from '@/db'
 import { brands, brandsStores, categories, categoriesStores, combinations, contents, reviews } from '@/db/schema'
-import { Content, Review } from '@/db/types'
+import { Review } from '@/db/types'
 import { actionClient } from '@/lib/action-client'
 import { QSPayClient } from '@/lib/qs-pay-client'
 import { QSPayBrand, QSPayCategory, QSPayCombin } from '@/qspay-types'
@@ -51,12 +51,12 @@ export const SaveReviewTaskToQSPay = actionClient
                         await tx
                             .update(contents)
                             .set({
-                                config: config as MetaOutput || (review.config as MetaOutput) || {},
+                                config: (config as MetaOutput) || (review.config as MetaOutput) || {},
                             })
                             .where(eq(contents.id, content.id))
                     } else {
                         await tx.insert(contents).values({
-                            config: config as MetaOutput || (review.config as MetaOutput) || {},
+                            config: (config as MetaOutput) || (review.config as MetaOutput) || {},
                             entityId: review.entityId,
                             entityType: review.entityType,
                             storeId: review.storeId,
@@ -148,7 +148,7 @@ const processQSPay = async ({ review, config }: { review: Review; config?: Parti
                 .innerJoin(categories, eq(categories.id, categoriesStores.categoryId))
                 .where(eq(combinations.integrationId, review.entityId))
 
-            let remoteCombination = await QSPayClient<QSPayCombin>('CmsCombinPage/Get', {
+            const remoteCombination = await QSPayClient<QSPayCombin>('CmsCombinPage/Get', {
                 query: {
                     combinatioId: review.entityId,
                 },

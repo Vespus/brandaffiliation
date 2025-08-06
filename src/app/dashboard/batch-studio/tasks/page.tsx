@@ -1,9 +1,10 @@
+import { cookies } from 'next/headers'
+
 import { and, eq, or, sql } from 'drizzle-orm'
 import { TaskController } from '@/app/dashboard/batch-studio/tasks/task-controller'
 import { TaskJoin } from '@/app/dashboard/batch-studio/tasks/type'
 import { db } from '@/db'
 import { brands, brandsStores, categories, categoriesStores, combinations, tasks } from '@/db/schema'
-import { cookies } from 'next/headers'
 
 export default async function Tasks() {
     const cookie = await cookies()

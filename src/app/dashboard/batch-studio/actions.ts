@@ -1,19 +1,12 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 
 import { and, eq, inArray } from 'drizzle-orm'
-import { toMerged } from 'es-toolkit'
 import z from 'zod'
-import { MetaOutput, PartialMetaOutput, PartialMetaOutputSchema } from '@/app/dashboard/content-generation/types'
 import { db } from '@/db'
-import { brands, categories, combinations, contents, tasks } from '@/db/schema'
-import { Content } from '@/db/types'
+import { tasks } from '@/db/schema'
 import { actionClient } from '@/lib/action-client'
-import { QSPayClient } from '@/lib/qs-pay-client'
-import { QSPayBrand, QSPayCategory, QSPayCombin } from '@/qspay-types'
-import { cookies } from 'next/headers'
 
 export const saveTask = actionClient
     .inputSchema(
@@ -51,5 +44,5 @@ export const saveTask = actionClient
             throw new Error('No new task to save, Selected entities may already have a task')
         }
 
-        await db.insert(tasks).values(insertTask.map(x => ({...x, storeId})))
+        await db.insert(tasks).values(insertTask.map((x) => ({ ...x, storeId })))
     })

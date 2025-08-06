@@ -1,9 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server'
 
-
-
-import { and, eq, sql } from 'drizzle-orm';
-import { createLoader, parseAsString } from 'nuqs/server';
+import { and, eq } from 'drizzle-orm'
+import { PgTableWithColumns } from 'drizzle-orm/pg-core'
+import { createLoader, parseAsString } from 'nuqs/server'
 import { db } from '@/db'
 import {
     brandsStores,
@@ -16,11 +15,9 @@ import {
     tasks,
 } from '@/db/schema'
 import { QSPayClient } from '@/lib/qs-pay-client'
-import { QSPayBrand, QSPayCategory, QSPayCombin, QSPaySingleStoreBasedCategory } from '@/qspay-types';
-import { categoryFlat } from '@/utils/category-flat';
-import { isEmpty } from '@/utils/is-empty';
-import { PgTableWithColumns } from 'drizzle-orm/pg-core'
-
+import { QSPayBrand, QSPayCategory, QSPayCombin, QSPaySingleStoreBasedCategory } from '@/qspay-types'
+import { categoryFlat } from '@/utils/category-flat'
+import { isEmpty } from '@/utils/is-empty'
 
 const searchParamsLoader = createLoader({
     storeId: parseAsString,
@@ -53,37 +50,39 @@ export const GET = async (request: NextRequest) => {
 
 const processTasks = async (dbObj: PgTableWithColumns<any>, storeId: string) => {
     const taskList = await db.select().from(dbObj).where(eq(dbObj.storeId, storeId))
-    await Promise.all(taskList.map(async (task) => {
-        switch (task.entityType) {
-            case 'brand':
-                const isBrandExists = await db
-                    .select()
-                    .from(brandsStores)
-                    .where(eq(brandsStores.integrationId, task.entityId))
-                if (!isBrandExists) {
-                    await db.delete(dbObj).where(eq(dbObj.id, task.id))
-                }
-                break
-            case 'category':
-                const isCategoryExists = await db
-                    .select()
-                    .from(categoriesStores)
-                    .where(eq(categoriesStores.integrationId, task.entityId))
-                if (!isCategoryExists) {
-                    await db.delete(dbObj).where(eq(dbObj.id, task.id))
-                }
-                break
-            case 'combination':
-                const isCombinationExists = await db
-                    .select()
-                    .from(localCombinationsTable)
-                    .where(eq(localCombinationsTable.integrationId, task.entityId))
-                if (!isCombinationExists) {
-                    await db.delete(dbObj).where(eq(dbObj.id, task.id))
-                }
-                break
-        }
-    }))
+    await Promise.all(
+        taskList.map(async (task) => {
+            switch (task.entityType) {
+                case 'brand':
+                    const isBrandExists = await db
+                        .select()
+                        .from(brandsStores)
+                        .where(eq(brandsStores.integrationId, task.entityId))
+                    if (!isBrandExists) {
+                        await db.delete(dbObj).where(eq(dbObj.id, task.id))
+                    }
+                    break
+                case 'category':
+                    const isCategoryExists = await db
+                        .select()
+                        .from(categoriesStores)
+                        .where(eq(categoriesStores.integrationId, task.entityId))
+                    if (!isCategoryExists) {
+                        await db.delete(dbObj).where(eq(dbObj.id, task.id))
+                    }
+                    break
+                case 'combination':
+                    const isCombinationExists = await db
+                        .select()
+                        .from(localCombinationsTable)
+                        .where(eq(localCombinationsTable.integrationId, task.entityId))
+                    if (!isCombinationExists) {
+                        await db.delete(dbObj).where(eq(dbObj.id, task.id))
+                    }
+                    break
+            }
+        })
+    )
 }
 
 const processBrands = async (brands: QSPayBrand[], storeId: string) => {

@@ -1,4 +1,4 @@
-import { and, count, eq, isNotNull } from 'drizzle-orm'
+import { and, count, eq } from 'drizzle-orm'
 import { ZapIcon } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -11,13 +11,8 @@ export const CombinationsWidget = async ({ storeId }: { storeId: string }) => {
             .select()
             .from(combinationsTable)
             .innerJoin(contents, eq(combinationsTable.integrationId, contents.entityId))
-            .where(
-                and(
-                    eq(contents.entityType, 'combination'),
-                    eq(combinationsTable.storeId, storeId),
-                )
-            ),
-        db.select({ count: count() }).from(combinationsTable).where(eq(combinationsTable.storeId, storeId))
+            .where(and(eq(contents.entityType, 'combination'), eq(combinationsTable.storeId, storeId))),
+        db.select({ count: count() }).from(combinationsTable).where(eq(combinationsTable.storeId, storeId)),
     ])
 
     const missingContentCount = totalCombinations.count - combinations.length

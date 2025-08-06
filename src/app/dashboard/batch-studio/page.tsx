@@ -21,7 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { db } from '@/db'
-import { brands, brandsStores, categories, categoriesStores, combinations, contents, reviews, tasks } from '@/db/schema'
+import { brands, brandsStores, categories, categoriesStores, combinations, reviews, tasks } from '@/db/schema'
 import { cn } from '@/lib/utils'
 
 export default async function Page() {
