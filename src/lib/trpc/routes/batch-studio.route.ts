@@ -1,36 +1,64 @@
-import { and, eq, isNull, sql } from 'drizzle-orm'
+import { cookies } from 'next/headers';
+
+
+
+import { and, eq, isNull, or, sql } from 'drizzle-orm';
 import { db } from '@/db'
-import { brands, categories, combinations, contents } from '@/db/schema'
-import { createTRPCRouter, publicProcedure } from '@/lib/trpc/trpc'
+import { brands, brandsStores, categories, categoriesStores, combinations, contents } from '@/db/schema'
+import { createTRPCRouter, publicProcedure } from '@/lib/trpc/trpc';
+
 
 export const batchStudioRoute = createTRPCRouter({
     getAllBrands: publicProcedure.query(async () => {
-        const data = await db
-            .select({
-                name: brands.name,
-                slug: brands.slug,
-                content: contents.config,
-                integrationId: brands.integrationId,
-                hasContent: sql<boolean>`(${contents.config} IS NOT NULL)`.as('hasContent'),
-            })
-            .from(brands)
-            .leftJoin(contents, and(eq(contents.entityId, brands.integrationId), eq(contents.entityType, 'brand')))
+        const cookie = await cookies()
+        const storeId = cookie.get('qs-pay-store-id')?.value!
 
-        return data
+        return db
+            .select({
+                integrationId: brandsStores.integrationId,
+            })
+            .from(brandsStores)
+            .where(eq(brandsStores.storeId, storeId))
     }),
     getAllBrandsWithNoContent: publicProcedure.query(async () => {
-        const data = await db
+        const cookie = await cookies()
+        const storeId = cookie.get('qs-pay-store-id')?.value!
+
+        return db
             .select({
-                name: brands.name,
-                slug: brands.slug,
-                content: contents.config,
-                integrationId: brands.integrationId,
-                hasContent: sql<boolean>`(${contents.config} IS NOT NULL)`.as('hasContent'),
+                integrationId: brandsStores.integrationId,
             })
-            .from(brands)
-            .leftJoin(contents, and(eq(contents.entityId, brands.integrationId), eq(contents.entityType, 'brand')))
-            .where(isNull(contents.config))
-        return data
+            .from(brandsStores)
+            .leftJoin(
+                contents,
+                and(eq(contents.entityId, brandsStores.integrationId), eq(contents.entityType, 'brand'))
+            )
+            .where(and(isNull(contents.config), eq(brandsStores.storeId, storeId)))
+    }),
+    getAllBrandsWithNoTextContent: publicProcedure.query(async () => {
+        const cookie = await cookies()
+        const storeId = cookie.get('qs-pay-store-id')?.value!
+
+        return db
+            .select({
+                integrationId: brandsStores.integrationId,
+            })
+            .from(brandsStores)
+            .leftJoin(
+                contents,
+                and(eq(contents.entityId, brandsStores.integrationId), eq(contents.entityType, 'brand'))
+            )
+            .where(
+                and(
+                    eq(brandsStores.storeId, storeId),
+                    or(
+                        sql`${contents.config}->'descriptions'->>'header' IS NULL`,
+                        sql`${contents.config}->'descriptions'->>'header' = ''`,
+                        sql`${contents.config}->'descriptions'->>'footer' IS NULL`,
+                        sql`${contents.config}->'descriptions'->>'footer' = ''`
+                    )
+                )
+            )
     }),
     getAllCombinations: publicProcedure.query(async () => {
         const data = await db
@@ -67,39 +95,80 @@ export const batchStudioRoute = createTRPCRouter({
 
         return data
     }),
-    getAllCategories: publicProcedure.query(async () => {
-        const data = await db
+    getAllCombinationsWithNoTextContent: publicProcedure.query(async () => {
+        const cookie = await cookies()
+        const storeId = cookie.get('qs-pay-store-id')?.value!
+
+        return db
             .select({
-                name: categories.name,
-                description: categories.description,
-                content: contents.config,
-                integrationId: categories.integrationId,
-                hasContent: sql<boolean>`(${contents.config} IS NOT NULL)`.as('hasContent'),
+                integrationId: combinations.integrationId,
             })
-            .from(categories)
+            .from(combinations)
             .leftJoin(
                 contents,
-                and(eq(contents.entityId, categories.integrationId), eq(contents.entityType, 'category'))
+                and(eq(contents.entityId, combinations.integrationId), eq(contents.entityType, 'combination'))
             )
+            .where(
+                and(
+                    eq(combinations.storeId, storeId),
+                    or(
+                        sql`${contents.config}->'descriptions'->>'header' IS NULL`,
+                        sql`${contents.config}->'descriptions'->>'header' = ''`,
+                        sql`${contents.config}->'descriptions'->>'footer' IS NULL`,
+                        sql`${contents.config}->'descriptions'->>'footer' = ''`
+                    )
+                )
+            )
+    }),
+    getAllCategories: publicProcedure.query(async () => {
+        const cookie = await cookies()
+        const storeId = cookie.get('qs-pay-store-id')?.value!
 
-        return data
+        return db
+            .select({
+                integrationId: categoriesStores.integrationId,
+            })
+            .from(categoriesStores)
+            .where(eq(categoriesStores.storeId, storeId))
     }),
     getAllCategoriesWithNoContent: publicProcedure.query(async () => {
-        const data = await db
+        const cookie = await cookies()
+        const storeId = cookie.get('qs-pay-store-id')?.value!
+
+        return db
             .select({
-                name: categories.name,
-                description: categories.description,
-                content: contents.config,
-                integrationId: categories.integrationId,
-                hasContent: sql<boolean>`(${contents.config} IS NOT NULL)`.as('hasContent'),
+                integrationId: categoriesStores.integrationId,
             })
-            .from(categories)
+            .from(categoriesStores)
             .leftJoin(
                 contents,
-                and(eq(contents.entityId, categories.integrationId), eq(contents.entityType, 'category'))
+                and(eq(contents.entityId, categoriesStores.integrationId), eq(contents.entityType, 'category'))
             )
-            .where(isNull(contents.config))
+            .where(and(isNull(contents.config), eq(categoriesStores.storeId, storeId)))
+    }),
+    getAllCategoriesWithNoTextContent: publicProcedure.query(async () => {
+        const cookie = await cookies()
+        const storeId = cookie.get('qs-pay-store-id')?.value!
 
-        return data
+        return db
+            .select({
+                integrationId: categoriesStores.integrationId,
+            })
+            .from(categoriesStores)
+            .leftJoin(
+                contents,
+                and(eq(contents.entityId, categoriesStores.integrationId), eq(contents.entityType, 'category'))
+            )
+            .where(
+                and(
+                    eq(categoriesStores.storeId, storeId),
+                    or(
+                        sql`${contents.config}->'descriptions'->>'header' IS NULL`,
+                        sql`${contents.config}->'descriptions'->>'header' = ''`,
+                        sql`${contents.config}->'descriptions'->>'footer' IS NULL`,
+                        sql`${contents.config}->'descriptions'->>'footer' = ''`
+                    )
+                )
+            )
     }),
 })

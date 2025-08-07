@@ -65,6 +65,15 @@ export const BatchStudioBrandTable = ({ promise }: BrandsTableProps) => {
         setSelected(allRows)
     }
 
+    const selectAllWithoutTextContentHandler = async () => {
+        const allBrands = await utils.client.batchStudioRoute.getAllBrandsWithNoTextContent.query()
+        const allRows = allBrands
+            .filter((x) => x.integrationId)
+            .reduce((acc, b) => ((acc[b.integrationId!] = true), acc), {} as Record<string, boolean>)
+        table.setRowSelection(allRows)
+        setSelected(allRows)
+    }
+
     const clearSelectionHandler = async () => {
         setSelected({})
         table.resetRowSelection()
@@ -84,6 +93,10 @@ export const BatchStudioBrandTable = ({ promise }: BrandsTableProps) => {
                 <Button size="sm" variant="link" onClick={selectAllWithoutContentHandler}>
                     <SquareDashedMousePointerIcon />
                     Select w/o Contents
+                </Button>
+                <Button size="sm" variant="link" onClick={selectAllWithoutTextContentHandler}>
+                    <SquareDashedMousePointerIcon />
+                    Select w/o Texts
                 </Button>
                 {Object.keys(selected).length > 0 && (
                     <>

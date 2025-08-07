@@ -61,6 +61,7 @@ export const getCategories = async (input: Awaited<ReturnType<typeof searchParam
             )
             .where(where)
             .orderBy(...orderBy)
+            .groupBy(categories.id, contents.config, categories.name, categories.description, categoriesStores.slug, categoriesStores.integrationId)
             .offset(offset)
             .limit(input.perPage)
 
@@ -69,11 +70,6 @@ export const getCategories = async (input: Awaited<ReturnType<typeof searchParam
                 count: count(),
             })
             .from(categoriesStores)
-            .leftJoin(categories, eq(categories.id, categoriesStores.categoryId))
-            .leftJoin(
-                contents,
-                and(eq(contents.entityId, categoriesStores.integrationId), eq(contents.entityType, 'category'))
-            )
             .where(where)
             .execute()
             .then((res) => res[0]?.count ?? 0)

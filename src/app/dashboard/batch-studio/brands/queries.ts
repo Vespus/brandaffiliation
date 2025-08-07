@@ -47,6 +47,7 @@ export const getBrands = async (input: Awaited<ReturnType<typeof searchParamsCac
             .leftJoin(contents, and(eq(contents.entityId, brandsStores.integrationId), eq(contents.entityType, 'brand')))
             .where(where)
             .orderBy(...orderBy)
+            .groupBy(brands.id, contents.config, brands.name, brandsStores.slug, brandsStores.integrationId)
             .offset(offset)
             .limit(input.perPage)
 
@@ -55,8 +56,6 @@ export const getBrands = async (input: Awaited<ReturnType<typeof searchParamsCac
                 count: count(),
             })
             .from(brandsStores)
-            .leftJoin(brands, eq(brands.id, brandsStores.brandId))
-            .leftJoin(contents, and(eq(contents.entityId, brandsStores.integrationId), eq(contents.entityType, 'brand')))
             .where(where)
             .execute()
             .then((res) => res[0]?.count ?? 0)

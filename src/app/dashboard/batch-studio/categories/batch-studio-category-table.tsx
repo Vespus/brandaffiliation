@@ -65,6 +65,15 @@ export const BatchStudioCategoryTable = ({ promise }: CategoriesTableProps) => {
         setSelected(allRows)
     }
 
+    const selectAllWithoutTextContentHandler = async () => {
+        const allCategories = await utils.client.batchStudioRoute.getAllCategoriesWithNoTextContent.query()
+        const allRows = allCategories
+            .filter((x) => x.integrationId)
+            .reduce((acc, b) => ((acc[b.integrationId!] = true), acc), {} as Record<string, boolean>)
+        table.setRowSelection(allRows)
+        setSelected(allRows)
+    }
+
     const clearSelectionHandler = async () => {
         setSelected({})
         table.resetRowSelection()
@@ -84,6 +93,10 @@ export const BatchStudioCategoryTable = ({ promise }: CategoriesTableProps) => {
                 <Button size="sm" variant="link" onClick={selectAllWithoutContentHandler}>
                     <SquareDashedMousePointerIcon />
                     Select w/o Contents
+                </Button>
+                <Button size="sm" variant="link" onClick={selectAllWithoutTextContentHandler}>
+                    <SquareDashedMousePointerIcon />
+                    Select w/o Texts
                 </Button>
                 {Object.keys(selected).length > 0 && (
                     <>
