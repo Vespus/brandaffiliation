@@ -24,7 +24,7 @@ export const BatchStudioCombinationTable = ({ promise }: BrandsTableProps) => {
     const columns = useGetBatchStudioCombinationTableColumns()
     const utils = api.useUtils()
     const t = useTranslations()
-    const { selected, setSelected } = useDataTableSelectionStore()
+    const { setSelected } = useDataTableSelectionStore()
 
     const { table } = useDataTable({
         data: data,
@@ -40,6 +40,12 @@ export const BatchStudioCombinationTable = ({ promise }: BrandsTableProps) => {
         shallow: false,
         clearOnDefault: true,
     })
+
+    const state = table.getState()
+
+    useEffect(() => {
+        setSelected(state.rowSelection)
+    }, [state.rowSelection])
 
     const selectAllHandler = async () => {
         const allBrands = await utils.client.batchStudioRoute.getAllCombinations.query()
