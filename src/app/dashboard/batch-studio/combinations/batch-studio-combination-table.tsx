@@ -75,23 +75,23 @@ export const BatchStudioCombinationTable = ({ promise }: BrandsTableProps) => {
                 <DataTableSortList table={table} align="end" />
             </DataTableToolbar>
             <div className="flex h-9 items-center gap-4">
-                <span className="text-sm">You&apos;ve selected {Object.keys(selected).length} records</span>
-                <Button size="sm" variant="link" onClick={selectAllHandler}>
+                <span className="text-sm">You&apos;ve selected {Object.keys(table.getState().rowSelection).length} records</span>
+                <Button size="sm" variant="outline" onClick={selectAllHandler}>
                     <SquareMousePointerIcon />
                     Select All Records
                 </Button>
-                <Button size="sm" variant="link" onClick={selectAllWithoutContentHandler}>
+                <Button size="sm" variant="outline" onClick={selectAllWithoutContentHandler}>
                     <SquareDashedMousePointerIcon />
                     Select w/o Contents
                 </Button>
-                <Button size="sm" variant="link" onClick={selectAllWithoutTextContentsHandler}>
+                <Button size="sm" variant="outline" onClick={selectAllWithoutTextContentsHandler}>
                     <SquareDashedMousePointerIcon />
-                    Select w/o Texts
+                    Select w/o SEO Texts
                 </Button>
             </div>
             {Object.keys(table.getState().rowSelection).length > 0 && (
                 <div>
-                    <span className="font-bold underline" role="button" onClick={clearSelectionHandler}>Unselect All</span>
+                    <span className="font-bold text-xs underline" role="button" onClick={clearSelectionHandler}>Unselect All</span>
                 </div>
             )}
         </DataTable>
