@@ -39,6 +39,14 @@ export const getCombinations = async (input: Awaited<ReturnType<typeof searchPar
         searchConditions.length > 0 ? and(...searchConditions) : undefined,
         input.content === 'yes' ? isNotNull(contents.config) : undefined,
         input.content === 'no' ? isNull(contents.config) : undefined,
+        input.content === 'missing'
+            ? or(
+                  sql`${contents.config}->'descriptions'->>'header' IS NULL`,
+                  sql`${contents.config}->'descriptions'->>'header' = ''`,
+                  sql`${contents.config}->'descriptions'->>'footer' IS NULL`,
+                  sql`${contents.config}->'descriptions'->>'footer' = ''`
+              )
+            : undefined,
         eq(combinations.storeId, storeId)
     )
 
@@ -71,7 +79,15 @@ export const getCombinations = async (input: Awaited<ReturnType<typeof searchPar
         .leftJoin(categories, eq(categoriesStores.categoryId, categories.id))
         .where(where)
         .orderBy(...orderBy)
-        .groupBy(combinations.id, contents.config, brands.name, categories.description, brandsStores.slug, categoriesStores.slug, combinations.name)
+        .groupBy(
+            combinations.id,
+            contents.config,
+            brands.name,
+            categories.description,
+            brandsStores.slug,
+            categoriesStores.slug,
+            combinations.name
+        )
         .offset(offset)
         .limit(input.perPage)) as unknown as BatchStudioCombinationType[]
 
@@ -80,6 +96,10 @@ export const getCombinations = async (input: Awaited<ReturnType<typeof searchPar
             count: count(),
         })
         .from(combinations)
+        .leftJoin(
+            contents,
+            and(eq(contents.entityId, combinations.integrationId), eq(contents.entityType, 'combination'))
+        )
         .where(where)
         .execute()
         .then((res) => res[0]?.count ?? 0)

@@ -1,12 +1,9 @@
-import { cookies } from 'next/headers';
+import { cookies } from 'next/headers'
 
-
-
-import { and, eq, isNull, or, sql } from 'drizzle-orm';
+import { and, eq, isNull, or, sql } from 'drizzle-orm'
 import { db } from '@/db'
-import { brands, brandsStores, categories, categoriesStores, combinations, contents } from '@/db/schema'
-import { createTRPCRouter, publicProcedure } from '@/lib/trpc/trpc';
-
+import { brandsStores, categoriesStores, combinations, contents } from '@/db/schema'
+import { createTRPCRouter, publicProcedure } from '@/lib/trpc/trpc'
 
 export const batchStudioRoute = createTRPCRouter({
     getAllBrands: publicProcedure.query(async () => {

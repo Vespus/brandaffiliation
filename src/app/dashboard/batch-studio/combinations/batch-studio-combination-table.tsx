@@ -41,19 +41,12 @@ export const BatchStudioCombinationTable = ({ promise }: BrandsTableProps) => {
         clearOnDefault: true,
     })
 
-    const state = table.getState()
-
-    useEffect(() => {
-        setSelected(state.rowSelection)
-    }, [state.rowSelection])
-
     const selectAllHandler = async () => {
         const allBrands = await utils.client.batchStudioRoute.getAllCombinations.query()
         const allRows = allBrands
             .filter((x) => x.integrationId)
             .reduce((acc, b) => ((acc[b.integrationId!] = true), acc), {} as Record<string, boolean>)
         table.setRowSelection(allRows)
-        setSelected(allRows)
     }
 
     const selectAllWithoutContentHandler = async () => {
@@ -62,7 +55,6 @@ export const BatchStudioCombinationTable = ({ promise }: BrandsTableProps) => {
             .filter((x) => x.integrationId)
             .reduce((acc, b) => ((acc[b.integrationId!] = true), acc), {} as Record<string, boolean>)
         table.setRowSelection(allRows)
-        setSelected(allRows)
     }
 
     const selectAllWithoutTextContentsHandler = async () => {
@@ -71,12 +63,10 @@ export const BatchStudioCombinationTable = ({ promise }: BrandsTableProps) => {
             .filter((x) => x.integrationId)
             .reduce((acc, b) => ((acc[b.integrationId!] = true), acc), {} as Record<string, boolean>)
         table.setRowSelection(allRows)
-        setSelected(allRows)
     }
 
     const clearSelectionHandler = async () => {
-        setSelected({})
-        table.resetRowSelection()
+        table.resetRowSelection(true)
     }
 
     return (
@@ -98,15 +88,12 @@ export const BatchStudioCombinationTable = ({ promise }: BrandsTableProps) => {
                     <SquareDashedMousePointerIcon />
                     Select w/o Texts
                 </Button>
-                {Object.keys(selected).length > 0 && (
-                    <>
-                        <Button size="sm" variant="link" onClick={clearSelectionHandler}>
-                            <XIcon />
-                            Clear Selected
-                        </Button>
-                    </>
-                )}
             </div>
+            {Object.keys(table.getState().rowSelection).length > 0 && (
+                <div>
+                    <span className="font-bold underline" role="button" onClick={clearSelectionHandler}>Unselect All</span>
+                </div>
+            )}
         </DataTable>
     )
 }

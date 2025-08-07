@@ -26,8 +26,8 @@ export function useGetBatchStudioCombinationTableColumns(): ColumnDef<BatchStudi
     return [
         {
             id: 'select',
-            header: ({ table }) => (
-                <div className="flex gap-2">
+            header: ({ table }) => {
+                return (
                     <Checkbox
                         checked={
                             table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')
@@ -36,8 +36,8 @@ export function useGetBatchStudioCombinationTableColumns(): ColumnDef<BatchStudi
                         aria-label="Select all"
                         className="translate-y-0.5"
                     />
-                </div>
-            ),
+                )
+            },
             cell: ({ row }) => (
                 <Checkbox
                     checked={row.getIsSelected()}
@@ -168,6 +168,10 @@ export function useGetBatchStudioCombinationTableColumns(): ColumnDef<BatchStudi
                     {
                         label: 'No',
                         value: 'no',
+                    },
+                    {
+                        label: 'Missing SEO Texts',
+                        value: 'missing',
                     },
                 ],
                 icon: StarIcon,
