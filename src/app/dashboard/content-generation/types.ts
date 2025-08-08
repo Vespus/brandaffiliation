@@ -14,7 +14,7 @@ export const MetaOutputSchema = z.object({
             category: z.string().describe('Category name for the content. Single plain string.'),
             openGraph: z
                 .object({
-                    type: z.string().describe('Open Graph type. Value must be exactly "article".'),
+                    type: z.string().describe('Open Graph type. Value must be exactly "website".'),
                     title: z.string().describe('Open Graph title. Should closely match the meta title.'),
                     description: z
                         .string()
