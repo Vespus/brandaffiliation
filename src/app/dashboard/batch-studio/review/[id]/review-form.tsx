@@ -65,7 +65,7 @@ export const ReviewForm = ({ item }: { item: ReviewJoinWithContent }) => {
     }
 
     const hasComparisonFields = (fields: string[]) => {
-        return fields.map((field) => get(item.content?.config, field)).some((field) => field !== undefined)
+        return fields.map((field) => get(item.content?.config, field)).some((field) => !!field)
     }
 
     useEffect(() => {
