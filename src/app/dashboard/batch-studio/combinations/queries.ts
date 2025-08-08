@@ -97,17 +97,19 @@ export const getCombinations = async (input: Awaited<ReturnType<typeof searchPar
         .limit(input.perPage)) as unknown as BatchStudioCombinationType[]
 
     const total = await db
-        .select({
-            count: count(),
-        })
+        .select({ count: count(combinations.id) })
         .from(combinations)
         .leftJoin(
             contents,
             and(eq(contents.entityId, combinations.integrationId), eq(contents.entityType, 'combination'))
         )
+        .leftJoin(brandsStores, eq(combinations.brandId, brandsStores.integrationId))
+        .leftJoin(categoriesStores, eq(combinations.categoryId, categoriesStores.integrationId))
+        .leftJoin(brands, eq(brandsStores.brandId, brands.id))
+        .leftJoin(categories, eq(categoriesStores.categoryId, categories.id))
         .where(where)
-        .execute()
-        .then((res) => res[0]?.count ?? 0)
+        .groupBy(combinations.id)
+        .then(result => result.length); // Count the grouped results
 
     const pageCount = Math.ceil(total / input.perPage)
     return { data, pageCount, total }
