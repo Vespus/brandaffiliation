@@ -70,6 +70,7 @@ export const POST = async (req: NextRequest) => {
     await db.update(tasks).set({ status: 'inProgress' }).where(eq(tasks.id, task.id))
     try {
         const driver = getDriver(model)
+        const finalUserPrompt = userPrompt.filter(Boolean).join('\n')
         const { object, usage } = await generateObject({
             model: driver,
             maxOutputTokens: model.settings.maxTokens,
@@ -79,7 +80,7 @@ export const POST = async (req: NextRequest) => {
             presencePenalty: model.settings.presencePenalty,
             system: prompt!.prompt,
             schema: MetaOutputSchema,
-            prompt: userPrompt.filter(Boolean).join('\n'),
+            prompt: finalUserPrompt,
         })
 
         await db.insert(reviews).values({
@@ -89,6 +90,10 @@ export const POST = async (req: NextRequest) => {
             approved: false,
             storeId: task.storeId,
             usage: usage,
+            userPrompt: {
+                prompt: finalUserPrompt,
+                system: prompt!.prompt,
+            }
         })
     } catch (e) {
         await db.update(tasks).set({ status: 'failed' }).where(eq(tasks.id, task.id))
@@ -208,8 +213,18 @@ const processCombination = async (task: Task) => {
         )
         .where(eq(combinations.integrationId, task.entityId))
 
-    const brand = await processBrand(task, combination.combinations.brandId!)
-    const category = await processCategory(task, combination.combinations.categoryId!)
+    const brandContent = await processBrand(task, combination.combinations.brandId!)
+    const categoryContent = await processCategory(task, combination.combinations.categoryId!)
 
-    return brand + category
+    const combinationHeaderInformation = `<CombinationPageName>${combination.combinations.description}</CombinationPageName>`
+    const combinationMetaData = combination.contents
+        ? `<CombinationPageExistingMetaData>${JSON.stringify(combination.contents.config)}</CombinationPageExistingMetaData>`
+        : ''
+
+    const output = [combinationHeaderInformation]
+    if (combination.contents?.config) {
+        output.push(combinationMetaData)
+    }
+
+    return brandContent + categoryContent + `<CombinationPage>${output.filter(Boolean).join('')}</CombinationPage>`
 }

@@ -256,7 +256,8 @@ export const reviews = pgTable('reviews', {
     createdAt: timestamp('created_at'),
     storeId: text('store_id'),
     approved: boolean(),
-    approvedAt: timestamp('approved_at', {withTimezone: true})
+    approvedAt: timestamp('approved_at', {withTimezone: true}),
+    userPrompt: jsonb('user_prompt').$type<{system: string, prompt: string}>(),
 })
 
 export const tasks = pgTable('tasks', {
