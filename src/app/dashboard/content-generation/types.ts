@@ -18,7 +18,7 @@ export const MetaOutputSchema = z.object({
                 .object({
                     card: z.string().describe('Twitter card type. Must only be use "summary" as a type.'),
                     title: z.string().describe('Twitter title'),
-                    description: z.string().describe('Twitter description'),
+                    description: z.string().describe('Twitter description, maximum of 200 Characters is a must'),
                 })
                 .describe('Twitter shareable link metadata'),
             robot: z.string().describe('Robot meta tag content'),
