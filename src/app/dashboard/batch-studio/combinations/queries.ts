@@ -1,12 +1,15 @@
-import { cookies } from 'next/headers'
+import { cookies } from 'next/headers';
 
-import { and, asc, count, desc, eq, ilike, isNotNull, isNull, or, sql } from 'drizzle-orm'
-import { createSearchParamsCache, parseAsInteger, parseAsString } from 'nuqs/server'
-import { BatchStudioCombinationType } from '@/app/dashboard/batch-studio/combinations/batch-studio-combination-type'
-import { db } from '@/db'
-import { brands, brandsStores, categories, categoriesStores, combinations, contents } from '@/db/schema'
-import { BrandWithCharacteristicAndScales } from '@/db/types'
-import { getSortingStateParser } from '@/lib/datatable/parsers'
+
+
+import { and, asc, count, desc, eq, ilike, isNotNull, isNull, or, sql } from 'drizzle-orm';
+import { createSearchParamsCache, parseAsInteger, parseAsString } from 'nuqs/server';
+import { BatchStudioCombinationType } from '@/app/dashboard/batch-studio/combinations/batch-studio-combination-type';
+import { db } from '@/db';
+import { brands, brandsStores, categories, categoriesStores, combinations, contents, reviews, tasks } from '@/db/schema'
+import { BrandWithCharacteristicAndScales } from '@/db/types';
+import { getSortingStateParser } from '@/lib/datatable/parsers';
+
 
 export const searchParamsCache = createSearchParamsCache({
     page: parseAsInteger.withDefault(1),
@@ -47,7 +50,9 @@ export const getCombinations = async (input: Awaited<ReturnType<typeof searchPar
                   sql`${contents.config}->'descriptions'->>'footer' = ''`
               )
             : undefined,
-        eq(combinations.storeId, storeId)
+        eq(combinations.storeId, storeId),
+        sql`NOT EXISTS (SELECT 1 FROM ${tasks} WHERE ${tasks.entityId} = ${combinations.integrationId} AND ${tasks.entityType} = 'combination')`,
+        sql`NOT EXISTS (SELECT 1 FROM ${reviews} WHERE ${reviews.entityId} = ${combinations.integrationId} AND ${reviews.entityType} = 'combination')`,
     )
 
     const orderBy =

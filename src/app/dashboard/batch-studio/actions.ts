@@ -7,6 +7,7 @@ import z from 'zod'
 import { db } from '@/db'
 import { tasks } from '@/db/schema'
 import { actionClient } from '@/lib/action-client'
+import { revalidatePath } from 'next/cache'
 
 export const saveTask = actionClient
     .inputSchema(
@@ -45,4 +46,6 @@ export const saveTask = actionClient
         }
 
         await db.insert(tasks).values(insertTask.map((x) => ({ ...x, storeId })))
+
+        revalidatePath('/dashboard/batch-studio', 'layout')
     })

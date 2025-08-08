@@ -2,12 +2,12 @@
 
 import { cookies } from 'next/headers'
 
+import { createStreamableValue } from '@ai-sdk/rsc'
 import { streamObject } from 'ai'
-import { createStreamableValue } from 'ai/rsc'
 import { and, eq, inArray, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { ContentGenerateSchema } from '@/app/dashboard/content-generation/schema'
-import { MetaOutputSchema } from '@/app/dashboard/content-generation/types'
+import { MetaOutputSchema, PartialMetaOutput } from '@/app/dashboard/content-generation/types'
 import { appendMarkdown, getDriver } from '@/app/dashboard/content-generation/utils'
 import { db } from '@/db'
 import { getAIModelsWithProviderAndSettings } from '@/db/presets'
@@ -87,7 +87,7 @@ export const CompletionStream = async (parsedInput: z.infer<typeof ContentGenera
         }
     }
 
-    const streamList = new Map(models.map((model) => [model.id, createStreamableValue()]))
+    const streamList = new Map(models.map((model) => [model.id, createStreamableValue<PartialMetaOutput>()]))
 
     Promise.all(
         models.map(async (model) => {
@@ -95,7 +95,7 @@ export const CompletionStream = async (parsedInput: z.infer<typeof ContentGenera
 
             const { partialObjectStream } = streamObject({
                 model: driver,
-                maxTokens: model.settings.maxTokens,
+                maxOutputTokens: model.settings.maxTokens,
                 temperature: model.settings.temperature,
                 topP: model.settings.topP,
                 frequencyPenalty: model.settings.frequencyPenalty,

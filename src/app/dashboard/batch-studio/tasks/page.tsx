@@ -42,6 +42,7 @@ export default async function Tasks() {
         )
         .leftJoin(brands, eq(brands.id, brandsStores.brandId))
         .leftJoin(categories, eq(categories.id, categoriesStores.categoryId))
+        .groupBy(tasks.id, brands.name, categories.name, combinations.name, brands.id, categories.id, combinations.id)
         .where(eq(tasks.storeId, storeId))
 
     return (

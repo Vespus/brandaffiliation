@@ -4,7 +4,7 @@ import { use, useEffect } from 'react'
 
 import { useTranslations } from 'next-intl'
 
-import { SquareDashedMousePointerIcon, SquareMousePointerIcon, XIcon } from 'lucide-react'
+import { SquareDashedMousePointerIcon, SquareMousePointerIcon } from 'lucide-react'
 import { useGetBatchStudioCombinationTableColumns } from '@/app/dashboard/batch-studio/combinations/batch-studio-combination-table-columns'
 import { BatchStudioCombinationType } from '@/app/dashboard/batch-studio/combinations/batch-studio-combination-type'
 import { useDataTableSelectionStore } from '@/app/dashboard/batch-studio/store'
@@ -81,7 +81,9 @@ export const BatchStudioCombinationTable = ({ promise }: BrandsTableProps) => {
                 <DataTableSortList table={table} align="end" />
             </DataTableToolbar>
             <div className="flex h-9 items-center gap-4">
-                <span className="text-sm">You&apos;ve selected {Object.keys(table.getState().rowSelection).length} records</span>
+                <span className="text-sm">
+                    You&apos;ve selected {Object.keys(table.getState().rowSelection).length} records
+                </span>
                 <Button size="sm" variant="outline" onClick={selectAllHandler}>
                     <SquareMousePointerIcon />
                     Select All Records
@@ -97,7 +99,9 @@ export const BatchStudioCombinationTable = ({ promise }: BrandsTableProps) => {
             </div>
             {Object.keys(table.getState().rowSelection).length > 0 && (
                 <div>
-                    <span className="font-bold text-xs underline" role="button" onClick={clearSelectionHandler}>Unselect All</span>
+                    <span className="text-xs font-bold underline" role="button" onClick={clearSelectionHandler}>
+                        Unselect All
+                    </span>
                 </div>
             )}
         </DataTable>

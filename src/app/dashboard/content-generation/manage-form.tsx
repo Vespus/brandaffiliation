@@ -1,7 +1,6 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { readStreamableValue } from 'ai/rsc'
 import { Sparkles } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -17,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Legend } from '@/components/ui/legend'
 import { Scroller } from '@/components/ui/scroller'
+import { readStreamableValue } from "@ai-sdk/rsc"
 
 export const ManageForm = () => {
     const form = useForm<z.infer<typeof ContentGenerateSchema>>({
@@ -42,7 +42,7 @@ export const ManageForm = () => {
         Promise.all(
             response.map(async ({ model, streamValue }) => {
                 for await (const value of readStreamableValue(streamValue)) {
-                    contentStore.saveStream(model, value || {})
+                    contentStore.saveStream(model, value)
                 }
             })
         ).then(() => {

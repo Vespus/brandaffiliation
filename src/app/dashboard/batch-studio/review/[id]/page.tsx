@@ -31,6 +31,14 @@ export default async function ReviewPage(props: ReviewPageProps) {
                     <span className="text-muted-foreground text-sm">
                         Review and approve SEO content for this category
                     </span>
+                    {review.review.usage && (
+                        <div className="text-muted-foreground flex text-xs divide-x mt-2">
+                            <span className="px-2 first:-ml-2">Input Tokens: {review.review.usage.inputTokens}</span>
+                            <span className="px-2">Output Tokens: {review.review.usage.outputTokens}</span>
+                            <span className="px-2">Total Tokens: {review.review.usage.totalTokens}</span>
+                            {review.review.usage.reasoningTokens && <span className="px-2">Reasoning Tokens: {review.review.usage.reasoningTokens}</span>}
+                        </div>
+                    )}
                 </div>
                 <ReviewHandlers item={review} />
             </div>

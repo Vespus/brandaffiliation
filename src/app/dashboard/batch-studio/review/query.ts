@@ -47,6 +47,7 @@ export const getReviewTasks = cache(async () => {
         .leftJoin(brands, eq(brands.id, brandsStores.brandId))
         .leftJoin(categories, eq(categories.id, categoriesStores.categoryId))
         .where(and(eq(reviews.approved, false), eq(reviews.storeId, storeId)))
+        .groupBy(reviews.id, brands.name, categories.name, combinations.name, brands.id, categories.id, combinations.id)
 
     return reviewContents as ReviewJoin[]
 })

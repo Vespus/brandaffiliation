@@ -270,6 +270,7 @@ const getTasks = async (storeId: string) => {
         .leftJoin(brands, eq(brands.id, brandsStores.brandId))
         .leftJoin(categories, eq(categories.id, categoriesStores.categoryId))
         .where(eq(tasks.storeId, storeId))
+        .groupBy(tasks.id, brands.name, categories.name, combinations.name, brands.id, categories.id, combinations.id)
         .limit(5)
         .orderBy(desc(tasks.createdAt))
 }

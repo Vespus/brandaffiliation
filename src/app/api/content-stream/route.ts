@@ -70,9 +70,9 @@ export const POST = async (req: NextRequest) => {
     await db.update(tasks).set({ status: 'inProgress' }).where(eq(tasks.id, task.id))
     try {
         const driver = getDriver(model)
-        const { object } = await generateObject({
+        const { object, usage } = await generateObject({
             model: driver,
-            maxTokens: model.settings.maxTokens,
+            maxOutputTokens: model.settings.maxTokens,
             temperature: model.settings.temperature,
             topP: model.settings.topP,
             frequencyPenalty: model.settings.frequencyPenalty,
@@ -87,7 +87,8 @@ export const POST = async (req: NextRequest) => {
             entityType: task.entityType,
             config: object,
             approved: false,
-            storeId: task.storeId
+            storeId: task.storeId,
+            usage: usage,
         })
     } catch (e) {
         await db.update(tasks).set({ status: 'failed' }).where(eq(tasks.id, task.id))

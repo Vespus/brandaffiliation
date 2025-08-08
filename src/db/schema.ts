@@ -17,6 +17,7 @@ import {
 } from 'drizzle-orm/pg-core'
 import { BatchContentGenerateSchemaType } from '@/app/dashboard/batch-studio/schema'
 import { MetaOutput } from '@/app/dashboard/content-generation/types'
+import { LanguageModelV2Usage } from '@ai-sdk/provider'
 
 export const brandScales = pgTable('brand_scales', {
     // You can use { mode: "bigint" } if numbers are exceeding js number limitations
@@ -251,6 +252,7 @@ export const reviews = pgTable('reviews', {
     entityId: text('entity_id').notNull(),
     config: jsonb().$type<MetaOutput>(),
     previousConfig: jsonb('previous_config').$type<MetaOutput>(),
+    usage: jsonb('usage').$type<LanguageModelV2Usage>(),
     createdAt: timestamp('created_at'),
     storeId: text('store_id'),
     approved: boolean(),

@@ -1,13 +1,14 @@
-import { create } from 'zustand'
-import { MetaOutput } from '@/app/dashboard/content-generation/types'
-import { AIModelWithProviderAndSettings } from '@/db/types'
+import { create } from 'zustand';
+import { MetaOutput, PartialMetaOutput } from '@/app/dashboard/content-generation/types'
+import { AIModelWithProviderAndSettings } from '@/db/types';
+
 
 interface ContentGenerationStoreType {
     progressState: string | 'loading' | 'idle' | 'started' | 'complete'
     models: AIModelWithProviderAndSettings[]
     updateModels: (models: AIModelWithProviderAndSettings[]) => void
     setProgressState: (state: 'loading' | 'started' | 'idle' | 'complete') => void
-    saveStream: (model: AIModelWithProviderAndSettings, stream: MetaOutput) => void
+    saveStream: (model: AIModelWithProviderAndSettings, stream: PartialMetaOutput | undefined) => void
     streams: Record<string, { model: AIModelWithProviderAndSettings; stream: MetaOutput }>
     selectedCategory?: number
     selectedBrand?: number
@@ -30,7 +31,7 @@ export const useContentGenerationStore = create<ContentGenerationStoreType>((set
     ...initialState,
     setProgressState: (state) => set({ progressState: state }),
     updateModels: (models: AIModelWithProviderAndSettings[]) => set({ models }),
-    saveStream: (model: AIModelWithProviderAndSettings, stream: MetaOutput) => {
+    saveStream: (model: AIModelWithProviderAndSettings, stream: PartialMetaOutput | undefined) => {
         set((state) => {
             return {
                 streams: {
