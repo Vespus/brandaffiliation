@@ -17,7 +17,7 @@ export const ReviewSidebarHandler = ({ contents }: { contents: ReviewJoin[] }) =
     return (
         <Button
             loading={singleSaveAction.isPending}
-            onClick={() => singleSaveAction.execute(contents.map((item) => ({ contentId: item.content.id })))}
+            onClick={() => singleSaveAction.execute(contents.map((item) => ({ reviewId: item.review.id })))}
         >
             <CheckIcon />
             Accept All
