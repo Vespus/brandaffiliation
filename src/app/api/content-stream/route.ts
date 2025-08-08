@@ -1,16 +1,19 @@
-import { revalidatePath } from 'next/cache'
-import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache';
+import { NextRequest, NextResponse } from 'next/server';
 
-import { generateObject } from 'ai'
-import { and, eq, inArray, sql } from 'drizzle-orm'
-import z from 'zod'
-import { BatchContentGenerateSchemaType } from '@/app/dashboard/batch-studio/schema'
-import { MetaOutputSchema } from '@/app/dashboard/content-generation/types'
-import { getDriver } from '@/app/dashboard/content-generation/utils'
-import { db } from '@/db'
+
+
+import { generateObject } from 'ai';
+import { and, eq, inArray, sql } from 'drizzle-orm';
+import z from 'zod';
+import { BatchContentGenerateSchemaType } from '@/app/dashboard/batch-studio/schema';
+import { MetaOutputSchema } from '@/app/dashboard/content-generation/types';
+import { getDriver } from '@/app/dashboard/content-generation/utils';
+import { db } from '@/db';
 import { getAIModelsWithProviderAndSettings } from '@/db/presets'
 import {
     brandWithScales,
+    brands,
     brandsStores,
     categories,
     categoriesStores,
@@ -23,6 +26,7 @@ import {
     tasks,
 } from '@/db/schema'
 import { Task } from '@/db/types'
+
 
 export const maxDuration = 60
 
@@ -211,12 +215,16 @@ const processCombination = async (task: Task) => {
             contents,
             and(eq(contents.entityId, combinations.integrationId), eq(contents.entityType, 'combination'))
         )
+        .leftJoin(brandsStores, eq(combinations.brandId, brandsStores.integrationId))
+        .leftJoin(categoriesStores, eq(combinations.categoryId, categoriesStores.integrationId))
+        .leftJoin(brands, eq(brandsStores.brandId, brands.id))
+        .leftJoin(categories, eq(categoriesStores.categoryId, categories.id))
         .where(eq(combinations.integrationId, task.entityId))
 
     const brandContent = await processBrand(task, combination.combinations.brandId!)
     const categoryContent = await processCategory(task, combination.combinations.categoryId!)
 
-    const combinationHeaderInformation = `<CombinationPageName>${combination.combinations.description}</CombinationPageName>`
+    const combinationHeaderInformation = `<CombinationPageName>${combination.brands?.name} - ${combination.categories?.description}</CombinationPageName>`
     const combinationMetaData = combination.contents
         ? `<CombinationPageExistingMetaData>${JSON.stringify(combination.contents.config)}</CombinationPageExistingMetaData>`
         : ''
