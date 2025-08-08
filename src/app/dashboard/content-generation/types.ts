@@ -8,7 +8,7 @@ export const MetaOutputSchema = z.object({
             category: z.string().describe('Category name'),
             openGraph: z
                 .object({
-                    type: z.string().describe('Open Graph type'),
+                    type: z.string().describe('Open Graph type. Must only be use "article" as a type.'),
                     title: z.string().describe('Open Graph title'),
                     description: z.string().describe('Open Graph description'),
                     locale: z.string().describe('Content locale'),
@@ -16,7 +16,7 @@ export const MetaOutputSchema = z.object({
                 .describe('Facebook OpenGraph metadata'),
             twitter: z
                 .object({
-                    card: z.string().describe('Twitter card type'),
+                    card: z.string().describe('Twitter card type. Must only be use "summary" as a type.'),
                     title: z.string().describe('Twitter title'),
                     description: z.string().describe('Twitter description'),
                 })
