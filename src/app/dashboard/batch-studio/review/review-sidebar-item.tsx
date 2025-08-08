@@ -47,7 +47,7 @@ export const ReviewSidebarItem = ({ item }: { item: ReviewJoin }) => {
         acceptReview.execute([
             {
                 config: item.review.config!,
-                contentId: item.review.id,
+                reviewId: item.review.id,
             },
         ])
     }
