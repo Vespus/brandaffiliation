@@ -61,7 +61,7 @@ export function useGetBatchStudioCombinationTableColumns(): ColumnDef<BatchStudi
                 },
             }) => <DataTableColumnHeader column={column} title={meta!.t('brand.label')!} />,
             cell: ({ row }) => <div className="text-xs font-medium">{row.getValue('brand')}</div>,
-            enableSorting: false,
+            enableSorting: true,
             enableColumnFilter: false,
         },
         {
@@ -69,7 +69,7 @@ export function useGetBatchStudioCombinationTableColumns(): ColumnDef<BatchStudi
             accessorKey: 'category',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Category" />,
             cell: ({ row }) => <div className="text-xs font-medium">{row.getValue('category')}</div>,
-            enableSorting: false,
+            enableSorting: true,
             enableColumnFilter: false,
         },
         {
