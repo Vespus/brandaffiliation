@@ -26,6 +26,14 @@ const data: MenuItem[] = [
                 name: 'Batch Studio',
                 url: '/dashboard/batch-studio',
             },
+            {
+                name: 'Tasks',
+                url: '/dashboard/batch-studio/tasks',
+            },
+            {
+                name: 'Reviews',
+                url: '/dashboard/batch-studio/review',
+            },
         ],
     },
     {
@@ -86,12 +94,12 @@ const Guard = ({ item }: { item: MenuItem }) => {
     }))*/
 
     return (
-        <>
+        <Suspense>
             {item.children && item.children.length > 0 ? (
                 <CollapsableMenuItem item={item} />
             ) : (
                 <SingleMenuItem item={item} />
             )}
-        </>
+        </Suspense>
     )
 }
