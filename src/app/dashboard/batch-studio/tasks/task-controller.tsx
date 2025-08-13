@@ -1,82 +1,59 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 import { BanIcon, PauseIcon, PlayIcon } from 'lucide-react'
 import { Entity } from '@/app/dashboard/batch-studio/tasks/entity'
+import { useTaskQueue } from '@/app/dashboard/batch-studio/tasks/hooks/use-task-queue'
+import { useTasksStore } from '@/app/dashboard/batch-studio/tasks/tasks.store'
 import { TaskJoin } from '@/app/dashboard/batch-studio/tasks/type'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
-const MAX_CONCURRENCY = 3
+const MAX_CONCURRENCY = 5
 
 export const TaskController = ({ tasks }: { tasks: TaskJoin[] }) => {
-    const [runningIds, setRunningIds] = useState<number[]>([])
-    const [finishedIds, setFinishedIds] = useState<number[]>([])
-    const [, setErrorIds] = useState<number[]>([])
-    const [isRunning, setIsRunning] = useState(false)
-    const [isPaused, setIsPaused] = useState(false)
     const router = useRouter()
-
-    const startProcess = () => {
-        setIsRunning(true)
-    }
-
-    const handleTaskFinished = (task: TaskJoin) => {
-        setRunningIds((prev) => prev.filter((i) => i !== task.task.id))
-        setFinishedIds((prev) => [...prev, task.task.id])
-
-        router.refresh()
-    }
-
-    const handleTaskError = (task: TaskJoin) => {
-        setErrorIds((prev) => [...prev, task.task.id])
-    }
+    const { tasks: storeTasks, setStoreTasks } = useTasksStore()
+    const { startAll, pauseAll, stopAll, isProcessingAll, isPaused, stats } = useTaskQueue()
 
     useEffect(() => {
-        if (!isRunning || isPaused) return
-
-        const remaining = tasks.filter(
-            (task) => !runningIds.includes(task.task.id) && !finishedIds.includes(task.task.id)
-        )
-
-        const canStart = MAX_CONCURRENCY - runningIds.length
-        const toStart = remaining.slice(0, canStart)
-
-        if (toStart.length > 0) {
-            setRunningIds((prev) => [...prev, ...toStart.map((t) => t.task.id)])
-        }
-    }, [runningIds, finishedIds, isPaused, tasks, isRunning])
-
+        setStoreTasks(tasks)
+    }, [tasks, setStoreTasks])
     return (
         <div className="container">
             <div className="my-3 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    {!isRunning && (
-                        <Button onClick={startProcess}>
+                    {!isProcessingAll && (
+                        <Button onClick={startAll}>
                             <PlayIcon />
-                            Start Processing
+                            Process All
                         </Button>
                     )}
-                    {isRunning && (
-                        <Button variant="outline" onClick={() => setIsPaused(!isPaused)}>
+                    {isProcessingAll && (
+                        <Button variant="outline" onClick={pauseAll}>
                             {!isPaused ? <PauseIcon /> : <PlayIcon />}
+                            {!isPaused ? 'Pause' : 'Resume'}
                         </Button>
                     )}
-                    {isRunning && (
-                        <Button variant="outline" onClick={() => setIsRunning(false)}>
+                    {isProcessingAll && (
+                        <Button variant="outline" onClick={stopAll}>
                             <BanIcon />
+                            Stop All
                         </Button>
                     )}
                 </div>
                 <div className="flex gap-4">
                     <div className="flex flex-col text-xs">
-                        <span>{tasks.length} Total task records</span>
+                        <span>{stats.total} Total task records</span>
                         <span>
-                            {finishedIds.length} processed in {runningIds.length} queue
+                            {stats.completed} completed, {stats.processing} processing, {stats.queued} queued
+                        </span>
+                        <span>
+                            {stats.running}/{MAX_CONCURRENCY} running slots used
                         </span>
                     </div>
                     <div>
@@ -100,13 +77,10 @@ export const TaskController = ({ tasks }: { tasks: TaskJoin[] }) => {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {tasks.map((task) => (
+                    {Object.values(storeTasks).map((taskState) => (
                         <Entity
-                            key={task.task.entityType + task.task.entityId + task.task.id}
-                            task={task as TaskJoin}
-                            shouldStart={isRunning && runningIds.includes(task.task.id)}
-                            onJobComplete={handleTaskFinished}
-                            onJobError={handleTaskError}
+                            key={taskState.task.task.entityType + taskState.task.task.entityId + taskState.task.task.id}
+                            taskState={taskState}
                         />
                     ))}
                 </TableBody>

@@ -18,9 +18,9 @@ function createDatabase() {
     if (!global.__client) {
         global.__client = postgres(env.DATABASE_URL, {
             // Optional: Configure connection pool settings
-            max: 10, // Maximum number of connections
+            max: 60, // Maximum number of connections
             idle_timeout: 20, // Close idle connections after 20 seconds
-            connect_timeout: 10, // Connection timeout in seconds
+            connect_timeout: 10, // Connection timeout in seconds,
         })
     }
 

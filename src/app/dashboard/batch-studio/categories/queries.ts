@@ -57,11 +57,10 @@ export const getCategories = async (input: Awaited<ReturnType<typeof searchParam
             .leftJoin(categories, eq(categories.id, categoriesStores.categoryId))
             .leftJoin(
                 contents,
-                and(eq(contents.entityId, categoriesStores.integrationId), eq(contents.entityType, 'category'))
+                and(eq(contents.entityId, categoriesStores.integrationId), eq(contents.entityType, 'category'), eq(contents.storeId, storeId))
             )
             .where(where)
             .orderBy(...orderBy)
-            .groupBy(categories.id, contents.config, categories.name, categories.description, categoriesStores.slug, categoriesStores.integrationId)
             .offset(offset)
             .limit(input.perPage)
 

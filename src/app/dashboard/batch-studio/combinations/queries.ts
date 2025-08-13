@@ -48,7 +48,7 @@ export const getCombinations = async (input: Awaited<ReturnType<typeof searchPar
             : undefined,
         eq(combinations.storeId, storeId),
         sql`NOT EXISTS (SELECT 1 FROM ${tasks} WHERE ${tasks.entityId} = ${combinations.integrationId} AND ${tasks.entityType} = 'combination')`,
-        sql`NOT EXISTS (SELECT 1 FROM ${reviews} WHERE ${reviews.entityId} = ${combinations.integrationId} AND ${reviews.entityType} = 'combination')`
+        sql`NOT EXISTS (SELECT 1 FROM ${reviews} WHERE ${reviews.entityId} = ${combinations.integrationId} AND ${reviews.entityType} = 'combination' AND ${reviews.approved} = false)`
     )
 
     const orderBy =
@@ -75,7 +75,7 @@ export const getCombinations = async (input: Awaited<ReturnType<typeof searchPar
 
     const [data, total] = await Promise.all([
         db
-            .select({
+            .selectDistinct({
                 name: combinations.name,
                 id: combinations.id,
                 description: combinations.description,
@@ -98,19 +98,11 @@ export const getCombinations = async (input: Awaited<ReturnType<typeof searchPar
             .leftJoin(categories, eq(categoriesStores.categoryId, categories.id))
             .where(where)
             .orderBy(...orderBy)
-            .groupBy(
-                combinations.id,
-                contents.config,
-                brands.name,
-                categories.description,
-                brandsStores.slug,
-                categoriesStores.slug,
-                combinations.name
-            )
             .offset(offset)
             .limit(input.perPage),
+
         db
-            .select({ count: count(combinations.id) })
+            .select({ count: count() })
             .from(combinations)
             .leftJoin(
                 contents,

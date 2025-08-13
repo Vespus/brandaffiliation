@@ -120,13 +120,14 @@ const processQSPay = async ({ review, config }: { review: Review; config?: Parti
             const { result: remoteCategory } = await QSPayClient<QSPayCategory>('CmsCategory/Get', {
                 query: {
                     categoryId: category.integrationId!,
+                    storeId: category.storeId!,
                 },
             })
 
             await QSPayClient<QSPayCategory>('CmsCategory/EditDescription', {
                 method: 'POST',
                 body: JSON.stringify({
-                    brandName: category.integrationName,
+                    categoryName: category.integrationName,
                     config: toMerged(remoteCategory.config, config || (review.config as MetaOutput) || {}),
                 }),
             })

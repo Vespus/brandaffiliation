@@ -63,7 +63,7 @@ export const sync = actionClient.action(async () => {
     const [{ result: remoteBrands }, { result: categories }, { result: combinations }] = await Promise.all([
         QSPayClient<QSPayBrand[]>('CmsBrand/GetAll', { query: { storeId: storeId } }),
         QSPayClient<QSPayCategory[]>('CmsCategory/GetAll', { query: { storeId: storeId } }),
-        QSPayClient<QSPayCombin[]>('CmsCombinPage/GetAllWithConfig', { query: { storeId: storeId } }),
+        QSPayClient<QSPayCombin[]>('CmsCombinPage/GetAll', { query: { storeId: storeId } }),
     ])
 
     await processBrands(remoteBrands, storeId)
@@ -130,16 +130,15 @@ const processBrands = async (brands: QSPayBrand[], storeId: string) => {
     await db.delete(brandsStores).where(eq(brandsStores.storeId, storeId))
     await db.delete(contents).where(and(eq(contents.entityType, 'brand'), eq(contents.storeId, storeId)))
 
-    const contentTargets = remoteBrandContents.filter(x => !isEmpty(x.config))
-    if(contentTargets.length > 0) {
+    const contentTargets = remoteBrandContents.filter((x) => !isEmpty(x.config))
+    if (contentTargets.length > 0) {
         await db.insert(contents).values(
-            contentTargets
-                .map((brandContent) => ({
-                    entityType: 'brand',
-                    entityId: brandContent.id,
-                    config: brandContent.config,
-                    storeId: brandContent.storeId,
-                }))
+            contentTargets.map((brandContent) => ({
+                entityType: 'brand',
+                entityId: brandContent.id,
+                config: brandContent.config,
+                storeId: brandContent.storeId,
+            }))
         )
     }
 
@@ -220,13 +219,33 @@ const processCategories = async (categories: QSPayCategory[], storeId: string) =
 }
 
 const processCombinations = async (combinations: QSPayCombin[], storeId: string) => {
-    const filteredCombinations = combinations.filter((combination) => combination.category && !combination.catalog)
+    const remoteCombinations = await Promise.all(
+        combinations.filter(x => x.category && x.brand && !x.catalog).map(async (combination) => {
+            return QSPayClient<QSPayCombin>('CmsCombinPage/Get', {
+                query: {
+                    combinatioId: combination.id,
+                    storeId,
+                },
+            }).then((x) => x.result)
+        })
+    )
 
     await db.delete(localCombinationsTable).where(eq(localCombinationsTable.storeId, storeId))
     await db.delete(contents).where(and(eq(contents.entityType, 'combination'), eq(contents.storeId, storeId)))
 
+    await db.insert(contents).values(
+        remoteCombinations
+            .filter((c) => !isEmpty(c.config))
+            .map((categoryContent) => ({
+                entityType: 'combination',
+                entityId: categoryContent.id,
+                config: categoryContent.config,
+                storeId: categoryContent.storeId,
+            }))
+    )
+
     await db.insert(localCombinationsTable).values(
-        filteredCombinations.map((combination) => ({
+        remoteCombinations.map((combination) => ({
             name: combination.name,
             description: combination.description,
             integrationId: combination.id,
@@ -234,16 +253,5 @@ const processCombinations = async (combinations: QSPayCombin[], storeId: string)
             categoryId: combination.category.id,
             storeId: combination.storeId,
         }))
-    )
-
-    await db.insert(contents).values(
-        filteredCombinations
-            .filter((c) => !isEmpty(c.config))
-            .map((combination) => ({
-                entityType: 'combination',
-                entityId: combination.id,
-                config: combination.config,
-                storeId: combination.storeId,
-            }))
     )
 }

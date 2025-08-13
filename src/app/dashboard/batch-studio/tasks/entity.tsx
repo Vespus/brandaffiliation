@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
-
-import { PlayIcon, Trash2Icon } from 'lucide-react'
+import { PauseIcon, PlayIcon, Trash2Icon } from 'lucide-react'
 import { RemoveTaskAction } from '@/app/dashboard/batch-studio/tasks/action'
-import { TaskJoin } from '@/app/dashboard/batch-studio/tasks/type'
+import { useTaskQueue } from '@/app/dashboard/batch-studio/tasks/hooks/use-task-queue'
+import { TaskState } from '@/app/dashboard/batch-studio/tasks/tasks.store'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { TableCell, TableRow } from '@/components/ui/table'
@@ -10,93 +9,25 @@ import { useCustomAction } from '@/hooks/use-custom-action'
 import { cn } from '@/lib/utils'
 
 type EntityProps = {
-    task: TaskJoin
-    shouldStart: boolean
-    onJobComplete?: (task: TaskJoin) => void
-    onJobStart?: (task: TaskJoin) => void
-    onJobError?: (task: TaskJoin) => void
+    taskState: TaskState
 }
 
-export const Entity = ({ task, shouldStart, onJobStart, onJobComplete, onJobError }: EntityProps) => {
-    const interval = useRef<ReturnType<typeof setInterval> | number>(0)
-    const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-    const [progress, setProgress] = useState(0)
-    const [hasStarted, setHasStarted] = useState(false)
-
-    const simulateProgress = () => {
-        let current = 0
-        const startTime = Date.now()
-        const targetDuration = 20000 + Math.random() * 10000 // 20-30 seconds
-
-        interval.current = setInterval(
-            () => {
-                const elapsed = Date.now() - startTime
-                const timeProgress = elapsed / targetDuration
-
-                // Calculate how much we should have progressed by now
-                const expectedProgress = Math.min(timeProgress * 90, 90)
-
-                // Add some randomness but keep it realistic
-                const randomFactor = 0.5 + Math.random() // 0.5 to 1.5 multiplier
-                const baseIncrement = (expectedProgress - current) * 0.3 * randomFactor
-
-                // Ensure we always make some progress, but vary the amount
-                const increment = Math.max(0.5, Math.min(baseIncrement, 8))
-
-                current += increment
-
-                // Sometimes have small pauses or slower periods
-                const shouldPause = Math.random() < 0.15 // 15% chance
-                if (!shouldPause) {
-                    setProgress((prev) => Math.min(prev + increment, 90))
-                }
-
-                // Clear when we reach 90% or time is up
-                if (current >= 90 || elapsed >= targetDuration) {
-                    setProgress(90)
-                    clearInterval(interval.current)
-                }
-            },
-            300 + Math.random() * 700
-        ) // Random interval between 300ms-1000ms
-    }
-
-    const processTask = async () => {
-        setHasStarted(true)
-        onJobStart?.(task)
-        setStatus('loading')
-        simulateProgress()
-
-        try {
-            const response = await fetch('/api/content-stream', {
-                method: 'POST',
-                body: JSON.stringify({ taskId: task.task.id }),
-            })
-
-            if (!response.ok) {
-                setStatus('error')
-                onJobError?.(task)
-            } else {
-                setStatus('success')
-                onJobComplete?.(task)
-            }
-        } catch (e) {
-            void e
-            setStatus('error')
-            onJobError?.(task)
-        }
-
-        clearInterval(interval.current)
-        setProgress(100)
-    }
-
+export const Entity = ({ taskState }: EntityProps) => {
+    const { task, status, progress, retryCount, errorMessage } = taskState
+    const { startSingleTask, pauseSingleTask } = useTaskQueue()
     const removeTask = useCustomAction(RemoveTaskAction)
 
-    useEffect(() => {
-        if (shouldStart && !hasStarted) {
-            processTask()
-        }
-    }, [shouldStart])
+    const handleStartTask = () => {
+        startSingleTask(task.task.id.toString())
+    }
+
+    const handlePauseTask = () => {
+        pauseSingleTask(task.task.id.toString())
+    }
+
+    const handleRemoveTask = () => {
+        removeTask.execute({ taskId: task.task.id })
+    }
 
     return (
         <TableRow>
@@ -108,38 +39,56 @@ export const Entity = ({ task, shouldStart, onJobStart, onJobComplete, onJobErro
             <TableCell>{task.brand?.name || 'N/A'}</TableCell>
             <TableCell>
                 <div className="flex flex-col space-y-2">
-                    <span
-                        className={cn(
-                            'text-xs capitalize',
-                            status === 'success' && 'text-green-600',
-                            status === 'error' && 'text-red-600',
-                            status === 'loading' && 'text-yellow-600',
-                            status === 'idle' && 'text-muted-foreground'
-                        )}
-                    >
-                        {status}{' '}
-                        {status === 'success' && <span className="text-muted-foreground">/ Waiting Review</span>}
-                    </span>
+                    <div className="flex items-center gap-2">
+                        <span
+                            className={cn(
+                                'text-xs capitalize',
+                                status === 'completed' && 'text-green-600',
+                                status === 'error' && 'text-red-600',
+                                status === 'processing' && 'text-yellow-600',
+                                status === 'queued' && 'text-blue-600',
+                                status === 'paused' && 'text-orange-600',
+                                status === 'idle' && 'text-muted-foreground'
+                            )}
+                        >
+                            {status}{' '}
+                            {status === 'completed' && (
+                                <span className="text-muted-foreground">/ Ready for Review</span>
+                            )}
+                        </span>
+                        {retryCount > 0 && <span className="text-xs text-orange-500">(Retry {retryCount}/3)</span>}
+                    </div>
                     <Progress value={progress} />
+                    {errorMessage && (
+                        <span className="truncate text-xs text-red-500" title={errorMessage}>
+                            {errorMessage}
+                        </span>
+                    )}
                 </div>
             </TableCell>
             <TableCell>
                 <div className="flex justify-end gap-1">
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        className="p-"
-                        loading={status === 'loading'}
-                        onClick={processTask}
-                    >
-                        <PlayIcon className="size-4 text-emerald-500" />
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        loading={status === 'loading'}
-                        onClick={() => removeTask.execute({ taskId: task.task.id })}
-                    >
+                    {['idle', 'error', 'paused'].includes(status) && (
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={handleStartTask}
+                            disabled={status === 'processing'}
+                        >
+                            <PlayIcon className="size-4 text-emerald-500" />
+                        </Button>
+                    )}
+                    {['queued', 'processing'].includes(status) && (
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={handlePauseTask}
+                            disabled={status === 'processing'}
+                        >
+                            <PauseIcon className="size-4 text-orange-500" />
+                        </Button>
+                    )}
+                    <Button variant="outline" size="icon" onClick={handleRemoveTask} disabled={status === 'processing'}>
                         <Trash2Icon className="size-4" />
                     </Button>
                 </div>
