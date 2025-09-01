@@ -4,7 +4,7 @@ import { use, useEffect } from 'react'
 
 import { useTranslations } from 'next-intl'
 
-import { SquareDashedMousePointerIcon, SquareMousePointerIcon, XIcon } from 'lucide-react'
+import { SquareDashedMousePointerIcon, SquareMousePointerIcon } from 'lucide-react'
 import { useGetBatchStudioCategoryTableColumns } from '@/app/dashboard/batch-studio/categories/batch-studio-category-table-columns'
 import { BatchStudioCategoryType } from '@/app/dashboard/batch-studio/categories/batch-studio-category-type'
 import { useDataTableSelectionStore } from '@/app/dashboard/batch-studio/store'
@@ -71,12 +71,10 @@ export const BatchStudioCategoryTable = ({ promise }: CategoriesTableProps) => {
             .filter((x) => x.integrationId)
             .reduce((acc, b) => ((acc[b.integrationId!] = true), acc), {} as Record<string, boolean>)
         table.setRowSelection(allRows)
-        setSelected(allRows)
     }
 
     const clearSelectionHandler = async () => {
-        setSelected({})
-        table.resetRowSelection()
+        table.resetRowSelection(true)
     }
 
     return (
@@ -96,17 +94,16 @@ export const BatchStudioCategoryTable = ({ promise }: CategoriesTableProps) => {
                 </Button>
                 <Button size="sm" variant="link" onClick={selectAllWithoutTextContentHandler}>
                     <SquareDashedMousePointerIcon />
-                    Select w/o Texts
+                    Select w/o SEO Texts
                 </Button>
-                {Object.keys(selected).length > 0 && (
-                    <>
-                        <Button size="sm" variant="link" onClick={clearSelectionHandler}>
-                            <XIcon />
-                            Clear Selected
-                        </Button>
-                    </>
-                )}
             </div>
+            {Object.keys(table.getState().rowSelection).length > 0 && (
+                <div>
+                    <span className="text-xs font-bold underline" role="button" onClick={clearSelectionHandler}>
+                        Unselect All
+                    </span>
+                </div>
+            )}
         </DataTable>
     )
 }

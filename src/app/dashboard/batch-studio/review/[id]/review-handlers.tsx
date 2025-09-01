@@ -6,7 +6,9 @@ import { useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-import { EyeIcon, XIcon } from 'lucide-react'
+import { BotIcon, EyeIcon, ReceiptTextIcon, SparklesIcon, XIcon } from 'lucide-react'
+import Markdown from 'react-markdown'
+import xmlFormatter from 'xml-formatter'
 import { removeReviewTask } from '@/app/dashboard/batch-studio/review/actions'
 import { ReviewJoin } from '@/app/dashboard/batch-studio/tasks/type'
 import {
@@ -21,6 +23,16 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Button, buttonVariants } from '@/components/ui/button'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import { Scroller } from '@/components/ui/scroller'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useQSPayContext } from '@/hooks/contexts/use-qspay-context'
 import { useCustomAction } from '@/hooks/use-custom-action'
 
@@ -53,6 +65,45 @@ export const ReviewHandlers = ({ item }: { item: ReviewJoin }) => {
                 </Link>
             )}
 
+            <Dialog>
+                <DialogTrigger asChild>
+                    <Button variant="outline">
+                        <ReceiptTextIcon />
+                        See Prompt
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-7xl">
+                    <DialogHeader>
+                        <DialogTitle>Prompts</DialogTitle>
+                        <DialogDescription>See system and generated prompts</DialogDescription>
+                    </DialogHeader>
+                    <Tabs defaultValue="system" className="space-y-6">
+                        <TabsList className="grid w-fit grid-cols-2">
+                            <TabsTrigger value="system" className="flex items-center space-x-2">
+                                <BotIcon className="h-4 w-4" />
+                                <span>System Prompt</span>
+                            </TabsTrigger>
+                            <TabsTrigger value="user" className="flex items-center space-x-2">
+                                <SparklesIcon className="h-4 w-4" />
+                                <span>User Prompt</span>
+                            </TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="system">
+                            <Scroller className="prose prose-sm h-96 max-w-none">
+                                <Markdown>{item.review.userPrompt?.system}</Markdown>
+                            </Scroller>
+                        </TabsContent>
+                        <TabsContent value="user">
+                            <Scroller className="h-96 text-sm">
+                                <pre className="bg-background whitespace-pre-wrap">
+                                    <code>{prettyPrintUserPrompt(item.review.userPrompt?.prompt)}</code>
+                                </pre>
+                            </Scroller>
+                        </TabsContent>
+                    </Tabs>
+                </DialogContent>
+            </Dialog>
+
             <AlertDialog>
                 <AlertDialogTrigger asChild>
                     <Button
@@ -84,4 +135,19 @@ export const ReviewHandlers = ({ item }: { item: ReviewJoin }) => {
             <div id="review-form-portal-additional-handlers"></div>
         </div>
     )
+}
+
+const prettyPrintUserPrompt = (userPrompt?: string) => {
+    if (!userPrompt) return ''
+    // xml-formatter is forgiving. If input is not well-formed, we fall back safely.
+    try {
+        return xmlFormatter(userPrompt, {
+            indentation: '\t',
+            collapseContent: false,
+            lineSeparator: '\r\n',
+        })
+    } catch {
+        // Fallback: return as-is so you still see something
+        return userPrompt
+    }
 }

@@ -1,15 +1,13 @@
-import { revalidatePath } from 'next/cache';
-import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache'
+import { NextRequest, NextResponse } from 'next/server'
 
-
-
-import { generateObject } from 'ai';
-import { and, eq, inArray, sql } from 'drizzle-orm';
-import z from 'zod';
-import { BatchContentGenerateSchemaType } from '@/app/dashboard/batch-studio/schema';
-import { MetaOutputSchema } from '@/app/dashboard/content-generation/types';
-import { getDriver } from '@/app/dashboard/content-generation/utils';
-import { db } from '@/db';
+import { generateObject } from 'ai'
+import { and, eq, inArray, sql } from 'drizzle-orm'
+import z from 'zod'
+import { BatchContentGenerateSchemaType } from '@/app/dashboard/batch-studio/schema'
+import { MetaOutputSchema } from '@/app/dashboard/content-generation/types'
+import { getDriver } from '@/app/dashboard/content-generation/utils'
+import { db } from '@/db'
 import { getAIModelsWithProviderAndSettings } from '@/db/presets'
 import {
     brandWithScales,
@@ -26,7 +24,7 @@ import {
     tasks,
 } from '@/db/schema'
 import { Task } from '@/db/types'
-
+import { getStore } from '@/utils/get-store'
 
 export const maxDuration = 60
 
@@ -36,6 +34,7 @@ const bodySchema = z.object({
 
 export const POST = async (req: NextRequest) => {
     const { data: context } = bodySchema.safeParse(await req.json())
+    const store = await getStore()
 
     if (!context) {
         throw new Error('Invalid request')
@@ -52,6 +51,7 @@ export const POST = async (req: NextRequest) => {
     ])
 
     const userPrompt: string[] = []
+    userPrompt.push(`<Store><StoreName>${store?.name}</StoreName></Store>`)
 
     if (specifications.userPromptPrefix) {
         userPrompt.push(specifications.userPromptPrefix)
@@ -72,6 +72,7 @@ export const POST = async (req: NextRequest) => {
     userPrompt.push(await handleDataSources({ dataSources: specifications.dataSources }))
 
     await db.update(tasks).set({ status: 'inProgress' }).where(eq(tasks.id, task.id))
+
     try {
         const driver = getDriver(model)
         const finalUserPrompt = userPrompt.filter(Boolean).join('\n')
@@ -97,7 +98,7 @@ export const POST = async (req: NextRequest) => {
             userPrompt: {
                 prompt: finalUserPrompt,
                 system: prompt!.prompt,
-            }
+            },
         })
     } catch (e) {
         await db.update(tasks).set({ status: 'failed' }).where(eq(tasks.id, task.id))
@@ -159,7 +160,14 @@ const processBrand = async (task: Task, id?: string) => {
         })
         .from(brandWithScales)
         .leftJoin(brandsStores, eq(brandsStores.brandId, brandWithScales.id))
-        .leftJoin(contents, and(eq(contents.entityId, brandsStores.integrationId), eq(contents.entityType, 'brand')))
+        .leftJoin(
+            contents,
+            and(
+                eq(contents.entityId, brandsStores.integrationId),
+                eq(contents.entityType, 'brand'),
+                eq(contents.storeId, task.storeId)
+            )
+        )
         .where(eq(brandsStores.integrationId, id || task.entityId))
 
     const scales = scaleMap.filter((s) => brand.brand[s]).map((s) => `${s}:${brand.brand[s]}/5`)
@@ -191,7 +199,11 @@ const processCategory = async (task: Task, id?: string) => {
         .innerJoin(categories, eq(categories.id, categoriesStores.categoryId))
         .leftJoin(
             contents,
-            and(eq(contents.entityId, categoriesStores.integrationId), eq(contents.entityType, 'category'))
+            and(
+                eq(contents.entityId, categoriesStores.integrationId),
+                eq(contents.entityType, 'category'),
+                eq(contents.storeId, task.storeId)
+            )
         )
         .where(eq(categoriesStores.integrationId, id || task.entityId))
 
@@ -213,7 +225,11 @@ const processCombination = async (task: Task) => {
         .from(combinations)
         .leftJoin(
             contents,
-            and(eq(contents.entityId, combinations.integrationId), eq(contents.entityType, 'combination'))
+            and(
+                eq(contents.entityId, combinations.integrationId),
+                eq(contents.entityType, 'combination'),
+                eq(contents.storeId, task.storeId)
+            )
         )
         .leftJoin(brandsStores, eq(combinations.brandId, brandsStores.integrationId))
         .leftJoin(categoriesStores, eq(combinations.categoryId, categoriesStores.integrationId))

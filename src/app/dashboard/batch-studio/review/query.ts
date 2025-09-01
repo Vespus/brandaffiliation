@@ -92,7 +92,7 @@ export const getReviewTask = cache(async (id: string) => {
         )
         .leftJoin(brands, eq(brands.id, brandsStores.brandId))
         .leftJoin(categories, eq(categories.id, categoriesStores.categoryId))
-        .leftJoin(contents, and(eq(contents.entityId, reviews.entityId), eq(reviews.entityType, reviews.entityType)))
+        .leftJoin(contents, and(eq(contents.entityId, reviews.entityId), eq(contents.entityType, reviews.entityType), eq(contents.storeId, storeId)))
         .where(and(eq(reviews.approved, false), eq(reviews.storeId, storeId), eq(reviews.id, Number(id))))
 
     return reviewContent as ReviewJoinWithContent

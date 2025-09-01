@@ -1,5 +1,5 @@
 import { and, count, eq, or, sql } from 'drizzle-orm'
-import { CheckIcon, LayersIcon, XIcon, ZapIcon } from 'lucide-react'
+import { CheckIcon, LayersIcon, XIcon } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { db } from '@/db'

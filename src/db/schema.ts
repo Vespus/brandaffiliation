@@ -266,7 +266,7 @@ export const tasks = pgTable('tasks', {
     entityId: text('entity_id').notNull(),
     status: text('status'),
     specification: jsonb().$type<BatchContentGenerateSchemaType>(),
-    storeId: text('store_id'),
+    storeId: text('store_id').notNull(),
     createdAt: timestamp('created_at'),
 })
 

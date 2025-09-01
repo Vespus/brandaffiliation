@@ -3,7 +3,6 @@
 import { useEffect } from 'react'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
 import { BanIcon, PauseIcon, PlayIcon } from 'lucide-react'
 import { Entity } from '@/app/dashboard/batch-studio/tasks/entity'
@@ -16,7 +15,6 @@ import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components
 const MAX_CONCURRENCY = 5
 
 export const TaskController = ({ tasks }: { tasks: TaskJoin[] }) => {
-    const router = useRouter()
     const { tasks: storeTasks, setStoreTasks } = useTasksStore()
     const { startAll, pauseAll, stopAll, isProcessingAll, isPaused, stats } = useTaskQueue()
 

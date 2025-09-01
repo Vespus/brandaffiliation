@@ -35,6 +35,14 @@ export const getCategories = async (input: Awaited<ReturnType<typeof searchParam
         searchConditions.length > 0 ? and(...searchConditions) : undefined,
         input.content === 'yes' ? isNotNull(contents.config) : undefined,
         input.content === 'no' ? isNull(contents.config) : undefined,
+        input.content === 'missing'
+            ? or(
+                sql`${contents.config}->'descriptions'->>'header' IS NULL`,
+                sql`${contents.config}->'descriptions'->>'header' = ''`,
+                sql`${contents.config}->'descriptions'->>'footer' IS NULL`,
+                sql`${contents.config}->'descriptions'->>'footer' = ''`
+            )
+            : undefined,
         eq(categoriesStores.storeId, storeId)
     )
 
@@ -69,6 +77,11 @@ export const getCategories = async (input: Awaited<ReturnType<typeof searchParam
                 count: count(),
             })
             .from(categoriesStores)
+            .leftJoin(categories, eq(categories.id, categoriesStores.categoryId))
+            .leftJoin(
+                contents,
+                and(eq(contents.entityId, categoriesStores.integrationId), eq(contents.entityType, 'category'), eq(contents.storeId, storeId))
+            )
             .where(where)
             .execute()
             .then((res) => res[0]?.count ?? 0)
