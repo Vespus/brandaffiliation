@@ -16,20 +16,25 @@ import { PromptSelector } from '@/app/dashboard/content-generation/form-elements
 import { TipTapEditor } from '@/components/tiptap/editor'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { ComboboxBase } from '@/components/ui/combobox-base'
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Legend } from '@/components/ui/legend'
 import { Scroller } from '@/components/ui/scroller'
+import { useQSPayContext } from '@/hooks/contexts/use-qspay-context'
 import { useCustomAction } from '@/hooks/use-custom-action'
+import { cn } from '@/lib/utils'
 
-export const ManageForm = () => {
+export const CommonForm = ({entityType}: {entityType: string}) => {
     const router = useRouter()
+    const { storeList, currentStore } = useQSPayContext()
+
     const form = useForm<z.infer<typeof BatchContentGenerateSchema>>({
         resolver: zodResolver(BatchContentGenerateSchema),
         defaultValues: {
             prompt: undefined,
             aiModel: undefined,
-            useBrandContent: true,
-            useCategoryContent: true,
+            useContent: true,
+            useContentFrom: currentStore?.storeId || '',
             userPromptPrefix: '',
             dataSources: [],
         },
@@ -60,7 +65,7 @@ export const ManageForm = () => {
             .filter(([, value]) => Boolean(value))
             .map(([key]) => {
                 return {
-                    entityType: 'combination',
+                    entityType: entityType,
                     entityId: key,
                     status: 'pending',
                     specification: values,
@@ -70,12 +75,10 @@ export const ManageForm = () => {
         saveTaskAction.execute(input)
     }
 
+    const useContent = form.watch('useContent')
+
     return (
-        <div className="3xl:max-w-xl flex min-h-0 w-full flex-none flex-col gap-0 py-4 pr-4 md:max-w-md">
-            <div className="flex-none">
-                <h1 className="text-lg font-semibold">Combinations Batch Studio</h1>
-                <p className="text-muted-foreground text-sm">Choose AI model and customize your prompt</p>
-            </div>
+        <div className="flex min-h-0 w-full flex-1 flex-col gap-0 py-4 pr-4 md:max-w-md">
             <div className="min-h-0 flex-1">
                 <Scroller className="h-full">
                     <Form {...form}>
@@ -121,7 +124,7 @@ export const ManageForm = () => {
                                 />
                                 <FormField
                                     control={form.control}
-                                    name="useBrandContent"
+                                    name="useContent"
                                     render={({ field }) => (
                                         <FormItem>
                                             <div className="flex flex-row items-center gap-2">
@@ -131,11 +134,11 @@ export const ManageForm = () => {
                                                         onCheckedChange={(checked) => field.onChange(checked)}
                                                     />
                                                 </FormControl>
-                                                <FormLabel>Use existing brand content</FormLabel>
+                                                <FormLabel>Use existing SEO content</FormLabel>
                                             </div>
                                             <FormDescription className="text-xs">
-                                                Brandaffiliation will append brand&#39;s information for extra content
-                                                enrichment
+                                                If relevant QSPay content exists appends the existing content to the
+                                                generated prompt to enrich the content
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>
@@ -143,21 +146,24 @@ export const ManageForm = () => {
                                 />
                                 <FormField
                                     control={form.control}
-                                    name="useCategoryContent"
+                                    name="useContentFrom"
                                     render={({ field }) => (
-                                        <FormItem>
-                                            <div className="flex flex-row items-center gap-2">
-                                                <FormControl>
-                                                    <Checkbox
-                                                        checked={field.value}
-                                                        onCheckedChange={(checked) => field.onChange(checked)}
-                                                    />
-                                                </FormControl>
-                                                <FormLabel>Use existing category content</FormLabel>
-                                            </div>
+                                        <FormItem className={cn('relative ps-8', !useContent && 'opacity-40')}>
+                                            <div className="bg-muted-foreground/50 absolute top-0 bottom-0 left-0 w-px"></div>
+                                            <FormLabel>Select content source</FormLabel>
+                                            <FormControl>
+                                                <ComboboxBase
+                                                    data={storeList}
+                                                    valueKey={'storeId'}
+                                                    labelKey={'name'}
+                                                    value={field.value}
+                                                    disabled={!useContent}
+                                                    onValueChange={field.onChange}
+                                                />
+                                            </FormControl>
                                             <FormDescription className="text-xs">
-                                                BrandAffiliation will append category information for extra content
-                                                enrichment
+                                                Existing content from selected store will be used as a content
+                                                enrichment source
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>

@@ -194,8 +194,9 @@ export const ComboboxBase = <T,>({
     placeholder = 'Select Item...',
     maskedValue,
     className,
+    disabled,
     ...props
-}: Omit<VirtualizedCommandProps<T>, 'setOpen'> & { maskedValue?: any }) => {
+}: Omit<VirtualizedCommandProps<T>, 'setOpen'> & { disabled?: boolean, maskedValue?: any }) => {
     const [open, setOpen] = React.useState(false)
     const selectedValue = (data.find((d) => d[valueKey] === value)?.[labelKey] as string) || placeholder
 
@@ -205,6 +206,7 @@ export const ComboboxBase = <T,>({
                 <Button
                     variant="outline"
                     role="combobox"
+                    disabled={disabled}
                     aria-expanded={open}
                     className={cn('w-full justify-between', className)}
                 >

@@ -156,35 +156,48 @@ const processBrand = async (task: Task, id?: string) => {
     const [brand] = await db
         .select({
             brand: brandWithScales,
-            config: contents.config,
         })
         .from(brandWithScales)
         .leftJoin(brandsStores, eq(brandsStores.brandId, brandWithScales.id))
-        .leftJoin(
-            contents,
-            and(
-                eq(contents.entityId, brandsStores.integrationId),
-                eq(contents.entityType, 'brand'),
-                eq(contents.storeId, task.storeId)
-            )
-        )
         .where(eq(brandsStores.integrationId, id || task.entityId))
 
-    const scales = scaleMap.filter((s) => brand.brand[s]).map((s) => `${s}:${brand.brand[s]}/5`)
-
     const brandHeaderInformation = `<BrandName>${brand.brand.name}</BrandName>`
-    const brandMetaData = brand.config
-        ? `<BrandExistingMetaData>${JSON.stringify(brand.config)}</BrandExistingMetaData>`
-        : ''
-    const brandScaleInformation =
-        scales.length > 0 ? `<BrandScales>${scales.map((s) => `<Scale>${s}</Scale>`).join('')}</BrandScales>` : ''
-    const brandCharacteristics =
-        (brand.brand.characteristic?.length || 0) > 0
-            ? `<BrandCharacteristics>${brand.brand.characteristic?.map((c) => `<Characteristic>${c.value}</Characteristic>`).join('\n')}</BrandCharacteristics>`
-            : ''
-
     const output = [brandHeaderInformation]
-    if (brand.config && task.specification?.useBrandContent) {
+
+    if (task.specification?.useContent) {
+        //task.specification?.useContentFrom --> store id
+        const targetStoreId = task.specification.useContentFrom!
+        const [targetContent] = await db
+            .select({
+                config: contents.config,
+            })
+            .from(brandsStores)
+            .leftJoin(
+                contents,
+                and(
+                    eq(contents.entityId, brandsStores.integrationId),
+                    eq(contents.entityType, 'brand'),
+                )
+            )
+            .where(
+                and(
+                    eq(brandsStores.slug, brand.brand.slug!),
+                    eq(brandsStores.storeId, targetStoreId),
+                )
+            )
+
+        const scales = scaleMap.filter((s) => brand.brand[s]).map((s) => `${s}:${brand.brand[s]}/5`)
+
+        const brandMetaData = targetContent && targetContent.config
+            ? `<BrandExistingMetaData>${JSON.stringify(targetContent.config)}</BrandExistingMetaData>`
+            : ''
+        const brandScaleInformation =
+            scales.length > 0 ? `<BrandScales>${scales.map((s) => `<Scale>${s}</Scale>`).join('')}</BrandScales>` : ''
+        const brandCharacteristics =
+            (brand.brand.characteristic?.length || 0) > 0
+                ? `<BrandCharacteristics>${brand.brand.characteristic?.map((c) => `<Characteristic>${c.value}</Characteristic>`).join('\n')}</BrandCharacteristics>`
+                : ''
+
         output.push(brandMetaData)
         output.push(brandScaleInformation)
         output.push(brandCharacteristics)
@@ -197,23 +210,37 @@ const processCategory = async (task: Task, id?: string) => {
         .select()
         .from(categoriesStores)
         .innerJoin(categories, eq(categories.id, categoriesStores.categoryId))
-        .leftJoin(
-            contents,
-            and(
-                eq(contents.entityId, categoriesStores.integrationId),
-                eq(contents.entityType, 'category'),
-                eq(contents.storeId, task.storeId)
-            )
-        )
         .where(eq(categoriesStores.integrationId, id || task.entityId))
 
     const categoryHeaderInformation = `<CategoryName>${category.categories.description}</CategoryName>`
-    const categoryMetaData = category.contents
-        ? `<CategoryExistingMetaData>${JSON.stringify(category.contents.config)}</CategoryExistingMetaData>`
-        : ''
 
     const output = [categoryHeaderInformation]
-    if (category.contents?.config && task.specification?.useCategoryContent) {
+    if (task.specification?.useContent) {
+        const targetStoreId = task.specification.useContentFrom!
+        const [targetContent] = await db
+            .select({
+                config: contents.config,
+            })
+            .from(categoriesStores)
+            .leftJoin(
+                contents,
+                and(
+                    eq(contents.entityId, categoriesStores.integrationId),
+                    eq(contents.entityType, 'category'),
+                )
+            )
+            .where(
+                and(
+                    eq(categoriesStores.slug, category.categories.slug!),
+                    eq(categoriesStores.storeId, targetStoreId),
+                    eq(contents.storeId, targetStoreId)
+                )
+            )
+
+        const categoryMetaData = targetContent
+            ? `<CategoryExistingMetaData>${JSON.stringify(targetContent.config)}</CategoryExistingMetaData>`
+            : ''
+
         output.push(categoryMetaData)
     }
 
@@ -223,14 +250,6 @@ const processCombination = async (task: Task) => {
     const [combination] = await db
         .select()
         .from(combinations)
-        .leftJoin(
-            contents,
-            and(
-                eq(contents.entityId, combinations.integrationId),
-                eq(contents.entityType, 'combination'),
-                eq(contents.storeId, task.storeId)
-            )
-        )
         .leftJoin(brandsStores, eq(combinations.brandId, brandsStores.integrationId))
         .leftJoin(categoriesStores, eq(combinations.categoryId, categoriesStores.integrationId))
         .leftJoin(brands, eq(brandsStores.brandId, brands.id))
@@ -239,14 +258,31 @@ const processCombination = async (task: Task) => {
 
     const brandContent = await processBrand(task, combination.combinations.brandId!)
     const categoryContent = await processCategory(task, combination.combinations.categoryId!)
-
     const combinationHeaderInformation = `<CombinationPageName>${combination.brands?.name} - ${combination.categories?.description}</CombinationPageName>`
-    const combinationMetaData = combination.contents
-        ? `<CombinationPageExistingMetaData>${JSON.stringify(combination.contents.config)}</CombinationPageExistingMetaData>`
-        : ''
+
 
     const output = [combinationHeaderInformation]
-    if (combination.contents?.config) {
+    if (task.specification?.useContent) {
+        const targetStoreId = task.specification.useContentFrom!
+        const [targetContent] = await db
+            .select({
+                config: contents.config,
+            })
+            .from(combinations)
+            .leftJoin(brandsStores, and(eq(brandsStores.slug, combination.brands!.slug!), eq(brandsStores.storeId, targetStoreId)))
+            .leftJoin(categoriesStores, and(eq(categoriesStores.slug, combination.categories!.slug!), eq(categoriesStores.storeId, targetStoreId)))
+            .leftJoin(contents, and(eq(contents.entityId, combinations.integrationId), eq(contents.entityType, 'combination'), eq(contents.storeId, targetStoreId)))
+            .where(
+                and(
+                    eq(combinations.storeId, targetStoreId),
+                    eq(combinations.brandId, brandsStores.integrationId),
+                    eq(combinations.categoryId, categoriesStores.integrationId)
+                )
+            )
+
+        const combinationMetaData = targetContent && targetContent.config
+            ? `<CombinationPageExistingMetaData>${JSON.stringify(targetContent.config)}</CombinationPageExistingMetaData>`
+            : ''
         output.push(combinationMetaData)
     }
 
