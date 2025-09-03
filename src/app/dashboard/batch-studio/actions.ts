@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 
 import { and, eq, inArray } from 'drizzle-orm'
@@ -7,7 +8,6 @@ import z from 'zod'
 import { db } from '@/db'
 import { tasks } from '@/db/schema'
 import { actionClient } from '@/lib/action-client'
-import { revalidatePath } from 'next/cache'
 
 export const saveTask = actionClient
     .inputSchema(

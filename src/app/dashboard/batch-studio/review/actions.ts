@@ -43,7 +43,7 @@ export const SaveReviewTaskToQSPay = actionClient
                     const [content] = await tx
                         .select()
                         .from(contents)
-                        .where(and(eq(contents.entityId, review.entityId), eq(contents.entityType, review.entityType)))
+                        .where(and(eq(contents.entityId, review.entityId), eq(contents.entityType, review.entityType), eq(contents.storeId, review.storeId!)))
 
                     await processQSPay({ review, config })
 
@@ -110,7 +110,8 @@ const processQSPay = async ({ review, config }: { review: Review; config?: Parti
             const [category] = await db
                 .select()
                 .from(categoriesStores)
-                .where(eq(categoriesStores.integrationId, review.entityId))
+                .where(and(eq(categoriesStores.integrationId, review.entityId), eq(categoriesStores.storeId, review.storeId!)))
+
             if (!category) {
                 throw new Error(
                     "Category page not found. BrandAffiliation can't create a new one, please contact Administrators"
@@ -129,6 +130,7 @@ const processQSPay = async ({ review, config }: { review: Review; config?: Parti
                 body: JSON.stringify({
                     categoryName: category.integrationName,
                     config: toMerged(remoteCategory.config, config || (review.config as MetaOutput) || {}),
+                    storeId: category.storeId!,
                 }),
             })
         }
@@ -143,15 +145,16 @@ const processQSPay = async ({ review, config }: { review: Review; config?: Parti
                     categoriesStores: categoriesStores,
                 })
                 .from(combinations)
-                .innerJoin(brandsStores, eq(brandsStores.integrationId, combinations.brandId))
-                .innerJoin(categoriesStores, eq(categoriesStores.integrationId, combinations.categoryId))
+                .innerJoin(brandsStores, and(eq(brandsStores.integrationId, combinations.brandId), eq(brandsStores.storeId, review.storeId!)))
+                .innerJoin(categoriesStores, and(eq(categoriesStores.integrationId, combinations.categoryId), eq(categoriesStores.storeId, review.storeId!)))
                 .innerJoin(brands, eq(brands.id, brandsStores.brandId))
                 .innerJoin(categories, eq(categories.id, categoriesStores.categoryId))
-                .where(eq(combinations.integrationId, review.entityId))
+                .where(and(eq(combinations.integrationId, review.entityId), eq(combinations.storeId, review.storeId!)))
 
             const remoteCombination = await QSPayClient<QSPayCombin>('CmsCombinPage/Get', {
                 query: {
                     combinatioId: review.entityId,
+                    storeId: review.storeId!,
                 },
             }).then((x) => x.result)
 
@@ -164,6 +167,7 @@ const processQSPay = async ({ review, config }: { review: Review; config?: Parti
                         description: combination.combination.description,
                         brandId: combination.brandsStores.integrationId!,
                         categoryId: combination.categoriesStores.integrationId!,
+                        storeId: combination.combination.storeId!,
                     }),
                 })
 
@@ -189,6 +193,7 @@ const processQSPay = async ({ review, config }: { review: Review; config?: Parti
                 body: JSON.stringify({
                     categoryName: combination.categoriesStores.integrationName,
                     brandName: combination.brandsStores.integrationName,
+                    storeId: combination.combination.storeId!,
                     config: toMerged(remoteCombination?.config || {}, config || (review.config as MetaOutput) || {}),
                 }),
             })
