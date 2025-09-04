@@ -220,6 +220,7 @@ export const categoriesStores = pgTable('categories_stores', {
 
 export const categories = pgTable('categories', {
     id: serial().primaryKey().notNull(),
+    parentId: bigserial("parent_id", {mode: 'number'}),
     name: text().notNull(),
     description: text(),
     slug: varchar(),

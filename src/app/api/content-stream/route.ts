@@ -1,3 +1,4 @@
+import { alias } from 'drizzle-orm/pg-core'
 import { revalidatePath } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -206,15 +207,24 @@ const processBrand = async (task: Task, id?: string) => {
     return `<Brand>${output.filter(Boolean).join('')}</Brand>`
 }
 const processCategory = async (task: Task, id?: string) => {
+    const parentAlias = alias(categories, 'parent')
     const [category] = await db
-        .select()
+        .select({
+            categories: categories,
+            categoryStore: categoriesStores,
+            parentCategory: parentAlias,
+        })
         .from(categoriesStores)
         .innerJoin(categories, eq(categories.id, categoriesStores.categoryId))
+        .leftJoin(parentAlias, eq(parentAlias.id, categories.parentId))
         .where(eq(categoriesStores.integrationId, id || task.entityId))
+        .limit(1)
 
     const categoryHeaderInformation = `<CategoryName>${category.categories.description}</CategoryName>`
+    const categoryParentInformation = category.parentCategory ? `<CategoryParent>${category.parentCategory.description}</CategoryParent>` : ''
 
-    const output = [categoryHeaderInformation]
+    const output = [categoryHeaderInformation, categoryParentInformation].filter(Boolean)
+
     if (task.specification?.useContent) {
         const targetStoreId = task.specification.useContentFrom!
         const [targetContent] = await db
