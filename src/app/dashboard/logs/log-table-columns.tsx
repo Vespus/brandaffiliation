@@ -167,7 +167,7 @@ export function getLogTableColumns(): ColumnDef<LogTableType>[] {
                     </div>
                 )
             },
-            enableSorting: true,
+            enableSorting: false,
             enableColumnFilter: false,
         },
         {
