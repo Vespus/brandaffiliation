@@ -61,8 +61,8 @@ export function getLogTableColumns(): ColumnDef<LogTableType>[] {
             size: 40,
         },
         {
-            id: 'entityName',
-            accessorKey: 'entityName',
+            id: 'name',
+            accessorKey: 'name',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Title" />,
             cell: ({ row }) => <div className="min-w-20">{row.original.entityName}</div>,
             enableSorting: true,
