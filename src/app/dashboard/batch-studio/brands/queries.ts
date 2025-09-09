@@ -1,11 +1,16 @@
-import { and, asc, count, desc, eq, ilike, isNotNull, isNull, sql } from 'drizzle-orm'
-import { createSearchParamsCache, parseAsInteger, parseAsString } from 'nuqs/server'
+import { cookies } from 'next/headers';
+
+
+
+import { and, asc, count, desc, eq, ilike, isNotNull, isNull, or, sql } from 'drizzle-orm';
+import { createSearchParamsCache, parseAsInteger, parseAsString } from 'nuqs/server';
 import { BatchStudioBrandType } from '@/app/dashboard/batch-studio/brands/batch-studio-brand-type'
 import { db } from '@/db'
-import { brands, brandsStores, contents } from '@/db/schema'
-import { BrandWithCharacteristicAndScales } from '@/db/types'
-import { getSortingStateParser } from '@/lib/datatable/parsers'
-import { cookies } from 'next/headers'
+import { brands, brandsStores, categories, categoriesStores, contents } from '@/db/schema'
+import { BrandWithCharacteristicAndScales } from '@/db/types';
+import { getSortingStateParser } from '@/lib/datatable/parsers';
+import { BatchStudioCategoryType } from '@/app/dashboard/batch-studio/categories/batch-studio-category-type'
+
 
 export const searchParamsCache = createSearchParamsCache({
     page: parseAsInteger.withDefault(1),
@@ -20,11 +25,28 @@ export const getBrands = async (input: Awaited<ReturnType<typeof searchParamsCac
     const storeId = cookie.get('qs-pay-store-id')?.value!
     const offset = (input.page - 1) * input.perPage
 
+    const searchTerms = input.name
+        ? input.name
+            .split(/\s+/) // split by space
+            .filter(Boolean) // remove empty strings
+        : []
+
+    const searchConditions = searchTerms.map((term) =>
+        and(ilike(brands.name, `%${term}%`))
+    )
+
     const where = and(
-        input.name ? ilike(brands.name, `%${input.name}%`) : undefined,
+        searchConditions.length > 0 ? and(...searchConditions) : undefined,
         input.content === 'yes' ? isNotNull(contents.config) : undefined,
         input.content === 'no' ? isNull(contents.config) : undefined,
-        isNotNull(brandsStores.integrationId),
+        input.content === 'missing'
+            ? or(
+                sql`${contents.config}->'descriptions'->>'header' IS NULL`,
+                sql`${contents.config}->'descriptions'->>'header' = ''`,
+                sql`${contents.config}->'descriptions'->>'footer' IS NULL`,
+                sql`${contents.config}->'descriptions'->>'footer' = ''`
+            )
+            : undefined,
         eq(brandsStores.storeId, storeId)
     )
 
@@ -44,7 +66,7 @@ export const getBrands = async (input: Awaited<ReturnType<typeof searchParamsCac
             })
             .from(brandsStores)
             .leftJoin(brands, eq(brands.id, brandsStores.brandId))
-            .leftJoin(contents, and(eq(contents.entityId, brandsStores.integrationId), eq(contents.entityType, 'brand')))
+            .leftJoin(contents, and(eq(contents.entityId, brandsStores.integrationId), eq(contents.entityType, 'brand'), eq(contents.storeId, storeId)))
             .where(where)
             .orderBy(...orderBy)
             .groupBy(brands.id, contents.config, brands.name, brandsStores.slug, brandsStores.integrationId)
@@ -56,6 +78,8 @@ export const getBrands = async (input: Awaited<ReturnType<typeof searchParamsCac
                 count: count(),
             })
             .from(brandsStores)
+            .leftJoin(brands, eq(brands.id, brandsStores.brandId))
+            .leftJoin(contents, and(eq(contents.entityId, brandsStores.integrationId), eq(contents.entityType, 'brand'), eq(contents.storeId, storeId)))
             .where(where)
             .execute()
             .then((res) => res[0]?.count ?? 0)

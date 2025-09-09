@@ -144,6 +144,10 @@ export function useGetBatchStudioBrandTableColumns(): ColumnDef<BatchStudioBrand
                         label: 'No',
                         value: 'no',
                     },
+                    {
+                        label: 'Missing SEO Texts',
+                        value: 'missing',
+                    },
                 ],
                 icon: StarIcon,
             },
