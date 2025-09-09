@@ -1,12 +1,13 @@
-'use client'
+'use client';
 
 import { Suspense } from 'react'
 
-import { CogIcon, Database, GalleryVerticalEnd, Languages, SparklesIcon, UsersIcon } from 'lucide-react'
-import { CollapsableMenuItem } from '@/components/sidebar/collapsible-menu-item'
-import { SingleMenuItem } from '@/components/sidebar/single-menu-item'
-import { MenuItem } from '@/components/sidebar/type'
-import { SidebarGroup, SidebarGroupLabel, SidebarMenu } from '@/components/ui/sidebar'
+import { CogIcon, Database, GalleryVerticalEnd, Languages, SparklesIcon, TextSearchIcon, UsersIcon } from 'lucide-react'
+import { CollapsableMenuItem } from '@/components/sidebar/collapsible-menu-item';
+import { SingleMenuItem } from '@/components/sidebar/single-menu-item';
+import { MenuItem } from '@/components/sidebar/type';
+import { SidebarGroup, SidebarGroupLabel, SidebarMenu } from '@/components/ui/sidebar';
+
 
 const data: MenuItem[] = [
     {
@@ -56,6 +57,11 @@ const data: MenuItem[] = [
         url: '/dashboard/prompts',
         icon: SparklesIcon,
         permission: { role: 'admin', permission: { prompt: ['list'] } },
+    },
+    {
+        name: 'Logs',
+        url: '/dashboard/logs',
+        icon: TextSearchIcon,
     },
     {
         name: 'Manage Users',

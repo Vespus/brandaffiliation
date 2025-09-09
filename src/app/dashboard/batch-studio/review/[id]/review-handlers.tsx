@@ -8,7 +8,6 @@ import { useRouter } from 'next/navigation'
 
 import { BotIcon, EyeIcon, ReceiptTextIcon, SparklesIcon, XIcon } from 'lucide-react'
 import Markdown from 'react-markdown'
-import xmlFormatter from 'xml-formatter'
 import { removeReviewTask } from '@/app/dashboard/batch-studio/review/actions'
 import { ReviewJoin } from '@/app/dashboard/batch-studio/tasks/type'
 import {
@@ -35,6 +34,7 @@ import { Scroller } from '@/components/ui/scroller'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useQSPayContext } from '@/hooks/contexts/use-qspay-context'
 import { useCustomAction } from '@/hooks/use-custom-action'
+import { prettyPrintUserPrompt } from '@/utils/xml-beautifier'
 
 export const ReviewHandlers = ({ item }: { item: ReviewJoin }) => {
     const { currentStore } = useQSPayContext()
@@ -135,19 +135,4 @@ export const ReviewHandlers = ({ item }: { item: ReviewJoin }) => {
             <div id="review-form-portal-additional-handlers"></div>
         </div>
     )
-}
-
-const prettyPrintUserPrompt = (userPrompt?: string) => {
-    if (!userPrompt) return ''
-    // xml-formatter is forgiving. If input is not well-formed, we fall back safely.
-    try {
-        return xmlFormatter(userPrompt, {
-            indentation: '\t',
-            collapseContent: false,
-            lineSeparator: '\r\n',
-        })
-    } catch {
-        // Fallback: return as-is so you still see something
-        return userPrompt
-    }
 }
