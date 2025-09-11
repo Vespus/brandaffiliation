@@ -21,33 +21,40 @@ export default async function Tasks() {
         .from(tasks)
         .leftJoin(
             combinations,
-            and(eq(tasks.entityType, 'combination'), eq(tasks.entityId, combinations.integrationId))
+            and(
+                eq(tasks.entityType, 'combination'),
+                eq(tasks.entityId, combinations.integrationId),
+                eq(combinations.storeId, tasks.storeId)
+            )
         )
         .leftJoin(
             categoriesStores,
             and(
-                or(eq(tasks.entityType, 'combination'), eq(tasks.entityType, 'category')),
+                eq(categoriesStores.storeId, tasks.storeId),
                 or(
-                    eq(categoriesStores.integrationId, tasks.entityId),
-                    eq(categoriesStores.integrationId, combinations.categoryId)
+                    and(eq(tasks.entityType, 'category'), eq(categoriesStores.integrationId, tasks.entityId)),
+                    and(
+                        eq(tasks.entityType, 'combination'),
+                        eq(categoriesStores.integrationId, combinations.categoryId)
+                    )
                 )
             )
         )
         .leftJoin(
             brandsStores,
             and(
-                or(eq(tasks.entityType, 'combination'), eq(tasks.entityType, 'brand')),
-                or(eq(brandsStores.integrationId, tasks.entityId), eq(brandsStores.integrationId, combinations.brandId))
+                eq(brandsStores.storeId, tasks.storeId),
+                or(
+                    and(eq(tasks.entityType, 'brand'), eq(brandsStores.integrationId, tasks.entityId)),
+                    and(eq(tasks.entityType, 'combination'), eq(brandsStores.integrationId, combinations.brandId))
+                )
             )
         )
         .leftJoin(brands, eq(brands.id, brandsStores.brandId))
         .leftJoin(categories, eq(categories.id, categoriesStores.categoryId))
-        .groupBy(tasks.id, brands.name, categories.name, combinations.name, brands.id, categories.id, combinations.id)
         .where(eq(tasks.storeId, storeId))
 
     return (
-        <div>
-            <TaskController tasks={tasksResult as TaskJoin[]} />
-        </div>
+        <TaskController tasks={tasksResult as TaskJoin[]} />
     )
 }
