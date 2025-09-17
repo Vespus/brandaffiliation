@@ -35,10 +35,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useQSPayContext } from '@/hooks/contexts/use-qspay-context'
 import { useCustomAction } from '@/hooks/use-custom-action'
 import { prettyPrintUserPrompt } from '@/utils/xml-beautifier'
+import { authClient } from "@/lib/auth-client"
 
 export const ReviewHandlers = ({ item }: { item: ReviewJoin }) => {
     const { currentStore } = useQSPayContext()
     const router = useRouter()
+    const { data } = authClient.useSession()
 
     const getStoreSlug = useMemo(() => {
         if (currentStore) {
@@ -65,45 +67,46 @@ export const ReviewHandlers = ({ item }: { item: ReviewJoin }) => {
                 </Link>
             )}
 
-            <Dialog>
-                <DialogTrigger asChild>
-                    <Button variant="outline">
-                        <ReceiptTextIcon />
-                        See Prompt
-                    </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-7xl">
-                    <DialogHeader>
-                        <DialogTitle>Prompts</DialogTitle>
-                        <DialogDescription>See system and generated prompts</DialogDescription>
-                    </DialogHeader>
-                    <Tabs defaultValue="system" className="space-y-6">
-                        <TabsList className="grid w-fit grid-cols-2">
-                            <TabsTrigger value="system" className="flex items-center space-x-2">
-                                <BotIcon className="h-4 w-4" />
-                                <span>System Prompt</span>
-                            </TabsTrigger>
-                            <TabsTrigger value="user" className="flex items-center space-x-2">
-                                <SparklesIcon className="h-4 w-4" />
-                                <span>User Prompt</span>
-                            </TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="system">
-                            <Scroller className="prose prose-sm h-96 max-w-none">
-                                <Markdown>{item.review.userPrompt?.system}</Markdown>
-                            </Scroller>
-                        </TabsContent>
-                        <TabsContent value="user">
-                            <Scroller className="h-96 text-sm">
+            {data?.user && data.user.role === 'admin' && (
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button variant="outline">
+                            <ReceiptTextIcon />
+                            See Prompt
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-7xl">
+                        <DialogHeader>
+                            <DialogTitle>Prompts</DialogTitle>
+                            <DialogDescription>See system and generated prompts</DialogDescription>
+                        </DialogHeader>
+                        <Tabs defaultValue="system" className="space-y-6">
+                            <TabsList className="grid w-fit grid-cols-2">
+                                <TabsTrigger value="system" className="flex items-center space-x-2">
+                                    <BotIcon className="h-4 w-4" />
+                                    <span>System Prompt</span>
+                                </TabsTrigger>
+                                <TabsTrigger value="user" className="flex items-center space-x-2">
+                                    <SparklesIcon className="h-4 w-4" />
+                                    <span>User Prompt</span>
+                                </TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="system">
+                                <Scroller className="prose prose-sm h-96 max-w-none">
+                                    <Markdown>{item.review.userPrompt?.system}</Markdown>
+                                </Scroller>
+                            </TabsContent>
+                            <TabsContent value="user">
+                                <Scroller className="h-96 text-sm">
                                 <pre className="bg-background whitespace-pre-wrap">
                                     <code>{prettyPrintUserPrompt(item.review.userPrompt?.prompt)}</code>
                                 </pre>
-                            </Scroller>
-                        </TabsContent>
-                    </Tabs>
-                </DialogContent>
-            </Dialog>
-
+                                </Scroller>
+                            </TabsContent>
+                        </Tabs>
+                    </DialogContent>
+                </Dialog>
+            )}
             <AlertDialog>
                 <AlertDialogTrigger asChild>
                     <Button

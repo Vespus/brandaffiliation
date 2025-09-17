@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
+import { Side } from '@floating-ui/react'
 
 interface DataTableActionBarProps<TData> extends React.ComponentProps<typeof motion.div> {
     table: Table<TData>
@@ -76,6 +77,7 @@ function DataTableActionBar<TData>({
 interface DataTableActionBarActionProps extends React.ComponentProps<typeof Button> {
     tooltip?: string
     isPending?: boolean
+    side?: Side,
 }
 
 function DataTableActionBarAction({
@@ -85,6 +87,7 @@ function DataTableActionBarAction({
     disabled,
     className,
     children,
+    side,
     ...props
 }: DataTableActionBarActionProps) {
     const trigger = (
@@ -110,6 +113,7 @@ function DataTableActionBarAction({
             <TooltipTrigger asChild>{trigger}</TooltipTrigger>
             <TooltipContent
                 sideOffset={6}
+                side={side || 'top'}
                 className="bg-accent text-foreground border font-semibold dark:bg-zinc-900 [&>span]:hidden"
             >
                 <p>{tooltip}</p>

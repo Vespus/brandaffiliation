@@ -7,6 +7,7 @@ import { CollapsableMenuItem } from '@/components/sidebar/collapsible-menu-item'
 import { SingleMenuItem } from '@/components/sidebar/single-menu-item';
 import { MenuItem } from '@/components/sidebar/type';
 import { SidebarGroup, SidebarGroupLabel, SidebarMenu } from '@/components/ui/sidebar';
+import { authClient } from '@/lib/auth-client'
 
 
 const data: MenuItem[] = [
@@ -62,6 +63,8 @@ const data: MenuItem[] = [
         name: 'Logs',
         url: '/dashboard/logs',
         icon: TextSearchIcon,
+        permission: { role: 'admin', permission: { prompt: ['list'] } },
+
     },
     {
         name: 'Manage Users',
@@ -87,6 +90,7 @@ export const NavList = () => {
 }
 
 const Guard = ({ item }: { item: MenuItem }) => {
+    const {data} = authClient.useSession()
     /*const perm = use(new Promise(async resolve =>  {
         if(item.permission){
             resolve(true)
@@ -98,6 +102,12 @@ const Guard = ({ item }: { item: MenuItem }) => {
         console.log(res)
         resolve(true)
     }))*/
+
+    if(item.permission){
+        if(data?.user?.role !== item.permission.role){
+            return null
+        }
+    }
 
     return (
         <Suspense>
