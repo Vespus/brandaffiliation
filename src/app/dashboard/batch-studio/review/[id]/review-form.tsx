@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { useEffect } from 'react'
+import { useLayoutEffect } from 'react'
 
 import type { FieldPath, FieldValues } from 'react-hook-form'
 
@@ -68,7 +68,7 @@ export const ReviewForm = ({ item }: { item: ReviewJoinWithContent }) => {
         return fields.map((field) => get(item.content?.config, field)).some((field) => !!field)
     }
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         setDomReady(true)
     }, [])
 

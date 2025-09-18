@@ -151,6 +151,10 @@ const processQSPay = async ({ review, config }: { review: Review; config?: Parti
                 .innerJoin(categories, eq(categories.id, categoriesStores.categoryId))
                 .where(and(eq(combinations.integrationId, review.entityId), eq(combinations.storeId, review.storeId!)))
 
+            if(!combination) {
+                console.log(review, combination)
+            }
+
             const remoteCombination = await QSPayClient<QSPayCombin>('CmsCombinPage/Get', {
                 query: {
                     combinatioId: review.entityId,
@@ -159,7 +163,6 @@ const processQSPay = async ({ review, config }: { review: Review; config?: Parti
             }).then((x) => x.result)
 
             if (!remoteCombination) {
-                //eğer buraya gelindiyse bizde var olan combination page qspay de yok. oluşturak.
                 const addResult = await QSPayClient<string>('CmsCombinPage/Add', {
                     method: 'POST',
                     body: JSON.stringify({

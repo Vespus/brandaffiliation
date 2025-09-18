@@ -193,7 +193,31 @@ const processCategories = async (categories: QSPayCategory[], storeId: string) =
             }))
     )
 
-    const localCategories = await db.select().from(localCategoriesTable)
+    let localCategories = await db.select().from(localCategoriesTable)
+    const missingLocalCategories = remoteCategoryContents.filter((x) => {
+        const localCategory = localCategories.find(
+            (lb) => lb.slug?.toLowerCase() === x.slug.toLowerCase().replace(/\//g, '')
+        )
+        return !localCategory
+    })
+
+    if (missingLocalCategories.length > 0) {
+        console.info(
+            'Missing local categories',
+            missingLocalCategories.map((x) => x.name)
+        )
+        await db.insert(localCategoriesTable).values(
+            missingLocalCategories.map((x) => ({
+                parentId: x.parentId ? Number(x.parentId) : undefined,
+                name: x.name,
+                description: x.description,
+                integrationName: x.name,
+                slug: x.slug.toLowerCase().replace(/\//g, ''),
+            }))
+        )
+        localCategories = await db.select().from(localCategoriesTable)
+    }
+
     await db.insert(categoriesStores).values(
         remoteCategoryContents
             .map((categoryContent) => {
@@ -220,14 +244,16 @@ const processCategories = async (categories: QSPayCategory[], storeId: string) =
 
 const processCombinations = async (combinations: QSPayCombin[], storeId: string) => {
     const remoteCombinations = await Promise.all(
-        combinations.filter(x => x.category && x.brand && !x.catalog).map(async (combination) => {
-            return QSPayClient<QSPayCombin>('CmsCombinPage/Get', {
-                query: {
-                    combinatioId: combination.id,
-                    storeId,
-                },
-            }).then((x) => x.result)
-        })
+        combinations
+            .filter((x) => x.category && x.brand && !x.catalog)
+            .map(async (combination) => {
+                return QSPayClient<QSPayCombin>('CmsCombinPage/Get', {
+                    query: {
+                        combinatioId: combination.id,
+                        storeId,
+                    },
+                }).then((x) => x.result)
+            })
     )
 
     await db.delete(localCombinationsTable).where(eq(localCombinationsTable.storeId, storeId))

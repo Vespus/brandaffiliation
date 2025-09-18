@@ -22,25 +22,32 @@ export const getReviewTasks = cache(async () => {
         .from(reviews)
         .leftJoin(
             combinations,
-            and(eq(combinations.integrationId, reviews.entityId), eq(reviews.entityType, 'combination'))
+            and(
+                eq(reviews.entityType, 'combination'),
+                eq(reviews.entityId, combinations.integrationId),
+                eq(combinations.storeId, reviews.storeId)
+            )
         )
         .leftJoin(
             categoriesStores,
             and(
-                or(eq(reviews.entityType, 'combination'), eq(reviews.entityType, 'category')),
+                eq(categoriesStores.storeId, reviews.storeId),
                 or(
-                    eq(categoriesStores.integrationId, reviews.entityId),
-                    eq(categoriesStores.integrationId, combinations.categoryId)
+                    and(eq(reviews.entityType, 'category'), eq(categoriesStores.integrationId, reviews.entityId)),
+                    and(
+                        eq(reviews.entityType, 'combination'),
+                        eq(categoriesStores.integrationId, combinations.categoryId)
+                    )
                 )
             )
         )
         .leftJoin(
             brandsStores,
             and(
-                or(eq(reviews.entityType, 'combination'), eq(reviews.entityType, 'brand')),
+                eq(brandsStores.storeId, reviews.storeId),
                 or(
-                    eq(brandsStores.integrationId, reviews.entityId),
-                    eq(brandsStores.integrationId, combinations.brandId)
+                    and(eq(reviews.entityType, 'brand'), eq(brandsStores.integrationId, reviews.entityId)),
+                    and(eq(reviews.entityType, 'combination'), eq(brandsStores.integrationId, combinations.brandId))
                 )
             )
         )
@@ -68,31 +75,45 @@ export const getReviewTask = cache(async (id: string) => {
         .from(reviews)
         .leftJoin(
             combinations,
-            and(eq(combinations.integrationId, reviews.entityId), eq(reviews.entityType, 'combination'))
+            and(
+                eq(reviews.entityType, 'combination'),
+                eq(reviews.entityId, combinations.integrationId),
+                eq(combinations.storeId, reviews.storeId)
+            )
         )
         .leftJoin(
             categoriesStores,
             and(
-                or(eq(reviews.entityType, 'combination'), eq(reviews.entityType, 'category')),
+                eq(categoriesStores.storeId, reviews.storeId),
                 or(
-                    eq(categoriesStores.integrationId, reviews.entityId),
-                    eq(categoriesStores.integrationId, combinations.categoryId)
+                    and(eq(reviews.entityType, 'category'), eq(categoriesStores.integrationId, reviews.entityId)),
+                    and(
+                        eq(reviews.entityType, 'combination'),
+                        eq(categoriesStores.integrationId, combinations.categoryId)
+                    )
                 )
             )
         )
         .leftJoin(
             brandsStores,
             and(
-                or(eq(reviews.entityType, 'combination'), eq(reviews.entityType, 'brand')),
+                eq(brandsStores.storeId, reviews.storeId),
                 or(
-                    eq(brandsStores.integrationId, reviews.entityId),
-                    eq(brandsStores.integrationId, combinations.brandId)
+                    and(eq(reviews.entityType, 'brand'), eq(brandsStores.integrationId, reviews.entityId)),
+                    and(eq(reviews.entityType, 'combination'), eq(brandsStores.integrationId, combinations.brandId))
                 )
             )
         )
         .leftJoin(brands, eq(brands.id, brandsStores.brandId))
         .leftJoin(categories, eq(categories.id, categoriesStores.categoryId))
-        .leftJoin(contents, and(eq(contents.entityId, reviews.entityId), eq(contents.entityType, reviews.entityType), eq(contents.storeId, storeId)))
+        .leftJoin(
+            contents,
+            and(
+                eq(contents.entityId, reviews.entityId),
+                eq(contents.entityType, reviews.entityType),
+                eq(contents.storeId, reviews.storeId)
+            )
+        )
         .where(and(eq(reviews.approved, false), eq(reviews.storeId, storeId), eq(reviews.id, Number(id))))
 
     return reviewContent as ReviewJoinWithContent
