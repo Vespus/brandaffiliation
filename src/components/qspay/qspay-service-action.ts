@@ -1,28 +1,22 @@
-'use server'
+'use server';
 
-import { revalidatePath } from 'next/cache'
-import { cookies } from 'next/headers'
+import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
 
-import { and, eq } from 'drizzle-orm'
-import { PgTableWithColumns } from 'drizzle-orm/pg-core'
-import { z } from 'zod'
-import { db } from '@/db'
-import {
-    brandsStores,
-    categoriesStores,
-    contents,
-    brands as localBrandsTable,
-    categories as localCategoriesTable,
-    combinations as localCombinationsTable,
-    reviews,
-    tasks,
-} from '@/db/schema'
-import { actionClient } from '@/lib/action-client'
-import { QSPayClient } from '@/lib/qs-pay-client'
-import { SoftHttpError } from '@/lib/soft-http-error'
-import { QSPayAuthResponse, QSPayBrand, QSPayCategory, QSPayCombin, QSPaySingleStoreBasedCategory } from '@/qspay-types'
-import { categoryFlat } from '@/utils/category-flat'
-import { isEmpty } from '@/utils/is-empty'
+
+
+import { and, eq } from 'drizzle-orm';
+import { PgTableWithColumns } from 'drizzle-orm/pg-core';
+import { z } from 'zod';
+import { db } from '@/db';
+import { brandsStores, categoriesStores, contents, brands as localBrandsTable, categories as localCategoriesTable, combinations as localCombinationsTable, reviews, tasks } from '@/db/schema';
+import { actionClient } from '@/lib/action-client';
+import { QSPayClient } from '@/lib/qs-pay-client';
+import { SoftHttpError } from '@/lib/soft-http-error';
+import { QSPayAuthResponse, QSPayBrand, QSPayCategory, QSPayCombin, QSPaySingleStoreBasedCategory } from '@/qspay-types';
+import { categoryFlat } from '@/utils/category-flat';
+import { isEmpty } from '@/utils/is-empty';
+
 
 export const connect = actionClient
     .inputSchema(
@@ -70,8 +64,8 @@ export const sync = actionClient.action(async () => {
     await processCategories(categories, storeId)
     await processCombinations(combinations, storeId)
 
-    await processTasks(tasks, storeId)
-    await processTasks(reviews, storeId)
+    //await processTasks(tasks, storeId)
+    //await processTasks(reviews, storeId)
 
     revalidatePath('/', 'layout')
 
@@ -259,16 +253,20 @@ const processCombinations = async (combinations: QSPayCombin[], storeId: string)
     await db.delete(localCombinationsTable).where(eq(localCombinationsTable.storeId, storeId))
     await db.delete(contents).where(and(eq(contents.entityType, 'combination'), eq(contents.storeId, storeId)))
 
-    await db.insert(contents).values(
-        remoteCombinations
-            .filter((c) => !isEmpty(c.config))
-            .map((categoryContent) => ({
-                entityType: 'combination',
-                entityId: categoryContent.id,
-                config: categoryContent.config,
-                storeId: categoryContent.storeId,
-            }))
-    )
+    console.dir(remoteCombinations, { depth: null })
+
+    if (remoteCombinations.filter((x) => !isEmpty(x.config)).length > 0) {
+        await db.insert(contents).values(
+            remoteCombinations
+                .filter((c) => !isEmpty(c.config))
+                .map((categoryContent) => ({
+                    entityType: 'combination',
+                    entityId: categoryContent.id,
+                    config: categoryContent.config,
+                    storeId: categoryContent.storeId,
+                }))
+        )
+    }
 
     await db.insert(localCombinationsTable).values(
         remoteCombinations.map((combination) => ({
